@@ -198,6 +198,13 @@ export const ImageViewer: React.FC<{
         easing: Easing.inOut(Easing.quad),
       })
     : 0;
+  // Ken Burns 缓动：非长图时配图缓慢放大 1.0→1.06，避免画面完全静止
+  const kenBurns = scrollDist
+    ? 1.0
+    : interpolate(frame, [0, durationInFrames], [1.0, 1.06], {
+        extrapolateRight: "clamp",
+        easing: Easing.inOut(Easing.quad),
+      });
 
   const outer: React.CSSProperties = {
     marginTop: 36,
@@ -236,7 +243,8 @@ export const ImageViewer: React.FC<{
             width: "100%",
             height: "auto",
             display: "block",
-            transform: `translateY(${-yOffset}px)`,
+            transform: `translateY(${-yOffset}px) scale(${kenBurns})`,
+            transformOrigin: "center center",
           }}
         />
       </div>
