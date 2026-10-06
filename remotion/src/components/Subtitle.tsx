@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 
 /**
  * KTV 卡拉OK 字幕（大字幕分页版）
@@ -68,12 +68,12 @@ const paginate = (text: string, prefix: number[]): { start: number; end: number 
 
 export const KTVSubtitle: React.FC<{ timeline: any }> = ({ timeline }) => {
   const frame = useCurrentFrame();
-  const fps = 30;
+  const { fps } = useVideoConfig();
   const t = frame / fps;
 
   let cur: any = null;
-  outer: for (const s of timeline.scenes) {
-    for (const c of s.clauses) {
+  outer: for (const s of Array.isArray(timeline?.scenes) ? timeline.scenes : []) {
+    for (const c of Array.isArray(s?.clauses) ? s.clauses : []) {
       if (t >= c.start && t < c.end) {
         cur = c;
         break outer;
@@ -82,7 +82,7 @@ export const KTVSubtitle: React.FC<{ timeline: any }> = ({ timeline }) => {
   }
   if (!cur) return null;
 
-  const chars: any[] = cur.chars;
+  const chars: any[] = Array.isArray(cur.chars) ? cur.chars : [];
   const elapsed = t - cur.start;
   const text: string = cur.text;
   const prefix = nonwsPrefix(text);

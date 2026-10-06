@@ -5,13 +5,14 @@
   "scripts": {
     "render": "remotion render src/index.tsx MainVideo out/main.mp4",
     "still": "remotion still src/index.tsx TitleCard out/title_card.png",
+    "typecheck": "tsc --noEmit",
     "preview": "remotion preview src/index.tsx"
   },
   "dependencies": {
-    "@remotion/cli": "^4.0.520",
+    "@remotion/cli": "4.0.520",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "remotion": "^4.0.520"
+    "remotion": "4.0.520"
   },
   "devDependencies": {
     "@types/react": "18.3.12",

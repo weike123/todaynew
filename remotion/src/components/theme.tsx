@@ -4,6 +4,7 @@ import { AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
 export const COLORS = {
   bg0: "#070b16",
   bg1: "#0e1730",
+  bg2: "#14234a",
   accent: "#4f8cff",   // 主蓝
   accent2: "#22d3ee",  // 青
   warn: "#ffd60a",     // KTV 黄

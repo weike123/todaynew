@@ -37,7 +37,7 @@ export const NewsHook: React.FC<{ v: any }> = ({ v }) => {
               fontWeight: 700,
             }}
           >
-            DAILY AI DIGEST
+            AI 热点速览
           </div>
 
           <div
