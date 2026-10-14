@@ -11,6 +11,32 @@ type CodebaseCoverProps = {
   author?: string;
 };
 
+// CJK/全角字符 ≈ 1.0em，其余（ASCII 半角）≈ 0.56em；粗体再加 6% 余量
+const estimateTextWidth = (text: string, fontSize: number, letterSpacing: number): number => {
+  let units = 0;
+  let count = 0;
+  for (const ch of text) {
+    count += 1;
+    units += /[\u2E80-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF\u3000-\u303F]/.test(ch) ? 1.0 : 0.56;
+  }
+  return units * fontSize * 1.06 + letterSpacing * Math.max(0, count - 1);
+};
+
+// 单行放不下则缩字号（下限 floor），配合 wordBreak 兜底换行。
+// 2026-10-12 沉淀：whiteSpace: nowrap + 外层 overflow: hidden 会让超宽文案静默裁切。
+const fitFontSize = (
+  text: string,
+  baseSize: number,
+  maxWidth: number,
+  letterSpacing: number,
+  floor: number,
+): number => {
+  if (!text) return baseSize;
+  const w = estimateTextWidth(text, baseSize, letterSpacing);
+  if (w <= maxWidth) return baseSize;
+  return Math.max(floor, Math.floor(baseSize * (maxWidth / w) * 0.97));
+};
+
 /**
  * video-upload skill 的 codebase-style 封面：深蓝径向渐变、细网格、
  * 顶/底光带、蓝黄橙渐变大标题与黄色描边胶囊。
@@ -25,10 +51,29 @@ export const CodebaseCover: React.FC<CodebaseCoverProps> = ({
   author = "翻奇兽AI",
 }) => {
   const scale = width / 1080;
-  const titleSize = Math.max(78, Math.min(210, 128 * scale));
-  const subtitleSize = Math.max(34, Math.min(84, 58 * scale));
+  const contentWidth = width - 2 * Math.max(44, 70 * scale);
+  const titleSize = fitFontSize(
+    mainTitle,
+    Math.max(78, Math.min(210, 128 * scale)),
+    contentWidth * 0.88,
+    4 * scale,
+    64,
+  );
+  const subtitleSize = fitFontSize(
+    subtitle,
+    Math.max(34, Math.min(84, 58 * scale)),
+    contentWidth * 0.88,
+    0,
+    34,
+  );
   const tagSize = Math.max(28, Math.min(58, 38 * scale));
-  const pillSize = Math.max(30, Math.min(62, 42 * scale));
+  const pillSize = fitFontSize(
+    pill,
+    Math.max(30, Math.min(62, 42 * scale)),
+    contentWidth * 0.80 - 2 * 38 * scale,
+    0,
+    30,
+  );
   const authorSize = Math.max(28, Math.min(54, 36 * scale));
   const sidePadding = Math.max(44, 70 * scale);
 
@@ -102,7 +147,7 @@ export const CodebaseCover: React.FC<CodebaseCoverProps> = ({
             fontWeight: 950,
             letterSpacing: 4 * scale,
             lineHeight: 1.08,
-            whiteSpace: "nowrap",
+            wordBreak: "break-word",
             background: "linear-gradient(100deg, #69bdff 0%, #ffd60a 48%, #ff7043 100%)",
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
@@ -120,7 +165,7 @@ export const CodebaseCover: React.FC<CodebaseCoverProps> = ({
             fontSize: subtitleSize,
             fontWeight: 850,
             lineHeight: 1.25,
-            whiteSpace: "nowrap",
+            wordBreak: "break-word",
             textShadow: "0 5px 18px rgba(0,0,0,0.55)",
           }}
         >
@@ -136,7 +181,8 @@ export const CodebaseCover: React.FC<CodebaseCoverProps> = ({
             background: "rgba(255,214,10,0.10)",
             fontSize: pillSize,
             fontWeight: 900,
-            whiteSpace: "nowrap",
+            wordBreak: "break-word",
+            maxWidth: "80%",
             boxShadow: "0 0 26px rgba(255,214,10,0.15)",
           }}
         >

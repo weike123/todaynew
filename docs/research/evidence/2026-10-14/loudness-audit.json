@@ -1,0 +1,53 @@
+[
+  {
+    "date": "2026-10-14",
+    "exit_code": 0,
+    "measurement": {
+      "input_i": "-17.92",
+      "input_tp": "-1.19",
+      "input_lra": "4.70",
+      "input_thresh": "-28.77",
+      "output_i": "-15.27",
+      "output_tp": "-1.00",
+      "output_lra": "3.70",
+      "output_thresh": "-25.93",
+      "normalization_type": "dynamic",
+      "target_offset": "1.27"
+    },
+    "stderr_tail": null
+  },
+  {
+    "date": "2026-10-13",
+    "exit_code": 0,
+    "measurement": {
+      "input_i": "-17.57",
+      "input_tp": "-1.42",
+      "input_lra": "3.90",
+      "input_thresh": "-28.77",
+      "output_i": "-14.64",
+      "output_tp": "-1.00",
+      "output_lra": "2.90",
+      "output_thresh": "-25.68",
+      "normalization_type": "dynamic",
+      "target_offset": "0.64"
+    },
+    "stderr_tail": null
+  },
+  {
+    "date": "2026-10-12",
+    "exit_code": 0,
+    "measurement": {
+      "input_i": "-17.06",
+      "input_tp": "-1.39",
+      "input_lra": "5.10",
+      "input_thresh": "-28.21",
+      "output_i": "-14.39",
+      "output_tp": "-1.00",
+      "output_lra": "4.20",
+      "output_thresh": "-25.37",
+      "normalization_type": "dynamic",
+      "target_offset": "0.39"
+    },
+    "stderr_tail": null
+  }
+]

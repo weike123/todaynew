@@ -1,0 +1,11 @@
+# todayaihot 核心依赖（运行流水线必须）
+requests>=2.31
+beautifulsoup4>=4.12
+lxml>=4.9
+pillow>=10.0
+numpy>=1.24
+edge-tts>=6.0
+websocket-client>=1.6
+
+# 可选：Whisper 强制对齐（统一所有 TTS 后端逐字时间戳；不装则 volc/gptsovits 退回均分）
+faster-whisper>=1.0

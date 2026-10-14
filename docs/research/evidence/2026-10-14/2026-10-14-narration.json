@@ -1,0 +1,261 @@
+{
+  "date": "2026-10-14",
+  "weekday": "周三",
+  "title": "每日 AI 头条",
+  "subtitle": "2026-10-14 周三 · 7 条精选",
+  "total": 7,
+  "sections": [
+    "今日要闻"
+  ],
+  "scenes": [
+    {
+      "id": "s0_intro",
+      "visual": {
+        "type": "news_hook",
+        "date": "2026-10-14",
+        "weekday": "周三",
+        "total": 7,
+        "sections": [
+          "今日要闻"
+        ]
+      },
+      "clauses": [
+        "今天 AI 圈有 7 件大事，Google直接发布。"
+      ]
+    },
+    {
+      "id": "s1_item",
+      "visual": {
+        "type": "news_item",
+        "index": 1,
+        "section": "今日要闻",
+        "title": "Google 发布 Gemini 4 Argon：1M 上下文前沿模型上线 OpenRouter",
+        "link": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon/",
+        "tags": [],
+        "source": "",
+        "bullets": [
+          "Google 全球开放新一代稀疏 MoE 前沿模型 Gemini 4 Argon，输入输出共享 1M token 窗口，单次响应最多输出 1M tokens。",
+          "经 Gemini API、AI Studio、Antigravity 可用，已上线 OpenRouter 与 OpenCode Go（11 月 30 日前 $10 抵 $60 额度）；AutomationBench 得 51.3%、CWE-bench v1 以 68% 并列第一；定价输入 $2/M、输出 $10/M，11 月 30 日后价格翻倍。",
+          "长上下文代码库理解与智能体编排成本显著下降，抢在 11 月底前迁移验证可锁定半价窗口；Claude/GPT 之外新增强基准参照。"
+        ],
+        "original_url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon/",
+        "image_source": "original",
+        "summary": "Were giving developers， enterprises， scientists， and consumers access to Gemini 4 Argon， our latest frontier model.",
+        "images": [
+          "images/aff2c9dc3d_1.jpg"
+        ],
+        "image_sizes": [
+          [
+            1300,
+            731
+          ]
+        ]
+      },
+      "clauses": [
+        "Google 发布 Gemini 4 Argon：1M 上下文前沿模型上线 OpenRouter。"
+      ]
+    },
+    {
+      "id": "s2_item",
+      "visual": {
+        "type": "news_item",
+        "index": 2,
+        "section": "今日要闻",
+        "title": "Anthropic 自研版本控制系统 Scion：五个月替换 Git 应对 AI 代码洪流",
+        "link": "https://www.anthropic.com/engineering/redesigning-source-control",
+        "tags": [],
+        "source": "",
+        "bullets": [
+          "Anthropic 宣布自建版本控制系统 Scion，五个月内将整个 monorepo 从 Git 完全迁移，为 AI 生成代码规模重构基础设施。",
+          "日均代码合并量从 5 月约 2,500 次涨到 9 月超 30,000 次（12 倍），为人类协作设计的 Git 成瓶颈；七人团队完成迁移，Git 镜像基础设施缩至原来的两百分之一，并配套推出代码评审工具 Antique。",
+          "AI Coding 倒逼研发基建重构的首个完整案例，团队的版本管理与评审流程设计思路可直接借鉴。"
+        ],
+        "original_url": "https://www.anthropic.com/engineering/redesigning-source-control",
+        "image_source": "pexels",
+        "summary": "As our merges per day grew more than tenfold， source control became our biggest development bottleneck. Here， we share how we migrated to an in-house version control system in five months.",
+        "images": [
+          "images/8625f276e3_pexels.jpg"
+        ],
+        "image_sizes": [
+          [
+            1880,
+            1253
+          ]
+        ]
+      },
+      "clauses": [
+        "Anthropic 自研版本控制系统 Scion：五个月替换 Git 应对 AI 代码洪流。"
+      ]
+    },
+    {
+      "id": "s3_item",
+      "visual": {
+        "type": "news_item",
+        "index": 3,
+        "section": "今日要闻",
+        "title": "Google 用 Gemini 4 Argon 无人值守优化 20 万行 Python 代码库 ADK",
+        "link": "https://developers.googleblog.com/optimizing-a-200000-line-python-codebase-overnight-with-gemini-4-argon/",
+        "tags": [],
+        "source": "",
+        "bullets": [
+          "Google 工程师让 Argon 在 google/adk-python 无人值守跑 11 小时，6 项优化提案经审查合并 2 项，长会话内存会话准备时间降约 40%，包导入加快 21%。",
+          "仓库约 800 文件、20.5 万行、16,892 个测试；方法是把维护者指南放进 .agents/skills 目录加 Antigravity /goal 模式固定目标，158 轮运行从 65.6 秒缩到 56.1 秒；另 4 项提案因依赖弱引用、私有属性等被审查否决。",
+          "完整的\"智能体探索、维护者做减法\"落地复盘，.agents/skills 规则文件布局可直接复制到自己仓库跑通宵优化。"
+        ],
+        "original_url": "https://developers.googleblog.com/optimizing-a-200000-line-python-codebase-overnight-with-gemini-4-argon/",
+        "image_source": "original",
+        "summary": "See the prompts， .agents、skills rulefiles， and code review decisions from the overnight Gemini 4 Argon run that made Google s Python Agent Development Kit ADK 40% faster in long sessions.",
+        "images": [
+          "images/ee6ad87839_1.jpg"
+        ],
+        "image_sizes": [
+          [
+            1200,
+            600
+          ]
+        ]
+      },
+      "clauses": [
+        "Google 用 Gemini 4 Argon 无人值守优化 20 万行 Python 代码库 ADK。"
+      ]
+    },
+    {
+      "id": "s4_item",
+      "visual": {
+        "type": "news_item",
+        "index": 4,
+        "section": "今日要闻",
+        "title": "LangChain 发布 langchain-scaledown：约束解码模型压缩长时智能体上下文",
+        "link": "https://www.langchain.com/blog/building-long-running-agents-with-scaledown-and-deep-agents",
+        "tags": [],
+        "source": "",
+        "bullets": [
+          "LangChain 发布 langchain-scaledown 集成，用 ScaleDown 约束解码模型（CDM）替代通用 LLM 做智能体上下文管理，官方报告比前沿模型快 200 倍、便宜 467 倍。",
+          "提供 Summarize/Compress/Extract/Classify 四个 LangChain 与 Deep Agents 中间件，分别负责摘要旧历史、压缩工具结果、提取结构化字段、分类运行漂移断路；单模型支持 100 万 token 输入及图像、扫描 PDF；LangSmith LLM Gateway 同步接入，新账户送 5000 万免费 token。",
+          "长时智能体每一轮的上下文决策不再烧前沿模型，成本与延迟优化方案开箱即用，Python 生态可直接 pip 接入。"
+        ],
+        "original_url": "https://www.langchain.com/blog/building-long-running-agents-with-scaledown-and-deep-agents",
+        "image_source": "original",
+        "summary": "Use ScaleDown s constrained decoding models with LangChain and Deep Agents to summarize history， compress tool results， and extract data faster and cheaper.",
+        "images": [
+          "images/d4dd8fdaf2_1.jpg"
+        ],
+        "image_sizes": [
+          [
+            396,
+            396
+          ]
+        ]
+      },
+      "clauses": [
+        "LangChain 发布 langchain-scaledown：约束解码模型压缩长时智能体上下文。"
+      ]
+    },
+    {
+      "id": "s5_item",
+      "visual": {
+        "type": "news_item",
+        "index": 5,
+        "section": "今日要闻",
+        "title": "Liquid AI 开源 LFM2.5-24B-A2B：2B 激活参数端侧智能体模型",
+        "link": "https://www.liquid.ai/blog/lfm2-5-24b-a2b",
+        "tags": [],
+        "source": "",
+        "bullets": [
+          "Liquid AI 发布开源权重模型 LFM2.5-24B-A2B，总参 24B、每 token 仅激活 2B，定位端侧快速智能体，已在 Hugging Face 上线。",
+          "上下文从 32K 扩到 131K，预训练 33T tokens，经五阶段后训练含 OpenClaw、Hermes Agent 等智能体框架内强化学习；8 项工具调用基准中 5 项领先 Qwen3.6-35B-A3B；Apple M5 Max 解码 184 tokens/s，单卡 B300 达 21K tokens/s；llama.cpp、MLX、vLLM 首日支持。",
+          "消费级硬件本地跑智能体从可用迈向好用，本地部署与微调路线多了一个高性价比开源选项。"
+        ],
+        "original_url": "https://www.liquid.ai/blog/lfm2-5-24b-a2b",
+        "image_source": "pexels",
+        "images": [
+          "images/83d869ed21_pexels.jpg"
+        ],
+        "image_sizes": [
+          [
+            1880,
+            1253
+          ]
+        ]
+      },
+      "clauses": [
+        "Liquid AI 开源 LFM2.5-24B-A2B：2B 激活参数端侧智能体模型。"
+      ]
+    },
+    {
+      "id": "s6_item",
+      "visual": {
+        "type": "news_item",
+        "index": 6,
+        "section": "今日要闻",
+        "title": "XBOW 借 G P T 五.6 Sol 六天拿下 Chrome 全链漏洞 25 万美元赏金",
+        "link": "https://x.com/reach_vb/status/2110086935733833893",
+        "tags": [],
+        "source": "",
+        "bullets": [
+          "安全团队 XBOW 用 OpenAI GPT-5.6 Sol 辅助，6 天内以约 4 万美元算力构建出 Chrome 全链漏洞，获 Google 25 万美元赏金。",
+          "这是 Google 第二次就 Chrome 全链漏洞发放赏金，也是 2026 年新规则下首次；受影响范围为 Windows 版 Chrome，作者称过去同类漏洞约需 6 个月构建，提醒用户看到 Update 按钮及时重启浏览器。",
+          "AI 驱动安全研究投入产出比被数量级放大，企业需重新评估 AI 辅助攻防下的漏洞响应节奏。"
+        ],
+        "original_url": "https://x.com/reach_vb/status/2110086935733833893",
+        "image_source": "original",
+        "summary": "G P T 5.6 Sol btw",
+        "images": [
+          "images/794f3d7cd4_1.jpg"
+        ],
+        "image_sizes": [
+          [
+            400,
+            400
+          ]
+        ]
+      },
+      "clauses": [
+        "XBOW 借 G P T 五.6 Sol 六天拿下 Chrome 全链漏洞 25 万美元赏金。"
+      ]
+    },
+    {
+      "id": "s7_item",
+      "visual": {
+        "type": "news_item",
+        "index": 7,
+        "section": "今日要闻",
+        "title": "英伟达 RTX Spark 笔记本 10 月 16 日上市：128GB 统一内存跑本地大模型",
+        "link": "https://blogs.nvidia.com/blog/local-ai-rtx-spark-laptops-software-updates/",
+        "tags": [],
+        "source": "",
+        "bullets": [
+          "NVIDIA 官宣 RTX Spark 软件生态就绪，搭载该平台的笔记本 10 月 16 日上市，最高 128GB 统一内存、1 petaflop AI 算力。",
+          "官方同步更新本地 AI 软件栈支持情况，面向端侧推理与智能体工作负载，覆盖主流本地推理框架。",
+          "移动端首次具备台式级本地大模型承载能力，本地部署、微调与端侧智能体开发者的新硬件基线。"
+        ],
+        "original_url": "https://blogs.nvidia.com/blog/local-ai-rtx-spark-laptops-software-updates/",
+        "image_source": "original",
+        "summary": "Nemotron 3.5 Bolt， 英伟达 PAIR and 英伟达 Broadcast 2.3 adding to the thousands of apps， games and models ready for RTX Spark launch on Friday， Oct. 16.",
+        "images": [
+          "images/05b845700b_1.jpg"
+        ],
+        "image_sizes": [
+          [
+            1280,
+            680
+          ]
+        ]
+      },
+      "clauses": [
+        "英伟达 RTX Spark 笔记本 10 月 16 日上市：128GB 统一内存跑本地大模型。"
+      ]
+    },
+    {
+      "id": "s8_outro",
+      "visual": {
+        "type": "news_outro",
+        "date": "2026-10-14",
+        "total": 7
+      },
+      "clauses": [
+        "以上就是今天的 AI 头条，我们明天见。"
+      ]
+    }
+  ]
+}

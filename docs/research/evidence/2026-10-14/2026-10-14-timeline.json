@@ -1,0 +1,1718 @@
+{
+  "date": "2026-10-14",
+  "title": "每日 AI 头条",
+  "subtitle": "2026-10-14 周三 · 7 条精选",
+  "narration": {
+    "date": "2026-10-14",
+    "weekday": "周三",
+    "title": "每日 AI 头条",
+    "subtitle": "2026-10-14 周三 · 7 条精选",
+    "total": 7,
+    "sections": [
+      "今日要闻"
+    ],
+    "scenes": [
+      {
+        "id": "s0_intro",
+        "visual": {
+          "type": "news_hook",
+          "date": "2026-10-14",
+          "weekday": "周三",
+          "total": 7,
+          "sections": [
+            "今日要闻"
+          ]
+        },
+        "clauses": [
+          "今天 AI 圈有 7 件大事，Google直接发布。"
+        ]
+      },
+      {
+        "id": "s1_item",
+        "visual": {
+          "type": "news_item",
+          "index": 1,
+          "section": "今日要闻",
+          "title": "Google 发布 Gemini 4 Argon：1M 上下文前沿模型上线 OpenRouter",
+          "link": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon/",
+          "tags": [],
+          "source": "",
+          "bullets": [
+            "Google 全球开放新一代稀疏 MoE 前沿模型 Gemini 4 Argon，输入输出共享 1M token 窗口，单次响应最多输出 1M tokens。",
+            "经 Gemini API、AI Studio、Antigravity 可用，已上线 OpenRouter 与 OpenCode Go（11 月 30 日前 $10 抵 $60 额度）；AutomationBench 得 51.3%、CWE-bench v1 以 68% 并列第一；定价输入 $2/M、输出 $10/M，11 月 30 日后价格翻倍。",
+            "长上下文代码库理解与智能体编排成本显著下降，抢在 11 月底前迁移验证可锁定半价窗口；Claude/GPT 之外新增强基准参照。"
+          ],
+          "original_url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon/",
+          "image_source": "original",
+          "summary": "Were giving developers， enterprises， scientists， and consumers access to Gemini 4 Argon， our latest frontier model.",
+          "images": [
+            "images/aff2c9dc3d_1.jpg"
+          ],
+          "image_sizes": [
+            [
+              1300,
+              731
+            ]
+          ]
+        },
+        "clauses": [
+          "Google 发布 Gemini 4 Argon：1M 上下文前沿模型上线 OpenRouter。"
+        ]
+      },
+      {
+        "id": "s2_item",
+        "visual": {
+          "type": "news_item",
+          "index": 2,
+          "section": "今日要闻",
+          "title": "Anthropic 自研版本控制系统 Scion：五个月替换 Git 应对 AI 代码洪流",
+          "link": "https://www.anthropic.com/engineering/redesigning-source-control",
+          "tags": [],
+          "source": "",
+          "bullets": [
+            "Anthropic 宣布自建版本控制系统 Scion，五个月内将整个 monorepo 从 Git 完全迁移，为 AI 生成代码规模重构基础设施。",
+            "日均代码合并量从 5 月约 2,500 次涨到 9 月超 30,000 次（12 倍），为人类协作设计的 Git 成瓶颈；七人团队完成迁移，Git 镜像基础设施缩至原来的两百分之一，并配套推出代码评审工具 Antique。",
+            "AI Coding 倒逼研发基建重构的首个完整案例，团队的版本管理与评审流程设计思路可直接借鉴。"
+          ],
+          "original_url": "https://www.anthropic.com/engineering/redesigning-source-control",
+          "image_source": "pexels",
+          "summary": "As our merges per day grew more than tenfold， source control became our biggest development bottleneck. Here， we share how we migrated to an in-house version control system in five months.",
+          "images": [
+            "images/8625f276e3_pexels.jpg"
+          ],
+          "image_sizes": [
+            [
+              1880,
+              1253
+            ]
+          ]
+        },
+        "clauses": [
+          "Anthropic 自研版本控制系统 Scion：五个月替换 Git 应对 AI 代码洪流。"
+        ]
+      },
+      {
+        "id": "s3_item",
+        "visual": {
+          "type": "news_item",
+          "index": 3,
+          "section": "今日要闻",
+          "title": "Google 用 Gemini 4 Argon 无人值守优化 20 万行 Python 代码库 ADK",
+          "link": "https://developers.googleblog.com/optimizing-a-200000-line-python-codebase-overnight-with-gemini-4-argon/",
+          "tags": [],
+          "source": "",
+          "bullets": [
+            "Google 工程师让 Argon 在 google/adk-python 无人值守跑 11 小时，6 项优化提案经审查合并 2 项，长会话内存会话准备时间降约 40%，包导入加快 21%。",
+            "仓库约 800 文件、20.5 万行、16,892 个测试；方法是把维护者指南放进 .agents/skills 目录加 Antigravity /goal 模式固定目标，158 轮运行从 65.6 秒缩到 56.1 秒；另 4 项提案因依赖弱引用、私有属性等被审查否决。",
+            "完整的\"智能体探索、维护者做减法\"落地复盘，.agents/skills 规则文件布局可直接复制到自己仓库跑通宵优化。"
+          ],
+          "original_url": "https://developers.googleblog.com/optimizing-a-200000-line-python-codebase-overnight-with-gemini-4-argon/",
+          "image_source": "original",
+          "summary": "See the prompts， .agents、skills rulefiles， and code review decisions from the overnight Gemini 4 Argon run that made Google s Python Agent Development Kit ADK 40% faster in long sessions.",
+          "images": [
+            "images/ee6ad87839_1.jpg"
+          ],
+          "image_sizes": [
+            [
+              1200,
+              600
+            ]
+          ]
+        },
+        "clauses": [
+          "Google 用 Gemini 4 Argon 无人值守优化 20 万行 Python 代码库 ADK。"
+        ]
+      },
+      {
+        "id": "s4_item",
+        "visual": {
+          "type": "news_item",
+          "index": 4,
+          "section": "今日要闻",
+          "title": "LangChain 发布 langchain-scaledown：约束解码模型压缩长时智能体上下文",
+          "link": "https://www.langchain.com/blog/building-long-running-agents-with-scaledown-and-deep-agents",
+          "tags": [],
+          "source": "",
+          "bullets": [
+            "LangChain 发布 langchain-scaledown 集成，用 ScaleDown 约束解码模型（CDM）替代通用 LLM 做智能体上下文管理，官方报告比前沿模型快 200 倍、便宜 467 倍。",
+            "提供 Summarize/Compress/Extract/Classify 四个 LangChain 与 Deep Agents 中间件，分别负责摘要旧历史、压缩工具结果、提取结构化字段、分类运行漂移断路；单模型支持 100 万 token 输入及图像、扫描 PDF；LangSmith LLM Gateway 同步接入，新账户送 5000 万免费 token。",
+            "长时智能体每一轮的上下文决策不再烧前沿模型，成本与延迟优化方案开箱即用，Python 生态可直接 pip 接入。"
+          ],
+          "original_url": "https://www.langchain.com/blog/building-long-running-agents-with-scaledown-and-deep-agents",
+          "image_source": "original",
+          "summary": "Use ScaleDown s constrained decoding models with LangChain and Deep Agents to summarize history， compress tool results， and extract data faster and cheaper.",
+          "images": [
+            "images/d4dd8fdaf2_1.jpg"
+          ],
+          "image_sizes": [
+            [
+              396,
+              396
+            ]
+          ]
+        },
+        "clauses": [
+          "LangChain 发布 langchain-scaledown：约束解码模型压缩长时智能体上下文。"
+        ]
+      },
+      {
+        "id": "s5_item",
+        "visual": {
+          "type": "news_item",
+          "index": 5,
+          "section": "今日要闻",
+          "title": "Liquid AI 开源 LFM2.5-24B-A2B：2B 激活参数端侧智能体模型",
+          "link": "https://www.liquid.ai/blog/lfm2-5-24b-a2b",
+          "tags": [],
+          "source": "",
+          "bullets": [
+            "Liquid AI 发布开源权重模型 LFM2.5-24B-A2B，总参 24B、每 token 仅激活 2B，定位端侧快速智能体，已在 Hugging Face 上线。",
+            "上下文从 32K 扩到 131K，预训练 33T tokens，经五阶段后训练含 OpenClaw、Hermes Agent 等智能体框架内强化学习；8 项工具调用基准中 5 项领先 Qwen3.6-35B-A3B；Apple M5 Max 解码 184 tokens/s，单卡 B300 达 21K tokens/s；llama.cpp、MLX、vLLM 首日支持。",
+            "消费级硬件本地跑智能体从可用迈向好用，本地部署与微调路线多了一个高性价比开源选项。"
+          ],
+          "original_url": "https://www.liquid.ai/blog/lfm2-5-24b-a2b",
+          "image_source": "pexels",
+          "images": [
+            "images/83d869ed21_pexels.jpg"
+          ],
+          "image_sizes": [
+            [
+              1880,
+              1253
+            ]
+          ]
+        },
+        "clauses": [
+          "Liquid AI 开源 LFM2.5-24B-A2B：2B 激活参数端侧智能体模型。"
+        ]
+      },
+      {
+        "id": "s6_item",
+        "visual": {
+          "type": "news_item",
+          "index": 6,
+          "section": "今日要闻",
+          "title": "XBOW 借 G P T 五.6 Sol 六天拿下 Chrome 全链漏洞 25 万美元赏金",
+          "link": "https://x.com/reach_vb/status/2110086935733833893",
+          "tags": [],
+          "source": "",
+          "bullets": [
+            "安全团队 XBOW 用 OpenAI GPT-5.6 Sol 辅助，6 天内以约 4 万美元算力构建出 Chrome 全链漏洞，获 Google 25 万美元赏金。",
+            "这是 Google 第二次就 Chrome 全链漏洞发放赏金，也是 2026 年新规则下首次；受影响范围为 Windows 版 Chrome，作者称过去同类漏洞约需 6 个月构建，提醒用户看到 Update 按钮及时重启浏览器。",
+            "AI 驱动安全研究投入产出比被数量级放大，企业需重新评估 AI 辅助攻防下的漏洞响应节奏。"
+          ],
+          "original_url": "https://x.com/reach_vb/status/2110086935733833893",
+          "image_source": "original",
+          "summary": "G P T 5.6 Sol btw",
+          "images": [
+            "images/794f3d7cd4_1.jpg"
+          ],
+          "image_sizes": [
+            [
+              400,
+              400
+            ]
+          ]
+        },
+        "clauses": [
+          "XBOW 借 G P T 五.6 Sol 六天拿下 Chrome 全链漏洞 25 万美元赏金。"
+        ]
+      },
+      {
+        "id": "s7_item",
+        "visual": {
+          "type": "news_item",
+          "index": 7,
+          "section": "今日要闻",
+          "title": "英伟达 RTX Spark 笔记本 10 月 16 日上市：128GB 统一内存跑本地大模型",
+          "link": "https://blogs.nvidia.com/blog/local-ai-rtx-spark-laptops-software-updates/",
+          "tags": [],
+          "source": "",
+          "bullets": [
+            "NVIDIA 官宣 RTX Spark 软件生态就绪，搭载该平台的笔记本 10 月 16 日上市，最高 128GB 统一内存、1 petaflop AI 算力。",
+            "官方同步更新本地 AI 软件栈支持情况，面向端侧推理与智能体工作负载，覆盖主流本地推理框架。",
+            "移动端首次具备台式级本地大模型承载能力，本地部署、微调与端侧智能体开发者的新硬件基线。"
+          ],
+          "original_url": "https://blogs.nvidia.com/blog/local-ai-rtx-spark-laptops-software-updates/",
+          "image_source": "original",
+          "summary": "Nemotron 3.5 Bolt， 英伟达 PAIR and 英伟达 Broadcast 2.3 adding to the thousands of apps， games and models ready for RTX Spark launch on Friday， Oct. 16.",
+          "images": [
+            "images/05b845700b_1.jpg"
+          ],
+          "image_sizes": [
+            [
+              1280,
+              680
+            ]
+          ]
+        },
+        "clauses": [
+          "英伟达 RTX Spark 笔记本 10 月 16 日上市：128GB 统一内存跑本地大模型。"
+        ]
+      },
+      {
+        "id": "s8_outro",
+        "visual": {
+          "type": "news_outro",
+          "date": "2026-10-14",
+          "total": 7
+        },
+        "clauses": [
+          "以上就是今天的 AI 头条，我们明天见。"
+        ]
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "id": "s0_intro",
+      "clauses": [
+        {
+          "i": 0,
+          "text": "今天 AI 圈有 7 件大事，Google直接发布。",
+          "start": 0.1,
+          "end": 3.844,
+          "duration": 3.744,
+          "chars": [
+            {
+              "ch": "今",
+              "t": 0.0385
+            },
+            {
+              "ch": "天",
+              "t": 0.4519
+            },
+            {
+              "ch": "A",
+              "t": 0.5385
+            },
+            {
+              "ch": "I",
+              "t": 1.0288
+            },
+            {
+              "ch": "圈",
+              "t": 1.0288
+            },
+            {
+              "ch": "有",
+              "t": 1.2019
+            },
+            {
+              "ch": "7",
+              "t": 1.3077
+            },
+            {
+              "ch": "件",
+              "t": 1.5865
+            },
+            {
+              "ch": "大",
+              "t": 1.5865
+            },
+            {
+              "ch": "事",
+              "t": 1.9519
+            },
+            {
+              "ch": "，",
+              "t": 2.0481
+            },
+            {
+              "ch": "G",
+              "t": 2.1442
+            },
+            {
+              "ch": "o",
+              "t": 2.2116
+            },
+            {
+              "ch": "o",
+              "t": 2.2789
+            },
+            {
+              "ch": "g",
+              "t": 2.3462
+            },
+            {
+              "ch": "l",
+              "t": 2.4135
+            },
+            {
+              "ch": "e",
+              "t": 2.4808
+            },
+            {
+              "ch": "直",
+              "t": 2.5
+            },
+            {
+              "ch": "接",
+              "t": 2.7596
+            },
+            {
+              "ch": "发",
+              "t": 2.7692
+            },
+            {
+              "ch": "布",
+              "t": 3.0481
+            },
+            {
+              "ch": "。",
+              "t": 3.0481
+            }
+          ],
+          "timing_src": "word"
+        }
+      ]
+    },
+    {
+      "id": "s1_item",
+      "clauses": [
+        {
+          "i": 0,
+          "text": "Google 发布 Gemini 4 Argon：1M 上下文前沿模型上线 OpenRouter。",
+          "start": 3.844,
+          "end": 8.884,
+          "duration": 5.04,
+          "chars": [
+            {
+              "ch": "G",
+              "t": 0.0385
+            },
+            {
+              "ch": "o",
+              "t": 0.1038
+            },
+            {
+              "ch": "o",
+              "t": 0.1692
+            },
+            {
+              "ch": "g",
+              "t": 0.2346
+            },
+            {
+              "ch": "l",
+              "t": 0.3
+            },
+            {
+              "ch": "e",
+              "t": 0.3654
+            },
+            {
+              "ch": "发",
+              "t": 0.375
+            },
+            {
+              "ch": "布",
+              "t": 0.7308
+            },
+            {
+              "ch": "G",
+              "t": 0.8173
+            },
+            {
+              "ch": "e",
+              "t": 0.8981
+            },
+            {
+              "ch": "m",
+              "t": 0.9788
+            },
+            {
+              "ch": "i",
+              "t": 1.0596
+            },
+            {
+              "ch": "n",
+              "t": 1.1404
+            },
+            {
+              "ch": "i",
+              "t": 1.2211
+            },
+            {
+              "ch": "4",
+              "t": 1.2308
+            },
+            {
+              "ch": "A",
+              "t": 1.4423
+            },
+            {
+              "ch": "r",
+              "t": 1.5336
+            },
+            {
+              "ch": "g",
+              "t": 1.625
+            },
+            {
+              "ch": "o",
+              "t": 1.7163
+            },
+            {
+              "ch": "n",
+              "t": 1.8077
+            },
+            {
+              "ch": "：",
+              "t": 1.9567
+            },
+            {
+              "ch": "1",
+              "t": 2.1058
+            },
+            {
+              "ch": "M",
+              "t": 2.2885
+            },
+            {
+              "ch": "上",
+              "t": 2.4808
+            },
+            {
+              "ch": "下",
+              "t": 2.6923
+            },
+            {
+              "ch": "文",
+              "t": 2.9038
+            },
+            {
+              "ch": "前",
+              "t": 2.9231
+            },
+            {
+              "ch": "沿",
+              "t": 3.1635
+            },
+            {
+              "ch": "模",
+              "t": 3.1731
+            },
+            {
+              "ch": "型",
+              "t": 3.3462
+            },
+            {
+              "ch": "上",
+              "t": 3.3558
+            },
+            {
+              "ch": "线",
+              "t": 3.6923
+            },
+            {
+              "ch": "O",
+              "t": 3.7692
+            },
+            {
+              "ch": "p",
+              "t": 3.8334
+            },
+            {
+              "ch": "e",
+              "t": 3.8975
+            },
+            {
+              "ch": "n",
+              "t": 3.9616
+            },
+            {
+              "ch": "R",
+              "t": 4.0257
+            },
+            {
+              "ch": "o",
+              "t": 4.0898
+            },
+            {
+              "ch": "u",
+              "t": 4.1539
+            },
+            {
+              "ch": "t",
+              "t": 4.218
+            },
+            {
+              "ch": "e",
+              "t": 4.2821
+            },
+            {
+              "ch": "r",
+              "t": 4.3462
+            },
+            {
+              "ch": "。",
+              "t": 4.3462
+            }
+          ],
+          "timing_src": "word"
+        }
+      ]
+    },
+    {
+      "id": "s2_item",
+      "clauses": [
+        {
+          "i": 0,
+          "text": "Anthropic 自研版本控制系统 Scion：五个月替换 Git 应对 AI 代码洪流。",
+          "start": 8.884,
+          "end": 14.428,
+          "duration": 5.544,
+          "chars": [
+            {
+              "ch": "A",
+              "t": 0.0385
+            },
+            {
+              "ch": "n",
+              "t": 0.1214
+            },
+            {
+              "ch": "t",
+              "t": 0.2043
+            },
+            {
+              "ch": "h",
+              "t": 0.2873
+            },
+            {
+              "ch": "r",
+              "t": 0.3702
+            },
+            {
+              "ch": "o",
+              "t": 0.4531
+            },
+            {
+              "ch": "p",
+              "t": 0.5361
+            },
+            {
+              "ch": "i",
+              "t": 0.619
+            },
+            {
+              "ch": "c",
+              "t": 0.7019
+            },
+            {
+              "ch": "自",
+              "t": 0.7212
+            },
+            {
+              "ch": "研",
+              "t": 0.8558
+            },
+            {
+              "ch": "版",
+              "t": 1.0577
+            },
+            {
+              "ch": "本",
+              "t": 1.3077
+            },
+            {
+              "ch": "控",
+              "t": 1.3269
+            },
+            {
+              "ch": "制",
+              "t": 1.4968
+            },
+            {
+              "ch": "系",
+              "t": 1.6667
+            },
+            {
+              "ch": "统",
+              "t": 1.8365
+            },
+            {
+              "ch": "S",
+              "t": 1.9135
+            },
+            {
+              "ch": "c",
+              "t": 2.0216
+            },
+            {
+              "ch": "i",
+              "t": 2.1298
+            },
+            {
+              "ch": "o",
+              "t": 2.238
+            },
+            {
+              "ch": "n",
+              "t": 2.3462
+            },
+            {
+              "ch": "：",
+              "t": 2.5192
+            },
+            {
+              "ch": "五",
+              "t": 2.6923
+            },
+            {
+              "ch": "个",
+              "t": 2.8365
+            },
+            {
+              "ch": "月",
+              "t": 2.9807
+            },
+            {
+              "ch": "替",
+              "t": 2.9904
+            },
+            {
+              "ch": "换",
+              "t": 3.2596
+            },
+            {
+              "ch": "G",
+              "t": 3.2788
+            },
+            {
+              "ch": "i",
+              "t": 3.3557
+            },
+            {
+              "ch": "t",
+              "t": 3.4327
+            },
+            {
+              "ch": "应",
+              "t": 3.4423
+            },
+            {
+              "ch": "对",
+              "t": 3.7885
+            },
+            {
+              "ch": "A",
+              "t": 3.875
+            },
+            {
+              "ch": "I",
+              "t": 4.3173
+            },
+            {
+              "ch": "代",
+              "t": 4.3269
+            },
+            {
+              "ch": "码",
+              "t": 4.5192
+            },
+            {
+              "ch": "洪",
+              "t": 4.5288
+            },
+            {
+              "ch": "流",
+              "t": 4.8654
+            },
+            {
+              "ch": "。",
+              "t": 4.8654
+            }
+          ],
+          "timing_src": "word"
+        }
+      ]
+    },
+    {
+      "id": "s3_item",
+      "clauses": [
+        {
+          "i": 0,
+          "text": "Google 用 Gemini 4 Argon 无人值守优化 20 万行 Python 代码库 ADK。",
+          "start": 14.428,
+          "end": 19.612,
+          "duration": 5.184,
+          "chars": [
+            {
+              "ch": "G",
+              "t": 0.0385
+            },
+            {
+              "ch": "o",
+              "t": 0.1173
+            },
+            {
+              "ch": "o",
+              "t": 0.1962
+            },
+            {
+              "ch": "g",
+              "t": 0.275
+            },
+            {
+              "ch": "l",
+              "t": 0.3539
+            },
+            {
+              "ch": "e",
+              "t": 0.4327
+            },
+            {
+              "ch": "用",
+              "t": 0.4327
+            },
+            {
+              "ch": "G",
+              "t": 0.6346
+            },
+            {
+              "ch": "e",
+              "t": 0.7096
+            },
+            {
+              "ch": "m",
+              "t": 0.7846
+            },
+            {
+              "ch": "i",
+              "t": 0.8596
+            },
+            {
+              "ch": "n",
+              "t": 0.9346
+            },
+            {
+              "ch": "i",
+              "t": 1.0096
+            },
+            {
+              "ch": "4",
+              "t": 1.0192
+            },
+            {
+              "ch": "A",
+              "t": 1.2404
+            },
+            {
+              "ch": "r",
+              "t": 1.3437
+            },
+            {
+              "ch": "g",
+              "t": 1.4471
+            },
+            {
+              "ch": "o",
+              "t": 1.5505
+            },
+            {
+              "ch": "n",
+              "t": 1.6538
+            },
+            {
+              "ch": "无",
+              "t": 1.7308
+            },
+            {
+              "ch": "人",
+              "t": 1.9519
+            },
+            {
+              "ch": "值",
+              "t": 1.9519
+            },
+            {
+              "ch": "守",
+              "t": 2.2981
+            },
+            {
+              "ch": "优",
+              "t": 2.375
+            },
+            {
+              "ch": "化",
+              "t": 2.6442
+            },
+            {
+              "ch": "2",
+              "t": 2.6635
+            },
+            {
+              "ch": "0",
+              "t": 2.7628
+            },
+            {
+              "ch": "万",
+              "t": 2.9615
+            },
+            {
+              "ch": "行",
+              "t": 2.9615
+            },
+            {
+              "ch": "P",
+              "t": 3.2981
+            },
+            {
+              "ch": "y",
+              "t": 3.3769
+            },
+            {
+              "ch": "t",
+              "t": 3.4558
+            },
+            {
+              "ch": "h",
+              "t": 3.5346
+            },
+            {
+              "ch": "o",
+              "t": 3.6135
+            },
+            {
+              "ch": "n",
+              "t": 3.6923
+            },
+            {
+              "ch": "代",
+              "t": 3.7019
+            },
+            {
+              "ch": "码",
+              "t": 3.9038
+            },
+            {
+              "ch": "库",
+              "t": 3.9038
+            },
+            {
+              "ch": "A",
+              "t": 4.0865
+            },
+            {
+              "ch": "D",
+              "t": 4.2933
+            },
+            {
+              "ch": "K",
+              "t": 4.5
+            },
+            {
+              "ch": "。",
+              "t": 4.5
+            }
+          ],
+          "timing_src": "word"
+        }
+      ]
+    },
+    {
+      "id": "s4_item",
+      "clauses": [
+        {
+          "i": 0,
+          "text": "LangChain 发布 langchain-scaledown：约束解码模型压缩长时智能体上下文。",
+          "start": 19.612,
+          "end": 24.748,
+          "duration": 5.136,
+          "chars": [
+            {
+              "ch": "L",
+              "t": 0.0385
+            },
+            {
+              "ch": "a",
+              "t": 0.0877
+            },
+            {
+              "ch": "n",
+              "t": 0.137
+            },
+            {
+              "ch": "g",
+              "t": 0.1863
+            },
+            {
+              "ch": "C",
+              "t": 0.2356
+            },
+            {
+              "ch": "h",
+              "t": 0.2849
+            },
+            {
+              "ch": "a",
+              "t": 0.3341
+            },
+            {
+              "ch": "i",
+              "t": 0.3834
+            },
+            {
+              "ch": "n",
+              "t": 0.4327
+            },
+            {
+              "ch": "发",
+              "t": 0.4423
+            },
+            {
+              "ch": "布",
+              "t": 0.75
+            },
+            {
+              "ch": "l",
+              "t": 0.7692
+            },
+            {
+              "ch": "a",
+              "t": 0.812
+            },
+            {
+              "ch": "n",
+              "t": 0.8547
+            },
+            {
+              "ch": "g",
+              "t": 0.8975
+            },
+            {
+              "ch": "c",
+              "t": 0.9402
+            },
+            {
+              "ch": "h",
+              "t": 0.9829
+            },
+            {
+              "ch": "a",
+              "t": 1.0257
+            },
+            {
+              "ch": "i",
+              "t": 1.0684
+            },
+            {
+              "ch": "n",
+              "t": 1.1111
+            },
+            {
+              "ch": "-",
+              "t": 1.1539
+            },
+            {
+              "ch": "s",
+              "t": 1.1966
+            },
+            {
+              "ch": "c",
+              "t": 1.2393
+            },
+            {
+              "ch": "a",
+              "t": 1.2821
+            },
+            {
+              "ch": "l",
+              "t": 1.3248
+            },
+            {
+              "ch": "e",
+              "t": 1.3676
+            },
+            {
+              "ch": "d",
+              "t": 1.4103
+            },
+            {
+              "ch": "o",
+              "t": 1.453
+            },
+            {
+              "ch": "w",
+              "t": 1.4958
+            },
+            {
+              "ch": "n",
+              "t": 1.5385
+            },
+            {
+              "ch": "：",
+              "t": 1.6923
+            },
+            {
+              "ch": "约",
+              "t": 1.8462
+            },
+            {
+              "ch": "束",
+              "t": 2.1442
+            },
+            {
+              "ch": "解",
+              "t": 2.1538
+            },
+            {
+              "ch": "码",
+              "t": 2.3654
+            },
+            {
+              "ch": "模",
+              "t": 2.3654
+            },
+            {
+              "ch": "型",
+              "t": 2.7404
+            },
+            {
+              "ch": "压",
+              "t": 2.8077
+            },
+            {
+              "ch": "缩",
+              "t": 3.0673
+            },
+            {
+              "ch": "长",
+              "t": 3.0865
+            },
+            {
+              "ch": "时",
+              "t": 3.2404
+            },
+            {
+              "ch": "智",
+              "t": 3.5865
+            },
+            {
+              "ch": "能",
+              "t": 3.8557
+            },
+            {
+              "ch": "体",
+              "t": 3.8558
+            },
+            {
+              "ch": "上",
+              "t": 4.0193
+            },
+            {
+              "ch": "下",
+              "t": 4.2308
+            },
+            {
+              "ch": "文",
+              "t": 4.4423
+            },
+            {
+              "ch": "。",
+              "t": 4.4423
+            }
+          ],
+          "timing_src": "word"
+        }
+      ]
+    },
+    {
+      "id": "s5_item",
+      "clauses": [
+        {
+          "i": 0,
+          "text": "Liquid AI 开源 LFM2.5-24B-A2B：2B 激活参数端侧智能体模型。",
+          "start": 24.748,
+          "end": 30.748,
+          "duration": 6.0,
+          "chars": [
+            {
+              "ch": "L",
+              "t": 0.0385
+            },
+            {
+              "ch": "i",
+              "t": 0.0981
+            },
+            {
+              "ch": "q",
+              "t": 0.1577
+            },
+            {
+              "ch": "u",
+              "t": 0.2173
+            },
+            {
+              "ch": "i",
+              "t": 0.2769
+            },
+            {
+              "ch": "d",
+              "t": 0.3365
+            },
+            {
+              "ch": "A",
+              "t": 0.3462
+            },
+            {
+              "ch": "I",
+              "t": 0.6058
+            },
+            {
+              "ch": "开",
+              "t": 0.6154
+            },
+            {
+              "ch": "源",
+              "t": 1.0096
+            },
+            {
+              "ch": "L",
+              "t": 1.0865
+            },
+            {
+              "ch": "F",
+              "t": 1.351
+            },
+            {
+              "ch": "M",
+              "t": 1.6154
+            },
+            {
+              "ch": "2",
+              "t": 1.625
+            },
+            {
+              "ch": ".",
+              "t": 1.875
+            },
+            {
+              "ch": "5",
+              "t": 2.125
+            },
+            {
+              "ch": "-",
+              "t": 2.1635
+            },
+            {
+              "ch": "2",
+              "t": 2.2019
+            },
+            {
+              "ch": "4",
+              "t": 2.5769
+            },
+            {
+              "ch": "B",
+              "t": 2.5769
+            },
+            {
+              "ch": "-",
+              "t": 2.649
+            },
+            {
+              "ch": "A",
+              "t": 2.7212
+            },
+            {
+              "ch": "2",
+              "t": 2.7308
+            },
+            {
+              "ch": "B",
+              "t": 2.875
+            },
+            {
+              "ch": "：",
+              "t": 3.1058
+            },
+            {
+              "ch": "2",
+              "t": 3.3365
+            },
+            {
+              "ch": "B",
+              "t": 3.5481
+            },
+            {
+              "ch": "激",
+              "t": 3.7212
+            },
+            {
+              "ch": "活",
+              "t": 3.9808
+            },
+            {
+              "ch": "参",
+              "t": 3.9904
+            },
+            {
+              "ch": "数",
+              "t": 4.25
+            },
+            {
+              "ch": "端",
+              "t": 4.25
+            },
+            {
+              "ch": "侧",
+              "t": 4.4135
+            },
+            {
+              "ch": "智",
+              "t": 4.6154
+            },
+            {
+              "ch": "能",
+              "t": 4.8365
+            },
+            {
+              "ch": "体",
+              "t": 4.8365
+            },
+            {
+              "ch": "模",
+              "t": 4.9712
+            },
+            {
+              "ch": "型",
+              "t": 5.2981
+            },
+            {
+              "ch": "。",
+              "t": 5.2981
+            }
+          ],
+          "timing_src": "word"
+        }
+      ]
+    },
+    {
+      "id": "s6_item",
+      "clauses": [
+        {
+          "i": 0,
+          "text": "XBOW 借 G P T 五.6 Sol 六天拿下 Chrome 全链漏洞 25 万美元赏金。",
+          "start": 30.748,
+          "end": 36.196,
+          "duration": 5.448,
+          "chars": [
+            {
+              "ch": "X",
+              "t": 0.0385
+            },
+            {
+              "ch": "B",
+              "t": 0.266
+            },
+            {
+              "ch": "O",
+              "t": 0.4936
+            },
+            {
+              "ch": "W",
+              "t": 0.7212
+            },
+            {
+              "ch": "借",
+              "t": 0.7308
+            },
+            {
+              "ch": "G",
+              "t": 1.0769
+            },
+            {
+              "ch": "P",
+              "t": 1.2981
+            },
+            {
+              "ch": "T",
+              "t": 1.5192
+            },
+            {
+              "ch": "五",
+              "t": 1.6635
+            },
+            {
+              "ch": ".",
+              "t": 1.7788
+            },
+            {
+              "ch": "6",
+              "t": 1.8942
+            },
+            {
+              "ch": "S",
+              "t": 2.0288
+            },
+            {
+              "ch": "o",
+              "t": 2.1731
+            },
+            {
+              "ch": "l",
+              "t": 2.3173
+            },
+            {
+              "ch": "六",
+              "t": 2.3173
+            },
+            {
+              "ch": "天",
+              "t": 2.5769
+            },
+            {
+              "ch": "拿",
+              "t": 2.5865
+            },
+            {
+              "ch": "下",
+              "t": 2.9135
+            },
+            {
+              "ch": "C",
+              "t": 3.0
+            },
+            {
+              "ch": "h",
+              "t": 3.05
+            },
+            {
+              "ch": "r",
+              "t": 3.1
+            },
+            {
+              "ch": "o",
+              "t": 3.15
+            },
+            {
+              "ch": "m",
+              "t": 3.2
+            },
+            {
+              "ch": "e",
+              "t": 3.25
+            },
+            {
+              "ch": "全",
+              "t": 3.25
+            },
+            {
+              "ch": "链",
+              "t": 3.4423
+            },
+            {
+              "ch": "漏",
+              "t": 3.5481
+            },
+            {
+              "ch": "洞",
+              "t": 3.8077
+            },
+            {
+              "ch": "2",
+              "t": 3.8269
+            },
+            {
+              "ch": "5",
+              "t": 3.9551
+            },
+            {
+              "ch": "万",
+              "t": 4.2115
+            },
+            {
+              "ch": "美",
+              "t": 4.2212
+            },
+            {
+              "ch": "元",
+              "t": 4.4039
+            },
+            {
+              "ch": "赏",
+              "t": 4.4135
+            },
+            {
+              "ch": "金",
+              "t": 4.75
+            },
+            {
+              "ch": "。",
+              "t": 4.75
+            }
+          ],
+          "timing_src": "word"
+        }
+      ]
+    },
+    {
+      "id": "s7_item",
+      "clauses": [
+        {
+          "i": 0,
+          "text": "英伟达 RTX Spark 笔记本 10 月 16 日上市：128GB 统一内存跑本地大模型。",
+          "start": 36.196,
+          "end": 42.148,
+          "duration": 5.952,
+          "chars": [
+            {
+              "ch": "英",
+              "t": 0.0385
+            },
+            {
+              "ch": "伟",
+              "t": 0.2692
+            },
+            {
+              "ch": "达",
+              "t": 0.5
+            },
+            {
+              "ch": "R",
+              "t": 0.5769
+            },
+            {
+              "ch": "T",
+              "t": 0.7836
+            },
+            {
+              "ch": "X",
+              "t": 0.9904
+            },
+            {
+              "ch": "S",
+              "t": 1.0
+            },
+            {
+              "ch": "p",
+              "t": 1.0865
+            },
+            {
+              "ch": "a",
+              "t": 1.1731
+            },
+            {
+              "ch": "r",
+              "t": 1.2596
+            },
+            {
+              "ch": "k",
+              "t": 1.3462
+            },
+            {
+              "ch": "笔",
+              "t": 1.3558
+            },
+            {
+              "ch": "记",
+              "t": 1.5433
+            },
+            {
+              "ch": "本",
+              "t": 1.7308
+            },
+            {
+              "ch": "1",
+              "t": 1.8077
+            },
+            {
+              "ch": "0",
+              "t": 1.891
+            },
+            {
+              "ch": "月",
+              "t": 2.0577
+            },
+            {
+              "ch": "1",
+              "t": 2.0673
+            },
+            {
+              "ch": "6",
+              "t": 2.1667
+            },
+            {
+              "ch": "日",
+              "t": 2.3654
+            },
+            {
+              "ch": "上",
+              "t": 2.375
+            },
+            {
+              "ch": "市",
+              "t": 2.7692
+            },
+            {
+              "ch": "：",
+              "t": 2.8894
+            },
+            {
+              "ch": "1",
+              "t": 3.0096
+            },
+            {
+              "ch": "2",
+              "t": 3.2091
+            },
+            {
+              "ch": "8",
+              "t": 3.4086
+            },
+            {
+              "ch": "G",
+              "t": 3.6082
+            },
+            {
+              "ch": "B",
+              "t": 3.8077
+            },
+            {
+              "ch": "统",
+              "t": 3.8173
+            },
+            {
+              "ch": "一",
+              "t": 4.048
+            },
+            {
+              "ch": "内",
+              "t": 4.0577
+            },
+            {
+              "ch": "存",
+              "t": 4.3558
+            },
+            {
+              "ch": "跑",
+              "t": 4.375
+            },
+            {
+              "ch": "本",
+              "t": 4.5385
+            },
+            {
+              "ch": "地",
+              "t": 4.7788
+            },
+            {
+              "ch": "大",
+              "t": 4.7885
+            },
+            {
+              "ch": "模",
+              "t": 4.9231
+            },
+            {
+              "ch": "型",
+              "t": 5.2692
+            },
+            {
+              "ch": "。",
+              "t": 5.2692
+            }
+          ],
+          "timing_src": "word"
+        }
+      ]
+    },
+    {
+      "id": "s8_outro",
+      "clauses": [
+        {
+          "i": 0,
+          "text": "以上就是今天的 AI 头条，我们明天见。",
+          "start": 42.148,
+          "end": 45.052,
+          "duration": 2.904,
+          "chars": [
+            {
+              "ch": "以",
+              "t": 0.0385
+            },
+            {
+              "ch": "上",
+              "t": 0.3462
+            },
+            {
+              "ch": "就",
+              "t": 0.3654
+            },
+            {
+              "ch": "是",
+              "t": 0.4423
+            },
+            {
+              "ch": "今",
+              "t": 0.5288
+            },
+            {
+              "ch": "天",
+              "t": 0.7211
+            },
+            {
+              "ch": "的",
+              "t": 0.7212
+            },
+            {
+              "ch": "A",
+              "t": 0.8173
+            },
+            {
+              "ch": "I",
+              "t": 1.0961
+            },
+            {
+              "ch": "头",
+              "t": 1.1058
+            },
+            {
+              "ch": "条",
+              "t": 1.4711
+            },
+            {
+              "ch": "，",
+              "t": 1.5721
+            },
+            {
+              "ch": "我",
+              "t": 1.6731
+            },
+            {
+              "ch": "们",
+              "t": 1.8173
+            },
+            {
+              "ch": "明",
+              "t": 1.8173
+            },
+            {
+              "ch": "天",
+              "t": 2.048
+            },
+            {
+              "ch": "见",
+              "t": 2.0481
+            },
+            {
+              "ch": "。",
+              "t": 2.0481
+            }
+          ],
+          "timing_src": "word"
+        }
+      ]
+    }
+  ],
+  "master_duration": 45.052,
+  "content_duration": 44.952,
+  "speech_rate": 30,
+  "loudness_rate": 50,
+  "title_pad": 0.1,
+  "tts_backend": "edge",
+  "failed_clauses": []
+}

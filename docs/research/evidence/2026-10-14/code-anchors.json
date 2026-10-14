@@ -1,0 +1,362 @@
+{
+  "skills/todayaihot/SKILL.md": [
+    {
+      "line": 12,
+      "text": "当前还原包只恢复了 Remotion 前端；`scripts/` 流水线、`work/` 中间产物和每日 `out/` 产物尚未恢复。发现这些文件缺失时，必须明确报告“流水线层未恢复”，不能假装已经完成抓取、TTS 或渲染。"
+    },
+    {
+      "line": 17,
+      "text": "2. **同一文本源**：卡片正文、逐字稿、TTS 输入、字幕文本必须来自同一份完整句；人工改稿后先回写 narration，再重生成 TTS。"
+    },
+    {
+      "line": 32,
+      "text": "6. 用 Remotion still 生成 `cover_first_frame.png` 及三种比例封面。"
+    },
+    {
+      "line": 40,
+      "text": "- 配图使用 `staticFile()`，不使用 `objectFit: cover` 裁切新闻主体；无图时使用关键词海报卡兜底。"
+    }
+  ],
+  "skills/todayaihot/USAGE.md": [
+    {
+      "line": 5,
+      "text": "当前仓库已恢复 Remotion 前端和优化方案文档，但没有恢复以下流水线层文件："
+    },
+    {
+      "line": 18,
+      "text": "→ 逐字稿（人工可审阅）"
+    },
+    {
+      "line": 29,
+      "text": "- 逐字稿句子完整，字幕与 TTS 使用同一文本；"
+    }
+  ],
+  "skills/定时任务提示词.md": [
+    {
+      "line": 19,
+      "text": "## 筛选要求"
+    },
+    {
+      "line": 21,
+      "text": "从候选中筛选 **6-7 条**高价值信息（与昨日已推送内容差异化；宁多勿少——最终视频要求 50-60 秒，条目少于 6 条时长不达标），每条包含："
+    },
+    {
+      "line": 60,
+      "text": "**第四步：调用 present_files 展示结果**"
+    },
+    {
+      "line": 64,
+      "text": "在第四步之后，使用 todayaihot skill 把第二步生成的 news.md 渲染成 9:16 竖屏口播短视频。成片**按日期归档到子文件夹**：`E:\\workbuddy-workspace\\todaynew\\out\\<YYYY-MM-DD>\\每日ai热门新闻-YYYY-MM-DD.mp4`（每天一个以日期命名的文件夹）。"
+    },
+    {
+      "line": 67,
+      "text": "`E:\\workbuddy-workspace\\todaynew\\.env` 中 `PEXELS_API_KEY` 与 `PIXABAY_API_KEY` 必须都非空。缺失会导致配图兜底静默失效、画面退化成文字卡（2026-09-16/17 两天事故根因），Key 值不得写入任何日志或正文。缺任一先补齐再继续。"
+    },
+    {
+      "line": 76,
+      "text": "C:/Python313/python.exe scripts/run_all.py \"G:\\Obsidian仓库\\AI知识库\\每日AI热点资讯\\AI新闻推送_YYYY-MM-DD.md\" --backend edge --concurrency 2 --force-tts"
+    },
+    {
+      "line": 80,
+      "text": "- **todayaihot 流水线不产封面**，封面由第六步的 video-upload skill 负责，不要在第五步手工造封面。"
+    },
+    {
+      "line": 84,
+      "text": "- **口播时长试算（写稿后、开跑前）**：先跑 `parse_news.py` 测口播总字数（目标 325~385 字 ≈ 50~59s，按 WPM 390 估算），并用 `fetch_news._norm` 预判每条标题归一化长度是否 >32——**≤32 会额外追加一条 22 字要点口播**，是超时主因。注意：试跑 parse 会把当日标题写入 `work/seen_titles.json` 造成去重自锁，正式 run_all 前必须清除当日键。"
+    },
+    {
+      "line": 95,
+      "text": "第五步成片产出并校验通过后，立即用 video-upload skill 把当天成片发布到抖音、B站、视频号三平台（不含小红书）。"
+    },
+    {
+      "line": 132,
+      "text": "- 章节兜底数据（可选）：由 `E:\\workbuddy-workspace\\todaynew\\work\\timeline.json` 的场景起始秒生成 `$D/chapters.json`（8-9 条，字段 `[{\"time\":\"MM:SS\",\"title\":\"...\"}]`），供抖音「章节要点」使用；章节要点弹窗未出现属已知非致命告警。章节标题建议渲染后用 narration.json 的真实条目标题回写替换「第N条」占位。"
+    }
+  ],
+  "skills/todayaihot/scripts/parse_news.py": [
+    {
+      "line": 178,
+      "text": "def _new_item(index, title_rest, section):"
+    },
+    {
+      "line": 189,
+      "text": "\"title\": clean_for_tts(title),"
+    },
+    {
+      "line": 390,
+      "text": "def generate_hook(items: list, date: str, weekday: str) -> str:"
+    },
+    {
+      "line": 398,
+      "text": "companies, actions, numbers = [], [], []"
+    },
+    {
+      "line": 455,
+      "text": "def filter_duplicates(items: list) -> list:"
+    },
+    {
+      "line": 460,
+      "text": "all_seen.update(titles)"
+    },
+    {
+      "line": 622,
+      "text": "save_seen_titles(narration[\"date\"], [it.get(\"title\", \"\") for it in items])"
+    }
+  ],
+  "skills/todayaihot/scripts/fetch_news.py": [
+    {
+      "line": 209,
+      "text": "def accepts_as_photo(path: str) -> bool:"
+    },
+    {
+      "line": 239,
+      "text": "def looks_like_text_image(path: str) -> bool:"
+    },
+    {
+      "line": 493,
+      "text": "LONG_TITLE = 32          # 标题超过该字数时不再加口播要点（避免超时）"
+    },
+    {
+      "line": 496,
+      "text": "def _spoken_bullet(b: str, title_norm: str) -> str:"
+    },
+    {
+      "line": 514,
+      "text": "def assemble_item_clauses(v: dict, bullets: list):"
+    },
+    {
+      "line": 640,
+      "text": "scene[\"clauses\"] = assemble_item_clauses(v, bullets)"
+    },
+    {
+      "line": 684,
+      "text": "for old in os.listdir(IMAGES_DIR):"
+    }
+  ],
+  "skills/todayaihot/scripts/gen_tts.py": [
+    {
+      "line": 52,
+      "text": "def synth_clause(text: str, wav_path: str, force: bool, backend: str):"
+    },
+    {
+      "line": 59,
+      "text": "if force or not os.path.exists(wav_path) or os.path.getsize(wav_path) < 1024:"
+    },
+    {
+      "line": 219,
+      "text": "wav = os.path.join(AUDIO_DIR, f\"{scene['id']}_{ci:02d}.wav\")"
+    },
+    {
+      "line": 230,
+      "text": "timing_src = \"silent_fallback\""
+    },
+    {
+      "line": 242,
+      "text": "if timing_src != \"silent_fallback\":"
+    },
+    {
+      "line": 247,
+      "text": "\"start\": round(TITLE_PAD + cursor, 4),"
+    },
+    {
+      "line": 258,
+      "text": "pad = np.zeros(int(SAMPLE_RATE * TITLE_PAD), dtype=np.int16)"
+    },
+    {
+      "line": 280,
+      "text": "\"failed_clauses\": ["
+    }
+  ],
+  "skills/todayaihot/scripts/validate_output.py": [
+    {
+      "line": 85,
+      "text": "if not os.path.isfile(full):"
+    },
+    {
+      "line": 96,
+      "text": "if not imgs:"
+    },
+    {
+      "line": 105,
+      "text": "est_seconds = total_chars / (WPM / 60)"
+    },
+    {
+      "line": 129,
+      "text": "def validate_timeline(tl):"
+    },
+    {
+      "line": 158,
+      "text": "if timing == \"silent_fallback\":"
+    },
+    {
+      "line": 180,
+      "text": "failed = tl.get(\"failed_clauses\", [])"
+    }
+  ],
+  "skills/todayaihot/scripts/render.py": [
+    {
+      "line": 101,
+      "text": "def post_process_audio(input_path: str, output_path: str, bgm_path: str = \"\") -> bool:"
+    },
+    {
+      "line": 140,
+      "text": "print(f\"[audio] 后处理失败，保留原片: {r.stderr[-300:]}\")"
+    },
+    {
+      "line": 145,
+      "text": "def generate_chapters(timeline: dict, out_dir: str) -> str:"
+    },
+    {
+      "line": 166,
+      "text": "title = title[:20].strip()"
+    },
+    {
+      "line": 196,
+      "text": "def generate_covers(out_dir: str) -> list:"
+    },
+    {
+      "line": 249,
+      "text": "if not os.path.exists(PUBLIC_AUDIO) and os.path.exists(master):"
+    },
+    {
+      "line": 251,
+      "text": "if not os.path.exists(PUBLIC_AUDIO):"
+    },
+    {
+      "line": 278,
+      "text": "for attempt in range(2):"
+    },
+    {
+      "line": 320,
+      "text": "source_for_archive = tmp_out  # 后处理失败时用原片"
+    },
+    {
+      "line": 339,
+      "text": "generate_covers(os.path.dirname(os.path.abspath(final)))"
+    }
+  ],
+  "skills/todayaihot/scripts/finalize.py": [
+    {
+      "line": 22,
+      "text": "def build_report(narration: dict, timeline: dict, video_path: str) -> dict:"
+    },
+    {
+      "line": 46,
+      "text": "\"duration_sec\": timeline.get(\"master_duration\", 0),"
+    },
+    {
+      "line": 49,
+      "text": "\"render\": {"
+    },
+    {
+      "line": 50,
+      "text": "\"duration_sec\": timeline.get(\"master_duration\", 0),"
+    },
+    {
+      "line": 71,
+      "text": "def update_handoff(handoff_path: str, narration: dict, timeline: dict, video_path: str):"
+    },
+    {
+      "line": 109,
+      "text": "content = re.sub(pattern, block.rstrip() + \"\\n\", content, flags=re.DOTALL)"
+    }
+  ],
+  "skills/todayaihot/scripts/run_all.py": [
+    {
+      "line": 64,
+      "text": "ap.add_argument(\"--concurrency\", type=int, default=2)"
+    },
+    {
+      "line": 125,
+      "text": "validate(val_extra)"
+    },
+    {
+      "line": 135,
+      "text": "if only in (\"\",):"
+    },
+    {
+      "line": 139,
+      "text": "if only in (\"\",):"
+    }
+  ],
+  "remotion/src/NewsVideo.tsx": [
+    {
+      "line": 12,
+      "text": "const tl = timeline as any;"
+    },
+    {
+      "line": 54,
+      "text": "const meta = (narr.scenes || []).find((x: any) => x.id === s.id) || {};"
+    },
+    {
+      "line": 63,
+      "text": "<KTVSubtitle timeline={tl} />"
+    },
+    {
+      "line": 66,
+      "text": "<Sequence from={TITLE_CARD_FRAMES}>"
+    }
+  ],
+  "remotion/src/scenes/NewsItem.tsx": [
+    {
+      "line": 13,
+      "text": "const CONTENT_W = 904;    // 1080 - 88*2 页面内边距"
+    },
+    {
+      "line": 14,
+      "text": "const IMG_BOX_MAX_H = 430; // 配图区最大高度（短图动态收紧，长图滚动上限）"
+    },
+    {
+      "line": 188,
+      "text": "const [imgErr, setImgErr] = useState(false);"
+    },
+    {
+      "line": 223,
+      "text": "return <KeywordPoster title={title} color={color} section={section} />;"
+    },
+    {
+      "line": 262,
+      "text": "const { durationInFrames } = useVideoConfig();"
+    },
+    {
+      "line": 273,
+      "text": "const titleSize = title.length > 34 ? 52 : title.length > 22 ? 60 : 70;"
+    },
+    {
+      "line": 275,
+      "text": "const bullets: string[] = (v.bullets || []).slice(0, 3);"
+    },
+    {
+      "line": 372,
+      "text": "fontSize: 30,"
+    }
+  ],
+  "remotion/src/components/Subtitle.tsx": [
+    {
+      "line": 13,
+      "text": "const PAGE_CHARS = 32;          // 每页非空白字符数（2 行 × 16 字）"
+    },
+    {
+      "line": 72,
+      "text": "const t = frame / fps;"
+    },
+    {
+      "line": 124,
+      "text": "bottom: 360,"
+    },
+    {
+      "line": 150,
+      "text": "<div key={li} style={{ whiteSpace: \"pre-wrap\" }}>"
+    }
+  ],
+  "remotion/src/videoConfig.ts": [
+    {
+      "line": 15,
+      "text": "export const TAIL_BUFFER_FRAMES = Math.round(1.5 * VIDEO_FPS);"
+    },
+    {
+      "line": 18,
+      "text": "Math.max(1, Math.ceil(masterDuration * VIDEO_FPS) + TAIL_BUFFER_FRAMES);"
+    }
+  ]
+}
