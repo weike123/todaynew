@@ -450,6 +450,4 @@ netsh int ipv4 show excludedportrange protocol=tcp
 
 本项目代码与文档采用 **MIT 许可证**，见 [LICENSE](LICENSE)。
 
-`assets/bgm/` 下的音乐素材来自 Pixabay 等免版权来源，遵循各自原始授权，**不适用**本仓库的 MIT 许可证。
-
-新闻内容版权归原作者所有，本项目仅作技术演示用途。
+各类素材的授权范围（内置 BGM 的原始授权、新闻内容版权、署名标识说明）见 [NOTICE.md](NOTICE.md)。

@@ -19,12 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-附加说明（与上述 MIT 条款不冲突）：
-
-- `assets/bgm/` 与 `skills/todayaihot/assets/bgm/` 下的音乐素材来自 Pixabay 等
-  免版权来源，遵循各自原始授权条款，不适用本 MIT 许可证。
-- `docs/` 下的历史审阅证据与方案文档同属本仓库 MIT 许可范围。
-- 新闻内容版权归原作者所有，本项目仅作技术演示用途。
