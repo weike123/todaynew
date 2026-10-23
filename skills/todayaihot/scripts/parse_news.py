@@ -442,21 +442,37 @@ def load_seen_titles() -> dict:
 
 
 def save_seen_titles(date: str, titles: list):
-    """保存当天标题到 seen_titles.json，合并已有记录并只保留最近 SEEN_DAYS 天。"""
+    """保存当天标题到 seen_titles.json，合并已有记录并只保留最近 SEEN_DAYS 天。
+
+    原子写入（临时文件 + replace）：写失败不会留下半个 JSON 损坏账本；
+    内容无变化时跳过落盘。
+    """
     data = load_seen_titles()
-    data[date] = [_norm_title(t) for t in titles]
+    normalized = [_norm_title(t) for t in titles]
+    if data.get(date) == normalized:
+        return  # 无变化，不重复落盘
+    data[date] = normalized
     sorted_dates = sorted(data.keys(), reverse=True)[:SEEN_DAYS]
     data = {d: data[d] for d in sorted_dates}
     os.makedirs(os.path.dirname(SEEN_TITLES_PATH), exist_ok=True)
-    with open(SEEN_TITLES_PATH, "w", encoding="utf-8") as f:
+    tmp = SEEN_TITLES_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, SEEN_TITLES_PATH)
 
 
-def filter_duplicates(items: list) -> list:
-    """过滤与最近 SEEN_DAYS 天重复的新闻，返回去重后的列表。"""
+def filter_duplicates(items: list, exclude_date: str = "") -> list:
+    """过滤与最近 SEEN_DAYS 天重复的新闻，返回去重后的列表。
+
+    exclude_date：当天日期。同日已记录标题不参与过滤——否则同一天
+    第二次 parse（预览/重跑/返工）会把自己第一次选中的条目全部滤掉，
+    造成「去重自锁」（2026-10-14 E6）。跨日已出现标题仍照常去重。
+    """
     seen = load_seen_titles()
     all_seen = set()
     for d, titles in seen.items():
+        if exclude_date and d == exclude_date:
+            continue
         all_seen.update(titles)
 
     kept = []
@@ -496,7 +512,7 @@ def build_script(meta, items, max_clauses=5, max_chars=120):
             "total": total,
             "sections": sections,
         },
-        "clauses": [c for c in (clean_for_tts(x) for x in intro_clauses) if c],
+        "clauses": [ensure_period(c) for c in (clean_for_tts(x) for x in intro_clauses) if c],
     })
 
     # --- 每条新闻（浓缩版：只出标题，fetch 阶段再补一条精简要点；
@@ -521,7 +537,9 @@ def build_script(meta, items, max_clauses=5, max_chars=120):
                 # 抓取失败时至少画面上还有内容，不会只剩标题
                 "bullets": it.get("points", [])[:3],
             },
-            "clauses": [c for c in (clean_for_tts(x) for x in clauses) if c],
+            # 每个子句都必须以完整标点结束（逗号切分的标题子句补句号，
+            # SKILL.md 约束 #3：禁止无标点残句）
+            "clauses": [ensure_period(c) for c in (clean_for_tts(x) for x in clauses) if c],
         })
 
     # --- 结尾（浓缩版：一句收束） ---
@@ -563,11 +581,19 @@ def spoken_date(date: str) -> str:
 
 
 def ensure_period(s: str) -> str:
+    """确保子句以句末标点收尾。
+
+    逗号结尾的子句（merge_clauses 按逗号切分标题/长句产生）必须把逗号
+    **替换**为句号，不能直接追加 —— 否则会产出「xxx缓存，。」这类双标点
+    （2026-10-22 成片前发现）。顿号同理。
+    """
     s = s.strip()
     if not s:
         return s
     if s[-1] in "。！？!?；;":
         return s
+    if s[-1] in "，,、":
+        return s[:-1].rstrip() + "。"
     return s + "。"
 
 
@@ -580,6 +606,9 @@ def main():
     ap.add_argument("--max-clauses", type=int, default=5, help="每条新闻最多取 N 个口播子句（默认 5）")
     ap.add_argument("--max-chars", type=int, default=120, help="每条新闻正文最多 N 字（默认 120）")
     ap.add_argument("--workdir", default="", help="工作目录（默认脚本上一层的 work/）")
+    ap.add_argument("--preview", action="store_true",
+                    help="预览模式：只解析不去重记账，产物写 narration.preview.json，"
+                         "不触碰 seen_titles.json 与正式 narration.json")
     args = ap.parse_args()
 
     md_path = os.path.abspath(args.news_md)
@@ -595,13 +624,30 @@ def main():
         print("FAIL: 未解析到任何新闻条目，请检查 md 格式（### N. 标题）")
         return 1
 
-    # 跨天去重：跳过最近 7 天已出现过的标题
-    items = filter_duplicates(items)
+    # 跨天去重：跳过最近 7 天已出现过的标题（排除当天，保证同日重跑幂等）
+    items = filter_duplicates(items, exclude_date=meta.get("date", ""))
     if not items:
         print("FAIL: 去重后无剩余新闻条目")
         return 1
 
     narration = build_script(meta, items, args.max_clauses, args.max_chars)
+
+    if args.preview:
+        # 预览模式忽略 --out：始终写独立预览稿，绝不覆盖正式 narration.json
+        workdir = args.workdir or os.path.dirname(NARRATION)
+        os.makedirs(workdir, exist_ok=True)
+        out = os.path.join(workdir, "narration.preview.json")
+        os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(narration, f, ensure_ascii=False, indent=2)
+        n_clauses = sum(len(s["clauses"]) for s in narration["scenes"])
+        total_chars = sum(len(c) for s in narration["scenes"] for c in s["clauses"])
+        print(f"OK  [preview] {len(items)} 条新闻 / {len(narration['scenes'])} 个场景 / "
+              f"{n_clauses} 句口播 / 口播总字数 {total_chars}")
+        print(f"    日期: {narration['date']} {narration['weekday']}  "
+              f"（预览模式：未写 seen_titles，未覆盖正式 narration.json）")
+        print(f"narration.preview.json -> {out}")
+        return 0
 
     out = args.out
     if not out:
@@ -618,7 +664,7 @@ def main():
     print(f"    日期: {narration['date']} {narration['weekday']}  分类: {', '.join(narration['sections'])}")
     print(f"narration.json -> {out}")
 
-    # 记录当天标题供跨天去重
+    # 记录当天标题供跨天去重（「已选用」记账；「已发布」以平台回执/handoff 为准）
     save_seen_titles(narration["date"], [it.get("title", "") for it in items])
     return 0
 

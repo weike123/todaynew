@@ -49,41 +49,92 @@ def normalize(data: np.ndarray) -> np.ndarray:
     return np.clip(x, -32767, 32767).astype(np.int16)
 
 
-def synth_clause(text: str, wav_path: str, force: bool, backend: str):
+def cache_fingerprint(text: str, backend: str,
+                      speech_rate: int = SPEECH_RATE,
+                      loudness_rate: int = LOUDNESS_RATE) -> str:
+    """缓存指纹：文本 + 后端 + 语速 + 音量。任一变化必须使缓存失效（T4）。"""
+    import hashlib
+    raw = f"v2|{backend}|{speech_rate}|{loudness_rate}|{text}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _read_cache(cache_path: str) -> dict:
+    try:
+        with open(cache_path, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _write_cache(cache_path: str, fp: str, bounds: list):
+    tmp = cache_path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump({"fp": fp, "bounds": bounds}, f, ensure_ascii=False)
+    os.replace(tmp, cache_path)
+
+
+def _invalidate(wav_path: str):
+    """删除某句的 wav 与缓存（TTS 失败后调用，防止静音占位伪装成成功缓存）。"""
+    for p in (wav_path, wav_path + ".cache.json", wav_path + ".bounds.json"):
+        try:
+            if os.path.exists(p):
+                os.remove(p)
+        except OSError:
+            pass
+
+
+def synth_clause(text: str, wav_path: str, force: bool, backend: str,
+                 speech_rate: int = SPEECH_RATE,
+                 loudness_rate: int = LOUDNESS_RATE):
     """合成单句，返回 (归一化后时长秒, PCM 数据, 词边界列表)。
 
-    词边界随 wav 一起缓存（.bounds.json），复用已有 wav 时不会丢失，
-    避免「缓存命中 → 退回均分时间戳」导致字幕再次漂移。
+    缓存绑定「文本+后端+语速+音量」指纹（T4）：
+    - 同文本同配置 → 复用已有 wav 与词边界（词边界随缓存文件一起存取，
+      避免「缓存命中 → 退回均分时间戳」导致字幕漂移）；
+    - 改字 / 换后端 / 改语速音量 → 指纹不符，自动重合成；
+    - 合成失败 → 删除该句 wav 与缓存，静音占位只进内存（master 拼接用），
+      绝不落盘为可复用缓存；下次运行自动重试该句。
     """
-    bounds_path = wav_path + ".bounds.json"
-    if force or not os.path.exists(wav_path) or os.path.getsize(wav_path) < 1024:
-        last_err = None
-        for attempt in range(4):          # edge-tts 偶发限流/挂起，多试几次
-            try:
-                bounds = tts_backend.synth(
-                    text, wav_path, backend=backend,
-                    speech_rate=SPEECH_RATE,
-                    loudness_rate=LOUDNESS_RATE,
-                    emotion="neutral",
-                    return_timing=True,
-                ) or []
-                last_err = None
-                break
-            except Exception as e:
-                last_err = e
-                print(f"    [retry {attempt + 1}/4] {type(e).__name__}: {str(e)[:90]}")
-                time.sleep(2.0 * (attempt + 1))
-        if last_err:
-            raise RuntimeError(f"TTS 失败（已重试 4 次）: {text[:20]}... -> {last_err}")
-        time.sleep(0.25)
-        with open(bounds_path, "w", encoding="utf-8") as f:
-            json.dump(bounds, f, ensure_ascii=False)
-    else:
+    cache_path = wav_path + ".cache.json"
+    fp = cache_fingerprint(text, backend, speech_rate, loudness_rate)
+
+    if not force and os.path.exists(wav_path) and os.path.getsize(wav_path) >= 1024:
+        cache = _read_cache(cache_path)
+        if cache.get("fp") == fp:
+            bounds = cache.get("bounds", [])
+            data = normalize(read_wav(wav_path))
+            dur = len(data) / SAMPLE_RATE
+            with wave.open(wav_path, "wb") as w:
+                w.setnchannels(1)
+                w.setsampwidth(2)
+                w.setframerate(SAMPLE_RATE)
+                w.writeframes(data.tobytes())
+            return dur, data, bounds
+        # 指纹不符（文本/配置已变）→ 作废旧缓存，走重合成
+        _invalidate(wav_path)
+
+    last_err = None
+    for attempt in range(4):          # edge-tts 偶发限流/挂起，多试几次
         try:
-            with open(bounds_path, "r", encoding="utf-8") as f:
-                bounds = json.load(f)
-        except Exception:
-            bounds = []
+            bounds = tts_backend.synth(
+                text, wav_path, backend=backend,
+                speech_rate=speech_rate,
+                loudness_rate=loudness_rate,
+                emotion="neutral",
+                return_timing=True,
+            ) or []
+            last_err = None
+            break
+        except Exception as e:
+            last_err = e
+            print(f"    [retry {attempt + 1}/4] {type(e).__name__}: {str(e)[:90]}")
+            time.sleep(2.0 * (attempt + 1))
+    if last_err:
+        # 失败必须清掉半成品，防止下次命中坏缓存
+        _invalidate(wav_path)
+        raise RuntimeError(f"TTS 失败（已重试 4 次）: {text[:20]}... -> {last_err}")
+    time.sleep(0.25)
+    _write_cache(cache_path, fp, bounds)
 
     data = normalize(read_wav(wav_path))
     dur = len(data) / SAMPLE_RATE
@@ -218,23 +269,23 @@ def main():
         for ci, text in enumerate(scene["clauses"]):
             wav = os.path.join(AUDIO_DIR, f"{scene['id']}_{ci:02d}.wav")
             try:
-                dur, data, bounds = synth_clause(text, wav, args.force, backend)
+                # 显式传语速/音量：默认参数在函数定义时绑定，改配置不会生效
+                dur, data, bounds = synth_clause(
+                    text, wav, args.force, backend,
+                    speech_rate=SPEECH_RATE, loudness_rate=LOUDNESS_RATE,
+                )
                 timing_src = "word" if bounds else "even"
             except RuntimeError as e:
-                # 单句 TTS 失败不中断整条流水线：生成静音占位，保证 timeline 连续
-                # 静音时长按字数估算（语速约 5 字/秒 + 0.3s 缓冲，最少 1s）
+                # 单句 TTS 失败不中断整条流水线：静音占位只进内存（供 master 拼接），
+                # 不落盘为缓存（T4：静音失败不能伪装成 word/even 成功缓存）。
+                # 该句 wav 与缓存已被清除，下次运行自动重试，无需 --force 全量重来。
                 est_dur = max(1.0, len(text) / 5.0 + 0.3)
                 data = np.zeros(int(SAMPLE_RATE * est_dur), dtype=np.int16)
                 dur = est_dur
                 bounds = []
                 timing_src = "silent_fallback"
                 failed_clauses.append((scene["id"], ci, text, str(e)[:120]))
-                # 写入静音 wav，保持缓存文件存在
-                with wave.open(wav, "wb") as w:
-                    w.setnchannels(1)
-                    w.setsampwidth(2)
-                    w.setframerate(SAMPLE_RATE)
-                    w.writeframes(data.tobytes())
+                _invalidate(wav)
                 print(f"  [{scene['id']}] #{ci:02d} TTS失败→静音 {dur:5.2f}s  {text[:38]}")
                 print(f"    错误: {str(e)[:120]}")
             n_ok += 1

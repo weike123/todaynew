@@ -434,22 +434,34 @@ def split_long_clause(text: str, max_chars: int = 40) -> list:
         if buf:
             result.append(buf)
 
-    # 硬切兜底：仍有超长的，在 max_chars 处找最近的非单词内部位置切
+    # 硬切兜底：仍有超长的，优先在中文标点边界切；绝不切 ASCII 空格
+    # （英文词间空格不是语义边界，2026-10-21 残句事故同源缺陷）。
+    # 找不到中文标点边界时保留整句不切 —— 字幕分页（PAGE_CHARS）能正常
+    # 显示超长 clause，而出残句会同时污染配音与字幕（SKILL.md 约束 #3）。
     final = []
     for r in result:
         if len(r) <= max_chars:
             final.append(r)
             continue
         while len(r) > max_chars:
-            cut = max_chars
-            # 向前找最近的标点/空格
+            cut = -1
+            # 只认中文标点（含全角逗号/顿号/分号/冒号）作为截切点
             for i in range(max_chars, max(1, max_chars - 10), -1):
-                if i < len(r) and r[i - 1] in "，,、；;：: ":
+                if i < len(r) and r[i - 1] in "，,、；;：:":
                     cut = i
                     break
+            if cut < 0:
+                # 无边界：整句保留，交字幕分页处理
+                final.append(r)
+                r = ""
+                break
             # 不拆英文单词
             while cut < len(r) and re.match(r"[A-Za-z0-9]", r[cut - 1]) and re.match(r"[A-Za-z0-9]", r[cut]):
                 cut -= 1
+            if cut <= 0:
+                final.append(r)
+                r = ""
+                break
             final.append(r[:cut])
             r = r[cut:]
         if r:

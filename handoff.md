@@ -21,6 +21,117 @@
 
 ## 视频登记
 
+### 自动登记（2026-09-06）
+<!-- finalize:begin -->
+- 日期：2026-09-06
+- 主题：每日 AI 头条（1 条精选：冒烟测试标题：验证 9:16 竖屏渲染链）
+- 简介：2026-09-06 1 条 AI 头条一分钟速览
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-09-06\每日ai热门新闻-2026-09-06.mp4`
+- 状态：READY（1080×1920 @30fps，7.6s，1.0MB，音轨正常，sha256 bfe7273f476b…）
+- TTS：smoke-tts，align=smoke，1 条/3 句
+- 封面：`E:\workbuddy-workspace\todaynew\out\2026-09-06\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`E:\workbuddy-workspace\todaynew\out\2026-09-06\chapters.json`（3 条）
+- 发布物料：`E:\workbuddy-workspace\todaynew\out\2026-09-06\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+<!-- finalize:end -->
+
+### 自动登记（2026-10-22）
+<!-- finalize:begin -->
+- 日期：2026-10-22
+- 主题：每日 AI 头条（7 条精选：Open AI A P I 支持 12 、蚂蚁集团与 v L L M 社区开源量化、Wiz 披露 LiteLLM PyPI …）
+- 简介：2026-10-22 7 条 AI 头条一分钟速览
+- 主视频路径：`out\2026-10-22\每日ai热门新闻-2026-10-22.mp4`
+- 状态：READY（1080×1920 @30fps，46.1s，16.6MB，音轨正常，sha256 3c165d30ef90…）
+- TTS：edge-tts，align=auto，7 条/12 句
+- 封面：`out\2026-10-22\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-10-22\chapters.json`（9 条）
+- 发布物料：`out\2026-10-22\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+<!-- finalize:end -->
+
+### 自动登记（2026-10-21）
+<!-- finalize:begin -->
+- 日期：2026-10-21
+- 主题：每日 AI 头条（7 条精选：Deep Seek 全面开源内部推理框架、Google 与 Meta 推出 Tor、A M D 与英特尔统一 PyTorch…）
+- 简介：2026-10-21 7 条 AI 头条一分钟速览
+- 主视频路径：`out\2026-10-21\每日ai热门新闻-2026-10-21.mp4`
+- 状态：READY（1080×1920 @30fps，44.9s，14.5MB，音轨正常，sha256 6a451b6db58f…）
+- TTS：edge-tts，align=auto，7 条/11 句
+- 封面：`out\2026-10-21\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-10-21\chapters.json`（9 条）
+- 发布物料：`out\2026-10-21\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+<!-- finalize:end -->
+
+### 自动登记（2026-10-20）
+<!-- finalize:begin -->
+- 日期：2026-10-20
+- 主题：每日 AI 头条（7 条精选：MiniMax 发布 M3.1 Flas、Open AI 开源 MultiLang、扩散语言模型 Mercury 3 上线 …）
+- 简介：2026-10-20 7 条 AI 头条一分钟速览
+- 主视频路径：`out\2026-10-20\每日ai热门新闻-2026-10-20.mp4`
+- 状态：READY（1080×1920 @30fps，52.0s，15.2MB，音轨正常，sha256 79438039e563…）
+- TTS：edge-tts，align=auto，7 条/13 句
+- 封面：`out\2026-10-20\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-10-20\chapters.json`（9 条）
+- 发布物料：`out\2026-10-20\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+<!-- finalize:end -->
+- 发布结果（2026-10-20 16:17）：抖音✓（合集「每日全球AI大事」+ 大字封面 --force-regen 重绘，章节弹窗未出现属已知非致命）/ B站✓ `BV1Z2nc6HEvi`（开放浏览，tid=231）/ 视频号✓（3:4 竖版封面设置成功；4:3 横版封面失败属已知非致命）
+- 标题「10.20 AI头条：MiniMax降价 端侧35B 提速」/ chapters.json 已回写真实条目标题 / QA 抽帧 8 帧全实拍、KTV 字幕正常、TP -0.69 dBTP
+
+### 自动登记（2026-10-19）
+<!-- finalize:begin -->
+- 日期：2026-10-19
+- 主题：每日 AI 头条（7 条精选：Anthropic 内部研究：初级技术岗、Deep Seek-V4.1-Flash、实测 Google Muse、Grok …）
+- 简介：2026-10-19 7 条 AI 头条一分钟速览
+- 主视频路径：`out\2026-10-19\每日ai热门新闻-2026-10-19.mp4`
+- 状态：READY（1080×1920 @30fps，47.8s，14.8MB，音轨正常，sha256 fd112b381ae9…）
+- TTS：edge-tts，align=auto，7 条/12 句
+- 封面：`out\2026-10-19\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-10-19\chapters.json`（9 条）
+- 发布物料：`out\2026-10-19\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+<!-- finalize:end -->
+
+### 自动登记（2026-10-16）
+<!-- finalize:begin -->
+- 日期：2026-10-16
+- 主题：每日 AI 头条（7 条精选：Meta 开源 816B 巨兽 Muse、Anthropic Code Revie、微软 MAI-Base-2：算力效率 4…）
+- 简介：2026-10-16 7 条 AI 头条一分钟速览
+- 主视频路径：`out\2026-10-16\每日ai热门新闻-2026-10-16.mp4`
+- 状态：READY（1080×1920 @30fps，49.2s，15.0MB，音轨正常，sha256 1b9b6e873766…）
+- TTS：edge-tts，align=auto，7 条/16 句
+- 封面：`out\2026-10-16\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-10-16\chapters.json`（9 条）
+- 发布物料：`out\2026-10-16\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+<!-- finalize:end -->
+
+### 发布结果（2026-10-16，人工登记）
+- 抖音：✓ 发布成功（合集「每日全球AI大事」+ 重绘 3:4 大字封面；「章节要点」弹窗未出现，已知非致命告警）
+- B站：✓ 发布成功 `BV1wAJ96zEfk`（tid=231，审核中）
+- 视频号：✗ 失败——tencent/tencent1 cookie 失效（code=1），需管理员微信扫码重新登录后补发
+- 说明：首跑因视频号 cookie 无效整体中止，改 --platforms douyin,bilibili 完成发布；未重复发布
+
+### 自动登记（2026-10-15）
+<!-- finalize:begin -->
+- 日期：2026-10-15
+- 主题：每日 AI 头条（7 条精选：Visual Studio Copilo、微软 Work IQ 知识编译引擎：不换、Claude Code 空闲压缩机制详解…）
+- 简介：2026-10-15 7 条 AI 头条一分钟速览
+- 主视频路径：`out\2026-10-15\每日ai热门新闻-2026-10-15.mp4`
+- 状态：READY（1080×1920 @30fps，50.7s，17.0MB，音轨正常，sha256 4316d3b82a3a…）
+- TTS：edge-tts，align=auto，7 条/11 句
+- 封面：`out\2026-10-15\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-10-15\chapters.json`（9 条）
+- 发布物料：`out\2026-10-15\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+<!-- finalize:end -->
+<!-- publish:begin -->
+- 发布结果（2026-10-15 16:21）：抖音✓（合集「每日全球AI大事」+ 重绘 3:4 大字封面，章节弹窗未出现属已知非致命）/ B站✓ `BV1mEJ16xEva`（审核中，tid=231）/ 视频号✓（3:4 竖版封面设置成功；4:3 横版封面失败属已知非致命）
+- 发布标题：AI日报1015：Copilot曝漏洞，智能体提速4倍（署名翻奇兽AI）
+- QA 记录：11 帧抽帧目检通过，配图原文 3 / Pexels 4 / 缺失 0；首版 s4/s7 图库热图视觉重复，经 work/repair_1015.py 换图（s7→代码屏幕特写）后仅重跑 render 修复
+<!-- publish:end -->
+
 下列三期为既有作品。主视频绝对路径补列如下；原登记保留，发布状态未经本次在线复核，测量修正以上节为准。
 
 | 日期 | 主视频绝对路径 | 本次实测时长 |
@@ -105,3 +216,48 @@ git status --short
 ```
 
 完整媒体复核命令见证据README；本次未跑新的渲染、TTS或产品回归测试，不能把只读检查说成实现Green。handoff必须≤24,576字节，长期历史与证据放docs并由本文件引用。
+
+## 2026-10-19 每日AI头条发布结果（fe33e700）
+- 成片：out/2026-10-19/每日ai热门新闻-2026-10-19.mp4（47.8s，edge+云希，357 字口播）
+- QA：8 帧抽帧通过，配图原文 2 / Pexels 5 / 缺失 0，实拍互不重复，KTV 黄白字幕正常
+- 抖音：✅ 发布成功（合集「每日全球AI大事」，重绘 3:4 大字封面；章节要点弹窗未出现，非致命）
+- B站：✅ 发布成功 BV1WPnj6TEKD（审核中）
+- 视频号：✅ 补发成功（16:14，cookie 恢复后单平台重发；短标题「1019AI头条速览」，3:4 封面成功、4:3 横版失败属已知非致命）
+
+
+## 2026-10-21 每日AI头条发布结果（fe33e700）
+- 成片：out/2026-10-21/每日ai热门新闻-2026-10-21.mp4（44.9s，edge+云希，328 字口播，7 条条目）
+- QA：11 帧抽帧通过，全部实拍照片互不重复，KTV 黄白字幕正常；TorchTPU 原文配图为 profiling 截图已替换为 Pexels 实拍；MemCurrent/Voxtral 缺图经 Pexels 修复后缺失 0
+- 抖音：✅ 发布成功（合集「每日全球AI大事」，重绘 3:4 大字封面 --force-regen；章节要点弹窗未出现，非致命）
+- B站：✅ 发布成功 BV1M2ni6gEro（tid 231，审核中）
+- 视频号：❌ 未发布（cookie 已失效需扫码重登，无人值守无法扫码，如实登记阻塞；待 cookie 恢复后单平台补发）
+- 封面：主标题「每日AI头条 10.21」副标题「DeepSeek开源推理框架」，门禁通过（AR 0.750，亮像素 18.2%）
+- **缺陷登记（2026-10-21 晚修复）**：已发布成片中第 1、3 条口播/字幕为残句（"DeepSeek 将内部生产级推理框架。"、"AMD 与英特尔宣布在 PyTorch 的 x86。"）——`_spoken_bullet` 在 ASCII 空格处截断要点所致。用户明确不重新生成视频，故未重渲染未重发。修复已落入 skill：`_spoken_bullet` 重写（只认中文标点边界）+ `audit_spoken_clause` 组装期审计 + `validate_output` 残句 ERROR 硬门 + `split_long_clause`/`build_bullets` 同源缺陷修复 + 时长估算改非空白字符基数；`tests/test_spoken_clause.py` 19 用例回归，全量 70 passed；对当日 narration.json 实跑校验精确报 2 ERROR 无误报。如需更正版：cookie 恢复后完整流水线重跑并单平台补发，补发前须与用户确认旧版处置方式，详见 `skills/todayaihot/references/spoken-clause-completeness.md`。
+
+
+## 2026-10-22 每日AI头条发布结果（fe33e700）
+- 成片：out/2026-10-22/每日ai热门新闻-2026-10-22.mp4（46.1s，edge+云希，365 字口播，7 条条目；1080x1920/30fps，16.6MB）
+- 响度：-14.85 LUFS / TP -0.72 dBTP / LRA 3.1；BGM 闪避混音（leberch-ambient-piano）
+- QA：7 帧抽帧通过（3/9/15/21/28/35/42s），全部实拍照片互不重复（7 张 md5 全异），KTV 黄白字幕高亮正常，无文字卡
+- 配图：原文 2 / Pexels 5 / Pixabay 0 / 缺失 0
+- 抖音：✅ 发布成功（合集「每日全球AI大事」，重绘 3:4 大字封面 --force-regen；章节要点弹窗未出现，非致命）
+- B站：✅ 发布成功 BV1sZnm6hE1M（tid 231，转码中）
+- 视频号：✅ 发布成功（短标题「12小时prompt缓存+Cl」；3:4 竖版封面成功、4:3 横版失败属已知非致命）
+- 封面：主标题「每日AI头条 10.22」副标题「12小时prompt缓存与vLLM量化内核」，门禁通过（AR 0.750，亮像素 17.7%）
+- 章节：chapters.json 9 条，占位「第N条」已回写为真实条目标题（去助读空格、截 22 字）
+- **缺陷修复（2026-10-22）**：发现并修复口播双标点缺陷 —— `merge_clauses` 按逗号切分标题后子句以「，」结尾，`ensure_period` 只识别句末标点却直接追加「。」，产出「xxx 缓存，。」这类双标点（当日 narration.json 实测 2 处）。修复：`ensure_period` 对逗号/顿号结尾做**替换**而非追加（E 盘运行版 + F 盘源同步）；新增 `tests/test_punct_normalization.py` 11 用例回归，全量 80 passed。修复后重跑 parse+fetch+TTS+render，narration.json 双标点计数 0。
+- **环境事实登记**：`E://workbuddy-workspace//todaynew//skills//todayaihot` 已是**实体目录而非 junction**，且与 `F://Migrated//.workbuddy//skills//todayaihot` 已分叉（E 盘含 10-21 残句修复 audit_spoken_clause，F 盘源为旧版无此函数；E 盘 SKILL.md 5514 字节 vs F 盘 44155 字节）。两处各自维护，修改需同步两份。
+
+
+## 2026-10-22 每日AI头条发布结果（fe33e700）
+- 成片：out/2026-10-22/每日ai热门新闻-2026-10-22.mp4（46.1s，edge+云希，365 字口播，7 条条目；1080x1920/30fps，16.6MB）
+- 响度：-14.85 LUFS / TP -0.72 dBTP / LRA 3.1；BGM 闪避混音（leberch-ambient-piano）
+- QA：7 帧抽帧通过（3/9/15/21/28/35/42s），全部实拍照片互不重复（7 张 md5 全异），KTV 黄白字幕高亮正常，无文字卡
+- 配图：原文 2 / Pexels 5 / Pixabay 0 / 缺失 0
+- 抖音：✅ 发布成功（合集「每日全球AI大事」，重绘 3:4 大字封面 --force-regen；章节要点弹窗未出现，非致命）
+- B站：✅ 发布成功 BV1sZnm6hE1M（tid 231，转码中）
+- 视频号：✅ 发布成功（短标题「12小时prompt缓存+Cl」；3:4 竖版封面成功、4:3 横版失败属已知非致命）
+- 封面：主标题「每日AI头条 10.22」副标题「12小时prompt缓存与vLLM量化内核」，门禁通过（AR 0.750，亮像素 17.7%）
+- 章节：chapters.json 9 条，占位「第N条」已回写为真实条目标题（去助读空格、截 22 字）
+- **缺陷修复（2026-10-22）**：发现并修复口播双标点缺陷 —— `merge_clauses` 按逗号切分标题后子句以「，」结尾，`ensure_period` 只识别句末标点却直接追加「。」，产出「xxx 缓存，。」这类双标点（当日 narration.json 实测 2 处）。修复：`ensure_period` 对逗号/顿号结尾做**替换**而非追加（E 盘运行版 + F 盘源同步）；新增 `tests/test_punct_normalization.py` 11 用例回归，全量 80 passed。修复后重跑 parse+fetch+TTS+render，narration.json 双标点计数 0。
+- **环境事实登记**：`E://workbuddy-workspace//todaynew//skills//todayaihot` 已是**实体目录而非 junction**，且与 `F://Migrated//.workbuddy//skills//todayaihot` 已分叉（E 盘含 10-21 残句修复 audit_spoken_clause，F 盘源为旧版无此函数；E 盘 SKILL.md 5514 字节 vs F 盘 44155 字节）。两处各自维护，修改需同步两份。

@@ -7,7 +7,7 @@ import { NewsItem } from "./scenes/NewsItem";
 import { NewsOutro } from "./scenes/NewsOutro";
 import { TitleCard } from "./scenes/TitleCard";
 import { COLORS } from "./components/theme";
-import { TITLE_CARD_FRAMES, VIDEO_FPS } from "./videoConfig";
+import { TAIL_BUFFER_FRAMES, TITLE_CARD_FRAMES, VIDEO_FPS } from "./videoConfig";
 
 const tl = timeline as any;
 const narr = tl.narration || { scenes: [], total: 0 };
@@ -43,13 +43,15 @@ export const MainVideo: React.FC = () => {
         <TitleCard />
       </Sequence>
 
-      {/* 场景序列：用「下一场景起点」收尾，保证无缝衔接不留黑帧 */}
+      {/* 场景序列：用「下一场景起点」收尾，保证无缝衔接不留黑帧。
+          末场景必须覆盖整个尾部缓冲（master_duration + TAIL_BUFFER），
+          否则缓冲区间是纯背景空尾（2026-10-14 审计 E11，三期成片均有 1.2s+ 空尾）。 */}
       {scenes.map((s, i) => {
           const startFrame = Math.round(starts[i] * VIDEO_FPS);
         const endSec =
           i + 1 < starts.length
             ? starts[i + 1]
-            : s.clauses[s.clauses.length - 1].end;
+            : masterDur + TAIL_BUFFER_FRAMES / VIDEO_FPS;
           const durationFrames = Math.max(1, Math.round(endSec * VIDEO_FPS) - startFrame);
         const meta = (narr.scenes || []).find((x: any) => x.id === s.id) || {};
         return (
@@ -62,10 +64,11 @@ export const MainVideo: React.FC = () => {
       {/* 全程 KTV 字幕层（置于场景之上） */}
       <KTVSubtitle timeline={tl} />
 
-      {/* 配音轨：标题卡 0.1s 后起播 */}
-      <Sequence from={TITLE_CARD_FRAMES}>
-        <Audio src={audioSrc} />
-      </Sequence>
+      {/* 配音轨：master.wav 已内置 0.1s 前置静音（TITLE_PAD），必须从第 0 帧起播。
+          若再套 Sequence 延迟到第 3 帧，静音会被双计，字幕相对配音整体早 0.1s
+          （2026-10-14 审计 E10）。timeline 的 clause.start 含 TITLE_PAD，
+          与「wav 位置 = 视频时间」的映射在音频 0 帧起播时严格对齐。 */}
+      <Audio src={audioSrc} />
     </AbsoluteFill>
   );
 };

@@ -481,7 +481,13 @@ def build_bullets(*texts):
         if len(bullets) >= MAX_BULLETS:
             break
     if not bullets and sents:
-        bullets.append(ensure_period(sents[0][:BULLET_MAX + 6]))
+        # 兜底：首句超长时只在中文标点边界截切；找不到边界保留整句
+        # （卡片展示可换行，不出残句 —— SKILL.md 约束 #3）
+        s0 = sents[0]
+        if len(s0) > BULLET_MAX:
+            cut = _cut_at_cn_punct(s0, BULLET_MAX)
+            s0 = cut or s0
+        bullets.append(ensure_period(s0))
     return bullets[:MAX_BULLETS]
 
 
@@ -489,26 +495,106 @@ def _norm(s: str) -> str:
     return re.sub(r"[\s，,。、；;：:！!？?\"'（）()\\[\\]【】]", "", s or "")
 
 
-MAX_BULLET_SPOKEN = 22   # 口播要点最大字数（浓缩模式，1 分钟内成片的关键）
+MAX_BULLET_SPOKEN = 22   # 口播要点目标字数（浓缩模式，1 分钟内成片的关键）
+COMPLETE_SENT_MAX = 36   # 完整句/截切结果的最大长度（宁慢勿残，SKILL.md 约束 #3）
+MIN_SPOKEN = 10          # 截切结果最小长度，过短不如不播
 LONG_TITLE = 32          # 标题超过该字数时不再加口播要点（避免超时）
+
+_CN_PUNCT_CUT = "，、；："   # 允许截切的中文标点（语义边界）
+_CN_SENT_END = "。！？；"    # 句末标点
+
+
+def _first_complete_sentences(b: str) -> list:
+    """按句末标点切出完整句（保留标点）；无句末标点时整体视为一句。"""
+    return [s.strip() for s in re.findall(r"[^。！？；]+[。！？；]?", b) if s.strip()]
+
+
+def _cut_at_cn_punct(s: str, max_len: int) -> str:
+    """在前 max_len+8 个字符内找最后一个中文标点截切；找不到返回 ""。
+
+    绝不切 ASCII 空格：英文词间空格不是语义边界，在空格处截切必然产出残句
+    （2026-10-21 事故：「DeepSeek 将内部生产级推理框架 DeepInfer 全面开源，…」
+    被切成 "DeepSeek 将内部生产级推理框架。"）。
+    """
+    window = s[:max_len + 8]
+    best = -1
+    for sep in _CN_PUNCT_CUT:
+        p = window.rfind(sep)
+        if p > best:
+            best = p
+    if best >= MIN_SPOKEN:
+        return s[:best]
+    return ""
+
+
+def _marked_norm(s: str) -> str:
+    """中文标点保留为边界哨兵 |，其余空白/标点删除（残句比对用）。"""
+    s = re.sub(r"[，,。、；;：:！!？?]", "|", s or "")
+    s = re.sub(r"[\s\"'“”‘’（）()\[\]【】]", "", s)
+    return s
+
+
+def audit_spoken_clause(clause: str, bullets: list) -> str:
+    """审计口播子句是否为来源要点的句中截断残句。
+
+    返回 "" 表示通过；否则返回原因（调用方应丢弃该子句）。
+    判定：子句（清洗后去尾句号）若是某要点（清洗后）的严格前缀，
+    且截点后一个字符不是中文标点边界 → 残句。
+    无法对应到任何来源（文本被清洗改写）时不误判。
+    """
+    if not clause or not bullets:
+        return ""
+    cn = _marked_norm(clean_for_tts(clause))
+    if cn.endswith("|"):
+        cn = cn[:-1]
+    if not cn:
+        return ""
+    for b in bullets:
+        bm = _marked_norm(clean_for_tts(b))
+        if bm.startswith(cn):
+            if len(cn) == len(bm):
+                return ""
+            nxt = bm[len(cn)]
+            if nxt == "|":
+                return ""
+            return (f"口播子句在来源要点中间截断（截点后是 {nxt!r}，非中文标点边界）: "
+                    f"{clause[:40]}")
+    return ""
 
 
 def _spoken_bullet(b: str, title_norm: str) -> str:
-    """把要点浓缩成口播版：截到 MAX_BULLET_SPOKEN 字、保证句尾句号、与标题去重。"""
+    """把要点浓缩成口播版（SKILL.md 约束 #3：禁止残句，每句必须以完整标点结束）。
+
+    策略（按优先级）：
+    1. 第一条完整句且 ≤ COMPLETE_SENT_MAX 字 → 直接口播；
+    2. 超长 → 只在前 COMPLETE_SENT_MAX+8 字符内找最后一个中文标点（，、；：）
+       边界截切，得到以标点边界结尾的完整子句；
+    3. 找不到中文标点边界 → 返回 ""（宁可不口播，不出半句话）。
+
+    历史缺陷（2026-10-21 成片）：曾在 ASCII 空格处截切，导致
+    "DeepSeek 将内部生产级推理框架。" / "AMD 与英特尔宣布在 PyTorch 的 x86。"
+    两句残句进入配音与字幕。
+    """
     bn = _norm(b)
     if title_norm and (bn in title_norm or title_norm in bn):
         return ""
+    b = clean_for_tts(b)     # 与标题子句同一清洗形态（去引号/括号、英文加空格）
     b = b.strip()
-    if len(b) > MAX_BULLET_SPOKEN:
-        cut = b[:MAX_BULLET_SPOKEN + 6]
-        # 在最后一个逗号/顿号处截断，避免半句话
-        for sep in ("，", "、", "；", " "):
-            p = cut.rfind(sep)
-            if p >= MAX_BULLET_SPOKEN - 8:
-                cut = cut[:p]
-                break
-        b = cut
-    return ensure_period(b)
+    if not b:
+        return ""
+    sents = _first_complete_sentences(b)
+    if not sents:
+        return ""
+    first = sents[0]
+    # 1) 第一条完整句够短 → 整句口播
+    if len(first) <= COMPLETE_SENT_MAX:
+        return ensure_period(first)
+    # 2) 只在中文标点边界截切
+    cut = _cut_at_cn_punct(first, COMPLETE_SENT_MAX)
+    if cut:
+        return ensure_period(cut)
+    # 3) 无边界：放弃口播要点，不出残句
+    return ""
 
 
 def assemble_item_clauses(v: dict, bullets: list):
@@ -516,17 +602,24 @@ def assemble_item_clauses(v: dict, bullets: list):
 
     用户要求成片尽量浓缩到 1 分钟以内：
     - 「第 N 条」「来源」不上口播（仍展示在画面卡片上）
-    - 要点最多口播 1 条且截到 MAX_BULLET_SPOKEN 字
+    - 要点最多口播 1 条，且必须是完整句（禁止残句，见 _spoken_bullet）
     - 标题本身超过 LONG_TITLE 字时不再加要点
+    - 组装后再过一遍残句审计（纵深防御）：审计不过 → 丢弃该要点并打日志
     """
     clauses = merge_clauses([ensure_period(v["title"])]) if v.get("title") else []
     title_norm = _norm(v.get("title", ""))
     if len(_norm(v.get("title", ""))) <= LONG_TITLE:
         for b in bullets[:1]:
             sb = _spoken_bullet(b, title_norm)
-            if sb:
-                clauses.append(sb)
-    return clauses
+            if not sb:
+                continue
+            problem = audit_spoken_clause(sb, bullets)
+            if problem:
+                print(f"    [残句拦截] 第 {v.get('index', '?')} 条 {problem} → 已丢弃该口播要点")
+                continue
+            clauses.append(sb)
+    # 每个子句都必须以完整标点结束（逗号切分的标题子句补句号）
+    return [ensure_period(c) for c in clauses if c and c.strip()]
 
 
 # ---------------------------------------------------------------- 主流程
@@ -705,6 +798,32 @@ def main():
     if stat[""]:
         print(f"  [CRITICAL] {stat['']} 条新闻无配图，画面将出现关键词文字卡（用户明令禁止）。"
               f"请检查 .env 的 PEXELS_API_KEY / PIXABAY_API_KEY 是否有效")
+
+    # --- 残句全局审计（纵深防御，2026-10-21 事故加固）---
+    # assemble_item_clauses 内已有单条审计；这里对全量 scenes 再查一遍，
+    # 覆盖人工改动 narration / 未来新代码路径，防止残句流入 narration.json。
+    n_frag = 0
+    for sc in scenes:
+        v = sc.get("visual", {})
+        if v.get("type") != "news_item":
+            continue
+        bullets = v.get("bullets", [])
+        kept = []
+        for c in sc.get("clauses", []):
+            problem = audit_spoken_clause(c, bullets)
+            if problem:
+                n_frag += 1
+                print(f"  [残句拦截] {sc.get('id')} {problem} → 已丢弃")
+                continue
+            kept.append(c)
+        if len(kept) != len(sc.get("clauses", [])):
+            sc["clauses"] = kept
+    if n_frag:
+        json.dump(narr, open(args.narration, "w", encoding="utf-8"),
+                  ensure_ascii=False, indent=2)
+        print(f"  [残句拦截] 共丢弃 {n_frag} 个残句子句并已回写 narration.json")
+    else:
+        print("  残句审计：通过（0 个残句）")
     return 0
 
 

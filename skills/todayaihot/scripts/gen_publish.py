@@ -142,9 +142,9 @@ def main():
             })
 
     total = len(items)
-    out_dir = os.path.join(OUT_DIR, date)
+    out_path = args.out or os.path.join(OUT_DIR, date, "publish.md")
+    out_dir = os.path.dirname(os.path.abspath(out_path))
     os.makedirs(out_dir, exist_ok=True)
-    out_path = args.out or os.path.join(out_dir, "publish.md")
     chapters_path = os.path.join(out_dir, "chapters.json")
 
     titles = gen_titles(items, date, total)

@@ -10,8 +10,37 @@ remotion/public/audio/
 remotion/public/images/
 work/
 *.wav
-*.mp3
 *.mp4
+
+# ============================================================
+# 音频素材
+#   默认全部不入库。例外：项目根 assets/bgm/ 下 20 首精选免版权 BGM
+#   随仓库入库，保证使用者 clone 后不用自己再找背景音乐
+#   （清单见 assets/bgm/README.md）。
+#   未列出的音频一律忽略；skill 内 assets/bgm/ 是本机历史副本，不入库。
+# ============================================================
+*.mp3
+!assets/bgm/atlasaudio-ambient-background-594878.mp3
+!assets/bgm/atlasaudio-ambient-519913.mp3
+!assets/bgm/alex-morgan-ambient-background-soft-air-drift-575882.mp3
+!assets/bgm/sub_clair-ambient-592195.mp3
+!assets/bgm/arpmedia-ambient-ambient-music-569475.mp3
+!assets/bgm/jonasblakewood-chill-vibe-573480.mp3
+!assets/bgm/velariomusic-chill-ambient-589693.mp3
+!assets/bgm/finley-chill-sunset-chill-nature-529994.mp3
+!assets/bgm/monume-ambient-ambient-music-570703.mp3
+!assets/bgm/paulyudin-chill-455250.mp3
+!assets/bgm/velariomusic-lofi-578605.mp3
+!assets/bgm/the_mountain-calm-lofi-587574.mp3
+!assets/bgm/allworldmusic-relaxed-upbeat-happy-lofi-276874.mp3
+!assets/bgm/mellowtape-nights-soft-chill-coffee-538887.mp3
+!assets/bgm/snoozybeats-matcha-chill-upbeat-lofi-243922.mp3
+!assets/bgm/mfcc-upbeat-music-499469.mp3
+!assets/bgm/jonasblakewood-pop-upbeat-557611.mp3
+!assets/bgm/sunsides-chill-trap-promo-160991.mp3
+!assets/bgm/loksii-chill-chill-beat-191321.mp3
+!assets/bgm/vaitsez-hip-hop-chill-music-590146.mp3
+skills/todayaihot/assets/bgm/*.mp3
 
 # 临时目录
 .tmp/
@@ -25,6 +54,7 @@ build/
 *.tsbuildinfo
 __pycache__/
 *.pyc
+.pytest_cache/
 
 # ============================================================
 # 大文件归档 / 符号链接

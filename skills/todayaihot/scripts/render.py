@@ -18,28 +18,51 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import common
 from common import (  # noqa: E402
     AUDIO_DIR, BGM_DIR, CRF, CONCURRENCY, FPS, HEIGHT, OUT_DIR,
     PUBLIC_AUDIO, REMOTION_DIR, TIMELINE, WIDTH, ffmpeg_path,
-    output_name,
+    output_name, probe_video,
 )
 
 def _find_node() -> str:
-    """定位 node：环境变量 > managed 运行时 > 系统 node。"""
+    """定位 node：环境变量 > managed 运行时 > 系统 node。
+
+    managed 运行时目录名带构建后缀（如 22.22.2-6），不能写死版本号，
+    否则升级后探测路径失效。这里按目录名匹配 node 主版本 >= 18 的最新版本，
+    并兼容 `current` 软链。
+    """
     env = os.environ.get("WB_NODE")
     if env and os.path.exists(env):
         return env
-    managed = os.path.join(
-        os.path.expanduser("~"), ".workbuddy", "binaries", "node",
-        "versions", "22.22.2-2", "node.exe",
+
+    managed_root = os.path.join(
+        os.path.expanduser("~"), ".workbuddy", "binaries", "node", "versions",
     )
-    if os.path.exists(managed):
-        return managed
+    if os.path.isdir(managed_root):
+        best = ""
+        best_ver = (-1, -1, -1)
+        for name in os.listdir(managed_root):
+            exe = os.path.join(managed_root, name, "node.exe")
+            if not os.path.exists(exe):
+                continue
+            # 目录名形如 22.22.2-6 / current / 24.7.0
+            m = re.match(r"^(\d+)\.(\d+)\.(\d+)", name)
+            if not m:
+                continue
+            ver = tuple(int(x) for x in m.groups())
+            if ver[0] < 18:
+                continue
+            if ver > best_ver:
+                best_ver, best = ver, exe
+        if best:
+            return best
+
     from shutil import which
     found = which("node")
     if found:
         return found
-    return managed
+    return managed_root
 
 
 NODE = _find_node()
@@ -58,25 +81,33 @@ def sh(cmd, cwd=None, check=True):
 
 
 def probe(path):
-    """用 ffmpeg 读取视频元信息。"""
-    r = subprocess.run(
-        [ffmpeg_path(), "-hide_banner", "-i", path],
-        capture_output=True, text=True, encoding="utf-8", errors="replace",
-    )
-    info = r.stderr
-    dur = re.search(r"Duration: (\d+):(\d+):(\d+\.\d+)", info)
-    seconds = 0.0
-    if dur:
-        h, m, s = dur.groups()
-        seconds = int(h) * 3600 + int(m) * 60 + float(s)
-    video = re.search(r"Stream #\d+:\d+.*Video:.*?, (\d+)x(\d+)", info)
-    audio = "Audio:" in info
-    return {
-        "duration": seconds,
-        "width": int(video.group(1)) if video else 0,
-        "height": int(video.group(2)) if video else 0,
-        "has_audio": audio,
+    """用 ffmpeg 读取视频元信息（兼容旧调用，内部转 common.probe_video）。"""
+    return probe_video(path)
+
+
+def write_render_state(out_dir: str, date: str, final_path: str,
+                       bgm_path: str, mix_ok: bool, mix_mode: str,
+                       loudness: dict | None = None):
+    """把本次渲染的混音状态与最终文件实测写到 out_dir/render_state.json，
+    供 finalize 合入 run_report（混音失败不得伪装成完成）。"""
+    state = {
+        "date": date,
+        "final_path": os.path.abspath(final_path),
+        "audio_mix": {
+            "mode": mix_mode,            # bgm_duck / lufs_only / none
+            "ok": bool(mix_ok),
+            "bgm_file": os.path.basename(bgm_path) if bgm_path else "",
+        },
+        "loudness": loudness,            # {"integrated_lufs", "true_peak_dbtp", "lra"}；未测为 None
+        "probe": probe_video(final_path),
+        "rendered_at": __import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
+    path = os.path.join(out_dir, "render_state.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
+    lufs = loudness.get("integrated_lufs") if loudness else None
+    print(f"[render] 状态存档 -> {path} (mix={mix_mode}, ok={mix_ok}, LUFS={lufs})")
+    return path
 
 
 def find_bgm(seed: str = "") -> str:
@@ -98,13 +129,64 @@ def find_bgm(seed: str = "") -> str:
     return os.path.join(BGM_DIR, files[idx])
 
 
-def post_process_audio(input_path: str, output_path: str, bgm_path: str = "") -> bool:
+def _port_available(port: int, hosts=("::1", "127.0.0.1", "::", "0.0.0.0")) -> bool:
+    """该端口能否在所有 host 上同时绑定。
+
+    Remotion 的 get-port 逻辑要求端口在 IPv4/IPv6 回环与通配地址上**都**可用，
+    任意一个失败就判定该端口不可用。Windows 的「排除端口范围」策略
+    （netsh int ipv4 show excludedportrange）常把 3000-3100 整段保留，
+    导致 Remotion 报 "No available ports found"。
+    """
+    import socket
+    for host in hosts:
+        try:
+            fam = socket.AF_INET6 if ":" in host else socket.AF_INET
+            s = socket.socket(fam, socket.SOCK_STREAM)
+            s.bind((host, port))
+            s.close()
+        except OSError:
+            return False
+    return True
+
+
+def find_usable_port(ranges=((3000, 3101), (4000, 4101), (18000, 18051))) -> int:
+    """找一个 Remotion 可用的端口；找不到返回 0（表示不指定 --port）。
+
+    Remotion 默认在 3000-3100 找端口，该段常被系统策略保留。
+    这里按优先级探测多段，返回第一个真正可用的端口。
+    """
+    for start, end in ranges:
+        for port in range(start, end):
+            if _port_available(port):
+                return port
+    return 0
+
+
+def check_mix_preflight(bgm_enabled: bool, ff: str = "") -> tuple:
+    """渲染前真实链路预检（T6/E9）。
+
+    bgm_enabled=True 需要完整闪避链路；False 只需 loudnorm。
+    返回 (ok, detail)。不通过时调用方必须在渲染前失败，
+    不得静默归档未混音成片。
+    """
+    try:
+        if not ff:
+            ff = ffmpeg_path(require_mix=bgm_enabled)
+    except FileNotFoundError as e:
+        return False, str(e)
+    if bgm_enabled:
+        return common.probe_mix_chain(ff)
+    return common.probe_loudnorm(ff)
+
+
+def post_process_audio(input_path: str, output_path: str, bgm_path: str = "",
+                       ff: str = "") -> bool:
     """渲染后音频后处理：BGM 人声闪避 + -14 LUFS 响度归一化。
 
     bgm_path 为空时只做 loudnorm。视频流 copy 不重编码，仅重编码音频。
     返回 True 成功。
     """
-    ff = ffmpeg_path()
+    ff = ff or ffmpeg_path()
     if bgm_path:
         # BGM 循环对齐 → 人声作侧链压低 BGM（闪避）→ 与人声混合 → loudnorm
         # 正确方向：sidechaincompress 主信号 = BGM，侧链信号 = 人声（人声说话时压低 BGM）
@@ -201,6 +283,14 @@ def generate_covers(out_dir: str) -> list:
     covers_dir = os.path.join(out_dir, "covers")
     os.makedirs(covers_dir, exist_ok=True)
 
+    # still 命令同样需要在可用端口上启动预览服务：Remotion 默认端口段
+    # 3000-3100 常被系统「排除端口范围」保留，导致 "No available ports found"。
+    port = find_usable_port()
+    if port:
+        print(f"[cover] 使用端口 {port}")
+    else:
+        print("[cover] 未找到四 host 通用端口，still 可能失败（可关闭占用 3000-3100 的进程）")
+
     specs = [
         ("Cover3x4", "cover_3x4.png", "小红书/抖音竖版"),
         ("Cover4x3", "cover_4x3.png", "B站横版"),
@@ -212,6 +302,8 @@ def generate_covers(out_dir: str) -> list:
         cmd = [
             NODE, CLI, "still", "src/index.tsx", comp_id, out_path,
         ]
+        if port:
+            cmd += ["--port", str(port)]
         try:
             r = subprocess.run(cmd, cwd=REMOTION_DIR, capture_output=True,
                                text=True, encoding="utf-8", errors="replace")
@@ -257,6 +349,15 @@ def main():
         print("FAIL: timeline.json 缺少 date 字段")
         return 1
 
+    # ---- 混音链路预检（T6/E9）：不支持的组合在渲染前失败，不静默归档未混音成片 ----
+    ok, detail = check_mix_preflight(bgm_enabled=args.bgm)
+    if not ok:
+        print(f"FAIL: 混音链路预检未通过（bgm={args.bgm}）: {detail}")
+        print("      处理：设置 TODAYAIHOT_FFMPEG 指向完整构建，或加 --no-bgm 仅做响度归一")
+        return 1
+    mix_ff = ffmpeg_path(require_mix=args.bgm)
+    print(f"[render] 混音预检通过 -> {mix_ff}")
+
     os.makedirs(OUT_DIR, exist_ok=True)
     tmp_out = os.path.join(REMOTION_DIR, "out", "main.mp4")
     os.makedirs(os.path.dirname(tmp_out), exist_ok=True)
@@ -273,7 +374,9 @@ def main():
           f"({tl['master_duration']:.1f}s 音频)")
     print("[render] 首次运行会自动下载 Chrome Headless Shell，请耐心等待…")
 
-    # 渲染（失败自动重试 1 次）
+    # 渲染（失败自动重试；第 2 次改用显式可用端口，规避 Remotion 默认
+    # 3000-3100 端口段被系统「排除端口范围」保留导致的
+    # "No available ports found" 硬失败）
     render_ok = False
     for attempt in range(2):
         if attempt > 0:
@@ -283,6 +386,10 @@ def main():
                     os.remove(tmp_out)
             except OSError:
                 pass
+            port = find_usable_port()
+            if port:
+                cmd = cmd + ["--port", str(port)]
+                print(f"[render] 显式指定端口 {port}（规避系统保留端口段）")
         r = subprocess.run(cmd, cwd=REMOTION_DIR, encoding="utf-8", errors="replace")
         if r.returncode == 0 and os.path.exists(tmp_out):
             render_ok = True
@@ -291,6 +398,8 @@ def main():
 
     if not render_ok:
         print("FAIL: Remotion 渲染失败（已重试 1 次，见上方输出）")
+        print("      常见原因：3000-3100 端口段被系统策略保留。"
+              "可关闭占用该段的代理/安全软件，或设置环境变量 REMOTION_PORT 指定其它端口")
         return 1
 
     # ---- 校验 ----
@@ -313,11 +422,20 @@ def main():
 
     # ---- 音频后处理：BGM 人声闪避 + -14 LUFS 归一化 ----
     bgm_path = find_bgm(seed=f"{date}|{tl.get('master_duration', '')}") if args.bgm else ""
+    mix_mode = "bgm_duck" if bgm_path else "lufs_only"
     processed_out = tmp_out.replace(".mp4", "_processed.mp4")
-    if post_process_audio(tmp_out, processed_out, bgm_path):
+    mix_ok = post_process_audio(tmp_out, processed_out, bgm_path, ff=mix_ff)
+    if mix_ok:
         source_for_archive = processed_out
+        # AV 一致性：视频流 copy 帧数不变；音视频结束偏差 ≤ 1 帧目标（容器容差 0.15s）
+        p_src, p_mix = probe_video(tmp_out), probe_video(processed_out)
+        av_diff = abs(p_mix["duration"] - p_src["duration"])
+        if av_diff > 0.15:
+            print(f"[audio] 后处理前后时长偏差 {av_diff:.3f}s 超过 1 帧目标，按失败处理")
+            mix_ok = False
+            source_for_archive = tmp_out
     else:
-        source_for_archive = tmp_out  # 后处理失败时用原片
+        source_for_archive = tmp_out  # 后处理失败时用原片，状态如实记录
 
     # ---- 归档命名 ----
     # 目标已存在时 shutil.move 会退化为 copy+delete；沙箱的批量删除防护
@@ -337,6 +455,14 @@ def main():
 
     # ---- 生成多比例封面 ----
     generate_covers(os.path.dirname(os.path.abspath(final)))
+
+    # ---- 渲染状态存档（混音状态 + 最终文件实测 + 响度，供 finalize 合入报告）----
+    loudness = common.measure_loudness(final) if mix_ok else None
+    if loudness:
+        print(f"[render] 成片响度实测: {loudness['integrated_lufs']} LUFS / "
+              f"TP {loudness['true_peak_dbtp']} dBTP / LRA {loudness['lra']}")
+    write_render_state(os.path.dirname(os.path.abspath(final)), date, final,
+                       bgm_path, mix_ok, mix_mode, loudness=loudness)
 
     print(f"DONE -> {final}")
     print(f"      {info['width']}x{info['height']} | {info['duration']:.1f}s | {size_mb:.1f} MB")

@@ -9,35 +9,45 @@ description: 将每日 AI 新闻 Markdown 生成可审阅的逐字稿、配音�
 
 把项目根目录的每日 AI 新闻简报转换为 `out/YYYY-MM-DD/` 下的 9:16 成片、字幕时间轴、封面、发布物料和 `handoff.md` 登记。
 
-当前还原包只恢复了 Remotion 前端；`scripts/` 流水线、`work/` 中间产物和每日 `out/` 产物尚未恢复。发现这些文件缺失时，必须明确报告“流水线层未恢复”，不能假装已经完成抓取、TTS 或渲染。
+## 当前能力状态（2026-10-14 核实）
+
+- `scripts/` 流水线（parse → fetch → tts → render → gen_publish → finalize）、`work/` 中间产物、每日 `out/` 产物均真实存在，可端到端运行。
+- 项目内 `skills/todayaihot` 是完整副本（实体目录，非 junction）；用户级安装位置为 `%USERPROFILE%/.workbuddy/skills/todayaihot`。两份内容需要手动保持同步。
+- 已验证运行环境：Python 3.10+（含 requests/bs4/lxml/PIL/numpy/edge-tts）；Remotion 4.0.520 在 `remotion/`，首次渲染会自动下载 Chrome Headless Shell。
+- 若上述文件意外缺失（误删、junction 断裂），按 [还原检查清单](references/recovery-checklist.md) 排查；该清单仅作异常恢复参考，不代表当前状态。
 
 ## 不可回归的约束
 
 1. **逐字稿先行**：先生成并校验 `work/逐字稿_<date>.md`，再生成配音和字幕。
 2. **同一文本源**：卡片正文、逐字稿、TTS 输入、字幕文本必须来自同一份完整句；人工改稿后先回写 narration，再重生成 TTS。
-3. **禁止字符硬截断**：超时或过长时重写成更短的完整句，不能截成“研究团队称……”这类残句；每句必须以完整标点结束。
+3. **禁止字符硬截断**：超时或过长时重写成更短的完整句，不能截成"研究团队称……"这类残句；每句必须以完整标点结束。具体规则（2026-10-21 残句事故后加固）：
+   - 口播要点优先取**第一条完整句**；超长时**只允许在中文标点（，、；：）边界**截切；
+   - **绝不在 ASCII 空格处截切**——英文词间空格不是语义边界（`tts_normalize` 插入的助读空格更不是）；
+   - 找不到中文标点边界时**整句保留或放弃该口播要点**，不出半句话；
+   - 每句结尾必须是 `。！？；`（逗号切分的标题子句统一补句号）；
+   - 三层防线：`_spoken_bullet` 构造期不出残句 → `assemble_item_clauses` 组装期审计丢弃 → `validate_output` 渲染前判 ERROR 阻断；回归用例见 `tests/test_spoken_clause.py`，事故记录见 [口播完整性](references/spoken-clause-completeness.md)。
 4. **时间轴连续**：每个 clause 满足 `start < end`，字符边界位于句内；音频、字幕和场景使用同一时间基准。
-5. **封面独立生成**：首帧静音封面和 3:4 / 4:3 / 16:9 封面使用 codebase-style 大字模板，不能把视频首帧直接裁切当作发布封面。
-6. **输出可交接**：视频结束前更新项目根 `handoff.md`，同日期更新原条目，不重复追加。
+5. **封面分工**：流水线用 Remotion still 生成 `out/<date>/covers/` 下 3:4 / 4:3 / 16:9 PNG（预览与备用）；**发布用 JPG 封面必须由外部 video-upload 的 codebase-style 大字模板重绘**，并在 run_report/manifest 标明实际采用文件。禁止把视频首帧或 PNG 直接裁切当发布封面。
+6. **配图硬要求**：每条新闻必须真实实拍照片；文字卡/海报卡/满屏文字截图不得进入正式成片。图库兜底失效（Pexels/Pixabay Key 缺失）时流水线打 CRITICAL 并由 validate_output 判 ERROR 阻断渲染，**不提供海报卡兜底**（海报卡仅允许出现在开发/冒烟 fixture）。
+7. **输出可交接**：视频结束前更新项目根 `handoff.md`，同日期更新原条目，不重复追加。
 
 ## 推荐流程
 
-在流水线脚本恢复后，按以下顺序执行：
+一键流程（run_all.py 依次执行 parse → fetch → tts → render → gen_publish → finalize）：
 
-1. 检查 `.env`、依赖、Remotion 版本和 `work/timeline.json` 生成能力。
-2. 解析新闻并抓取要点/配图；Pexels 等密钥只能来自环境变量或 `.env`。
-3. 导出逐字稿并做句末标点、总时长和单句长度校验。
-4. 如需润色，编辑逐字稿并回写 narration，再强制重新生成配音和字幕。
-5. 校验音频与时间轴后渲染主视频。
-6. 用 Remotion still 生成 `cover_first_frame.png` 及三种比例封面。
-7. 生成章节、发布物料、结构化 run report，并更新 `handoff.md`。
+```bash
+cd <PROJECT_ROOT>/skills/todayaihot
+python scripts/run_all.py "<news.md 绝对路径>" --backend edge --concurrency 1
+```
+
+分环节执行用 `--only parse|fetch|tts|render`。注意：`--only render` 目前不补跑 gen_publish/finalize，返工重渲染后必须显式补收尾（见 T1 修复项）；render 前会自动跑 validate_output，ERROR 即中止。
 
 ## Remotion 前端约定
 
 - 画布：1080×1920，30fps；时间常量统一放在 `remotion/src/videoConfig.ts`。
 - 首帧：3 帧静音 `TitleCard`；音频末尾默认保留 1.5 秒缓冲。
 - `TitleCard` 与 `CoverImage` 共用 `components/CodebaseCover.tsx`。
-- 配图使用 `staticFile()`，不使用 `objectFit: cover` 裁切新闻主体；无图时使用关键词海报卡兜底。
+- 配图使用 `staticFile()`，不使用 `objectFit: cover` 裁切新闻主体；无图阻断正式成片（见约束 6）。
 - 字幕分页不拆英文/数字单词，帧率从 `useVideoConfig()` 获取，不在组件内重复硬编码。
 - 渲染前运行 `npm run typecheck`；新增颜色 token、时间常量或组件 props 时必须同步类型，不能依赖 `any` 掩盖输入错误。
 
@@ -45,5 +55,8 @@ description: 将每日 AI 新闻 Markdown 生成可审阅的逐字稿、配音�
 
 - [流水线契约](references/pipeline-contract.md)：narration、timeline、音频、封面和 handoff 的数据不变量。
 - [封面规范](references/cover-style.md)：codebase-style 首帧和多比例封面要求。
-- [还原检查清单](references/recovery-checklist.md)：代码还原后先确认哪些能力真实存在。
-- [历史优化方案](../../docs/todayaihot-优化方案-20260914.md)：完整的优先级 backlog 与验收标准。
+- [开场钩子库](references/hooks.md)：口播开场动态钩子类型与选择规则。
+- [口播完整性](references/spoken-clause-completeness.md)：2026-10-21 残句事故的根因、修复与三层防线。
+- [还原检查清单](references/recovery-checklist.md)：仅当流水线文件意外缺失时的排查清单。
+- [历史优化方案](../../docs/todayaihot-优化方案-20260914.md)：2026-09-14 的优先级 backlog，部分结论已被 2026-10-14 审阅修正。
+- [当前优化方案](../../docs/research/main-AI日报视频优化方案-20261014.md)：2026-10-14 审阅报告与 T0—T10 实施计划。

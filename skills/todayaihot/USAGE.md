@@ -1,33 +1,48 @@
 # todayaihot 使用说明
 
-## 当前还原状态
+## 当前状态（2026-10-14 核实）
 
-当前仓库已恢复 Remotion 前端和优化方案文档，但没有恢复以下流水线层文件：
+`scripts/` 流水线、`work/` 中间产物、每日 `out/` 产物均已存在，可端到端运行：
 
-- `scripts/parse_news.py`、`fetch_news.py`、`gen_tts.py`、`render.py` 等脚本；
-- `requirements.txt`、`.env`、`work/timeline.json`、`remotion/public/audio/` 和新闻图片；
-- 每日 `out/YYYY-MM-DD/` 运行产物。
+| 环节 | 脚本 | 产物 |
+|---|---|---|
+| 解析 | `parse_news.py` | `work/narration.json` |
+| 抓取富化 | `fetch_news.py` | 富化后的 narration + `remotion/public/images/` 配图 |
+| 配音+时间轴 | `gen_tts.py` | `work/audio/master.wav` + `work/timeline.json` |
+| 渲染 | `render.py` | `out/<date>/每日ai热门新闻-<date>.mp4` + `covers/` + `chapters.json` |
+| 发布物料 | `gen_publish.py` | `out/<date>/publish.md` |
+| 收尾 | `finalize.py` | `out/<date>/run_report.json` + `handoff.md` 登记 |
 
-因此当前可以继续维护和预览 Remotion 源码，但不能仅凭本目录声称已经完成“抓取 → TTS → 渲染”的端到端任务。先按 [还原检查清单](references/recovery-checklist.md) 补齐缺失层。
+入口 `run_all.py` 依次串起以上全部环节；`--only <环节>` 可单独跑某一步（注意 `--only render` 不补 gen_publish/finalize）。
 
-## 生成任务的标准顺序
+## 运行环境
 
-```text
-新闻 Markdown
-  → narration.json
-  → 逐字稿（人工可审阅）
-  → narration 回写
-  → TTS + word/Whisper 时间轴
-  → validate_output
-  → Remotion 主视频
-  → 首帧/多比例封面
-  → publish.md + run_report.json + handoff.md
+- 解释器：Python 3.10+（已验证 `C:/Python313/python.exe` 含 requests/bs4/lxml/PIL/numpy/edge-tts；run_all 子进程复用同一解释器）。
+- Remotion：`remotion/` 下 4.0.520，node 由 `render.py` 自动定位（WB_NODE → managed → 系统 PATH）。
+- 密钥：只从项目根 `.env` 或环境变量读取（PEXELS_API_KEY / PIXABAY_API_KEY / VOLC_TTS_API_KEY），不写入代码、日志、交接文件。
+- TTS 默认 `--backend edge`（云希 zh-CN-YunxiNeural，语速 +30%）；auto=火山优先失败降级；不主动拉起 GPT-SoVITS。
+
+## 标准命令
+
+```bash
+cd <PROJECT_ROOT>/skills/todayaihot
+python scripts/run_all.py "<news.md 绝对路径>" --backend edge --concurrency 1
 ```
+
+- `--concurrency 1`：本机渲染并发保守值（曾因并发 2 OOM）；后续按实测耗时/内存再调。
+- `--force-tts`：仅在人工改稿后需要全量重合成时使用；正常情况下缓存按内容+配置指纹复用。
+- 渲染约 1—4 分钟，建议后台执行；完成后用 ffprobe 校验时长与 50—60 秒目标。
+
+## 封面分工（硬要求）
+
+- 流水线产出 `out/<date>/covers/cover_3x4.png`、`cover_4x3.png`、`cover_16x9.png`（codebase-style 大字模板，Remotion still 渲染），用于预览与备用。
+- **发布用 JPG 封面由外部 video-upload 的大字模板重绘**，run_report 需标明实际采用文件；严禁传 `--cover-*` 参数绕过重绘，严禁用 ffmpeg 从成片首帧裁切。
 
 ## 关键验收
 
 - 逐字稿句子完整，字幕与 TTS 使用同一文本；
 - master 音频时长与 timeline 记录偏差可解释；
-- 主视频为 1080×1920、30fps，有音轨；
-- 封面包含渐变大标题、白色副标题、黄色胶囊和署名；
+- 主视频为 1080×1920、30fps，有音轨，实测宽高/时长/哈希写入 run_report；
+- 七条配图均为真实实拍照片且互不重复（md5 去重），来源非空；
+- KTV 字幕黄白高亮正常，最长术语不超两行；
 - `handoff.md` 记录日期、主题、简介、绝对视频路径、封面、字幕/配音、时长和分辨率。

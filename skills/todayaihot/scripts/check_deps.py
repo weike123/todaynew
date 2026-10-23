@@ -64,11 +64,20 @@ def main():
         else:
             warnings.append(f"  ⚠ {pkg_name:25s} 未安装 ({desc})，将降级")
 
-    # ffmpeg 检查（Remotion 自带）
+    # ffmpeg 检查（Remotion 自带）+ 混音链路能力报告（T6/E9）
     try:
-        from common import ffmpeg_path
+        from common import ffmpeg_path, probe_loudnorm, probe_mix_chain
         ff = ffmpeg_path()
         print(f"  ✓ ffmpeg                   {ff}")
+        ok_ln, _ = probe_loudnorm(ff)
+        print(f"  {'✓' if ok_ln else '✗'} ffmpeg loudnorm          "
+              f"{'可用' if ok_ln else '不可用（--no-bgm 也会失败）'}")
+        ok_mix, _ = probe_mix_chain(ff)
+        if ok_mix:
+            print("  ✓ ffmpeg 闪避混音链路      可用（asplit/aloop/sidechaincompress/amix/loudnorm）")
+        else:
+            print("  ⚠ ffmpeg 闪避混音链路      不可用：BGM 模式会在渲染前失败；"
+                  "可设 TODAYAIHOT_FFMPEG 指向完整构建或用 --no-bgm")
     except Exception as e:
         errors.append(f"  ✗ ffmpeg                   未找到: {e}")
 

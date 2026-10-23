@@ -1,6 +1,6 @@
 # codebase-style 封面规范
 
-参考 `E:/code/social-auto-upload/skills/video-upload` 的封面规则，并在 Remotion 中使用 `components/CodebaseCover.tsx` 复用。
+参考外部发布工具 `social-auto-upload` 的 `skills/video-upload` 封面规则，并在 Remotion 中使用 `components/CodebaseCover.tsx` 复用。
 
 - 背景：深蓝径向渐变，叠加细网格；顶部蓝/黄光带，底部黄色光带；
 - 主标题：蓝 → 黄 → 橙渐变大字，宽度控制在画布约 72%–88%；
