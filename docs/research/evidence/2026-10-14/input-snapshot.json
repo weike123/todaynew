@@ -1,6 +1,6 @@
 {
   "review_date": "2026-10-14",
-  "python_used": "C:\\Python313\\python.exe",
+  "python_used": "python",
   "python_version": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
   "purpose": "read-only evidence tools; no dependency install",
   "packages": {
@@ -10,27 +10,27 @@
   },
   "files": [
     {
-      "path": "E:\\workbuddy-workspace\\todaynew\\skills\\todayaihot\\SKILL.md",
+      "path": "skills\\todayaihot\\SKILL.md",
       "bytes": 3354,
       "sha256": "df30f770a8c2a3b80529a076ff034c10d6b47c3edef9461246bf9fd8c48cba30"
     },
     {
-      "path": "E:\\workbuddy-workspace\\todaynew\\skills\\定时任务提示词.md",
+      "path": "skills\\定时任务提示词.md",
       "bytes": 15622,
       "sha256": "4b106375fc2d5e15c127fb94467bfd2377ae2285badf4f3aa27a3b651c71d7ba"
     },
     {
-      "path": "E:\\workbuddy-workspace\\todaynew\\work\\narration.json",
+      "path": "work\\narration.json",
       "bytes": 11966,
       "sha256": "ec55101c14731d41b4f15d82fca0bf2d96791e56382226080066eaad51527832"
     },
     {
-      "path": "E:\\workbuddy-workspace\\todaynew\\work\\timeline.json",
+      "path": "work\\timeline.json",
       "bytes": 43729,
       "sha256": "25c9fce764700cbde97504cb5cda586904a5c1e400a6eb8f33ba9446a8a547db"
     },
     {
-      "path": "E:\\workbuddy-workspace\\todaynew\\remotion\\public\\audio\\master.wav",
+      "path": "remotion\\public\\audio\\master.wav",
       "bytes": 2162540,
       "sha256": "ecdc6e578aeeb615fd18c42511bb7b77ef11f32a7de910b7a85a74b49d200f60"
     }

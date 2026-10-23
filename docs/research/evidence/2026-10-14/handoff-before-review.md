@@ -82,7 +82,7 @@
   2. 配图返工 `work/repair_1010.py`：s4（marktechpost 原文图＝tinyfish「Ambassador Program」推广卡）、s5（NVIDIA 文章头图满屏大字）→ 换 Pexels 实拍（chess strategy / programmer coding），只重跑 render.py（约 4 分钟）
   3. 音频后处理第三次静默失败（同因：精简 ffmpeg 缺 sidechaincompress/loudnorm）→ 复用 `work/audio_fix_1009.py`，成片峰值 -1.50 dBFS / RMS -21.26 / 51.39s
   4. 配图 QA：7/7 实拍（原文 2→返工后 Pexels 7 / 缺失 0），md5 互不重复；抽帧 f3/8/13/19/26/33/40/46 + r22/28/31/37 目检，KTV 黄白分段正常
-- 新闻源：`E:\Obsidian仓库\AI知识库\每日AI热点资讯\AI新闻推送_2026-10-10.md`（G 盘不可用，实际盘符 E:）
+- 新闻源：`<NEWS_DIR>\AI新闻推送_2026-10-10.md`
 
 
 ### 自动登记（2026-10-09）
@@ -90,10 +90,10 @@
 - 主题：每日 AI 头条（7 条要闻：OpenAI 上线 GPT-6.1 Sol Ultrafast（API/Codex/ChatGPT Work，最高 8 倍速，$12/$60 每百万 token，Codex steering 即时生效）、JetBrains 开源编程模型 Mellum2.1（12B MoE/2.5B 活跃，Apache 2.0，高负载吞吐近 Qwen3.5-9B 两倍，后续出 GGUF 与 vLLM MTP）、LLM 把 TypeScript 编译器/检查器/LSP 移植到 Rust（ts-rust，Opus 5.5 两周约 2.4 万美元完成、100% 兼容）、Anthropic 推出 OSS Scanner（最强模型免费为开源项目扫漏洞，报告无人工复核）、Unsloth 联手 Windows 集成 mxc 操作系统级沙箱（MIT，开销约 84ms，Win11 24H2+ 预装）、Google 开源 AQuA 环境质量智能体（五阶段流水线诊断生产 Agent 静默失败）、Zenity 披露 AgentCorruption（一条提示词劫持 AWS 账户内全部 AgentCore 智能体））
 - 简介：2026-10-09 七条 AI 头条一分钟速览，聚焦旗舰模型提速、开源编码模型自托管、LLM 移植大型工具链、开源安全审计、Agent 代码执行隔离、Agent 生产质量工程与云端 Agent 默认权限攻击面
 - 主视频路径：`out/2026-10-09/每日ai热门新闻-2026-10-09.mp4`（1080×1920 @30fps，**49.2s**，17.4MB；TTS 内容 49.1s / master 47.62s，12 句无 failed_clauses）
-- 新闻源：`E:\Obsidian仓库\AI知识库\每日AI热点资讯\AI新闻推送_2026-10-09.md`（G 盘不可用，实际盘符 E:）
+- 新闻源：`<NEWS_DIR>\AI新闻推送_2026-10-09.md`
 - **执行坑位记录**：
   1. 首轮 run_all 校验 ERROR「口播预估 60.6s 超 60s 硬上限」→ 7 条标题压缩（去「API 与/高负载/用最强模型/操作系统级/账户内」等）后 360 字 ≈ 55.4s，复跑通过；试跑 parse 会写 seen_titles.json 造成去重自锁，复跑前已备份并清除 2026-10-09 键（`work/seen_titles.bak_1009_preparse.json`）
-  2. 依赖环境：C:/Python313 的 `bs4`、`websocket-client` 缺失（check_deps 拦截），pip install 后恢复
+  2. 依赖环境：Python 3.13 的 `bs4`、`websocket-client` 缺失（check_deps 拦截），pip install 后恢复
   3. **音频后处理再次静默失败**（Remotion 精简 ffmpeg 缺 sidechaincompress/loudnorm，与 10-08 同因）→ `work/audio_fix_1009.py`（numpy RMS 闪避 + 峰值 -1.5dBFS + RMS 兜底，wav 头写真实采样率 24k 防 2 倍速，尾部补静音对齐原片 49.195s）；**包络对齐验证：×1.0 相关 0.9935、×2.0 相关 0.0010，无变速**；成片峰值 -1.50 dBFS
   4. **配图返工（repair_1009.py，只重跑 render 1m20s）**：s1 抓到 x.com 来源的 TestingCatalog 卡通吉祥物插画、s4 命中「CYBER SECURITY」字母拼贴照（满屏文字）、s6 抓到 Google 博客「Open Source Announcement」宣传图 → 按语义指定检索词换 Pexels 实拍（data center server racks corridor / padlock security protection keyboard / control room monitoring screens operator）
 - 配图：**原文 1 / Pexels 6 / Pixabay 0 / 缺失 0**，7 张 md5 两两不同；抽帧 f2/6/10/14/18/22/26/30/34/38/42/46 目检：7 条正文卡片全部为实拍照片、无文字卡、KTV 字幕黄白分段正常
@@ -123,7 +123,7 @@
 - ⚠️ **旧版本（坏音频）仍在线，待用户手动删除**：B站 `BV1fkHD6wEuG`、抖音（19:59 发布的同名视频）、视频号（20:02 发布的同名视频）——三平台第一版音频均为 2 倍速变调（根因见下），用户选择自行在后台删除旧版，本次直接重发未做平台内删除
 - **音频事故复盘（本次发布翻车根因，最重要教训）**：首发的视频音频是 **2 倍速变调 + 后半段 19s 静音**。根因是 `work/audio_fix_1008.py` 把 24kHz 的 master.wav 混音样本按 **48kHz 头**写出（wave.setframerate(48000)），人声与 BGM 全部 2 倍速、音调高八度。用能量包络对齐法定位：发布版音轨与母版在 ×2.0 速率下相关 0.714、×1.0 仅 0.13；修复版 ×1.0 相关 **0.995**、全程 8 段 RMS 均匀 -20~-23dB、无静音段。**教训：对 24k 母版做任何重混，输出 wav 头必须写真实采样率（24000），重采样交给 ffmpeg `-ar 48000`；改完音频必须用「包络对齐相关系数」验证速度，不能只看总时长与峰值**（总时长被 -t 参数掩盖、峰值正常，两者都查不出 2 倍速）
 
-- 新闻源：`E:\Obsidian仓库\AI知识库\每日AI热点资讯\AI新闻推送_2026-10-08.md`（注：G 盘当前不可用，实际盘符为 **E:**）
+- 新闻源：`<NEWS_DIR>\AI新闻推送_2026-10-08.md`
 
 ### 历史登记（2026-09-23）
 - 日期：2026-09-23
@@ -141,7 +141,7 @@
 - 标题：`AI头条9.23：Opus5.5降价、GPT-6砍半`（26 字符，满足抖音 ≤30）
 - 阻塞项：无。三平台 cookie 本次均 valid（`douyin1` / `bili1` / `tencent1`），无需扫码
 - 待确认：无
-- 新闻源：`G:\Obsidian仓库\AI知识库\每日AI热点资讯\AI新闻推送_2026-09-23.md`
+- 新闻源：`<NEWS_DIR>\AI新闻推送_2026-09-23.md`
 
 #### 执行备注（2026-09-23 新经验）
 1. **原文配图是「文字卡/插画卡」的重灾区**：今日 4 条原文图里 3 条是官宣大字卡与博客图表/插画头图（Anthropic、HF、MarkTechPost），全部未被 `looks_like_text_image()` 四判据拦住 —— 再次印证四判据只是高置信过滤器，**出片后抽帧目检必须逐张确认「是不是实拍照片」**，不能只看日志的「缺失 0」。
@@ -210,7 +210,7 @@
 
 ## TTS 音色规范（硬要求，自 2026-09-10 定版，2026-09-18 复核）
 - todayaihot **固定 `--backend edge` + `zh-CN-YunxiNeural`（云希，男声）**，语速 +30%、音量 +50%。
-- **不要**默认启用 GPT-SoVITS：其音色注册表 `E:\code\GPT-SoVITS\voice\cloned_voices.json` 的 `default` 为女声 `zh_female_sophie_uranus_bigtts`（表内三个音色全为 female），且英文术语发音易失真（2026-09-10 用户反馈）。
+- **不要**默认启用 GPT-SoVITS：其音色注册表 `<GPT_SOVITS_DIR>\voice\cloned_voices.json` 的 `default` 为女声 `zh_female_sophie_uranus_bigtts`（表内三个音色全为 female），且英文术语发音易失真（2026-09-10 用户反馈）。
 - 仅当用户当次明确要求克隆音色时才启用 gptsovits，且须先与用户确认参考音频音色/性别。
 
 ## 字幕规范（硬要求）
@@ -245,19 +245,19 @@
 - 标题：`AI头条9.24：Cursor开发机器人、Ember-1降本`（30 字符）
 - 阻塞项：视频号 cookie 失效，待扫码
 - 待确认：无
-- 新闻源：`G:\Obsidian仓库\AI知识库\每日AI热点资讯\AI新闻推送_2026-09-24.md`
+- 新闻源：`<NEWS_DIR>\AI新闻推送_2026-09-24.md`
 
 ## 当前状态（2026-09-24 17:02）
 - 2026-09-24 成片已完成抖音 + B站 双平台发布（视频号 cookie invalid 待处理）
 - 抖音 / B站 cookie 均 valid；视频号 cookie invalid，需扫码后单平台补发
 - 自动化任务 `automation-1777523241910`（每日 16:00）按当前提示词执行正常
-- Git 仓库已初始化，远端：`git@github.com:weike123/todaynew-wk.git`（SSH，账号 weike123）；默认分支 `main`
+- Git 仓库已初始化，远端：`git@github.com:weike123/todaynew.git`（SSH，账号 weike123）；默认分支 `main`
 - 注意：`validate_output.py` 对「TTS 静音占位」只报 WARN 不阻断，出片前需人工确认日志中无 `TTS失败→静音`
 - 可复用脚本：`work/repair_0923.py`（配图返工：仅换图 + 只重跑 render）
 - 2026-09-23 成片已完成三平台发布（抖音/B站/视频号全成功，前台一次通过，无重发无重试）
 - 三平台 cookie 均 valid（`douyin1` / `bili1` / `tencent1`）
 - 自动化任务 `automation-1777523241910`（每日 16:00）按当前提示词执行正常
-- Git 仓库已初始化，远端：`git@github.com:weike123/todaynew-wk.git`（SSH，账号 weike123）；默认分支 `main`
+- Git 仓库已初始化，远端：`git@github.com:weike123/todaynew.git`（SSH，账号 weike123）；默认分支 `main`
 - 注意：`validate_output.py` 对「TTS 静音占位」只报 WARN 不阻断，出片前需人工确认日志中无 `TTS失败→静音`
 - 可复用脚本：`work/repair_0923.py`（配图返工：仅换图 + 只重跑 render）
 

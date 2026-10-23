@@ -1,11 +1,11 @@
 {
   "review_date": "2026-10-14",
   "method": "ffmpeg metadata; scene-middle + head/tail frame inspection; decoded mono PCM statistics; no listening test",
-  "ffmpeg": "E:\\workbuddy-workspace\\todaynew\\remotion\\node_modules\\@remotion\\compositor-win32-x64-msvc\\ffmpeg.exe",
+  "ffmpeg": "remotion\\node_modules\\@remotion\\compositor-win32-x64-msvc\\ffmpeg.exe",
   "videos": [
     {
       "date": "2026-10-14",
-      "video": "E:\\workbuddy-workspace\\todaynew\\out\\2026-10-14\\每日ai热门新闻-2026-10-14.mp4",
+      "video": "out\\2026-10-14\\每日ai热门新闻-2026-10-14.mp4",
       "sha256": "c394205e70a4d0c2a94edeaafc733089ee1a2e3e787c2fde81c28353b3ea0c41",
       "bytes": 16627224,
       "duration_sec": 46.61,
@@ -245,7 +245,7 @@
     },
     {
       "date": "2026-10-13",
-      "video": "E:\\workbuddy-workspace\\todaynew\\out\\2026-10-13\\每日ai热门新闻-2026-10-13.mp4",
+      "video": "out\\2026-10-13\\每日ai热门新闻-2026-10-13.mp4",
       "sha256": "59be19b324a62abaec6e42dcdc5cb5ee7247a58002c0f8621480e3aa097150e2",
       "bytes": 15909693,
       "duration_sec": 51.9,
@@ -471,7 +471,7 @@
     },
     {
       "date": "2026-10-12",
-      "video": "E:\\workbuddy-workspace\\todaynew\\out\\2026-10-12\\每日ai热门新闻-2026-10-12.mp4",
+      "video": "out\\2026-10-12\\每日ai热门新闻-2026-10-12.mp4",
       "sha256": "42edc1401806e5a8d69be1134486de1e189e4c91aebad9ba36ef9560db27f379",
       "bytes": 17081680,
       "duration_sec": 52.0,

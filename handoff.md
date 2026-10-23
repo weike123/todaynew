@@ -6,7 +6,7 @@
 - 本次用户要求：重点审阅 `skills/todayaihot/` 与 `skills/定时任务提示词.md`，读取最近产出视频，制定优化方案到 `docs/`。本次已完成该文档任务，未进入代码改造。
 - 当前方案：[docs/research/main-AI日报视频优化方案-20261014.md](docs/research/main-AI日报视频优化方案-20261014.md)。目录索引：[docs/README.md](docs/README.md)。首轮建议 T0—T6：文档/配置、实测报告、正式质量门、幂等解析、TTS缓存、时间基准/片尾、混音与并发；第二轮再做显示稿/朗读稿分离、版式选图和发布回执。
 - 本次没有生成新视频、发布/补发、修改现有技能/提示词/定时配置、安装依赖、commit或push。修改范围是新方案/证据与本交接。原工作树已有 `.env.example`、Remotion封面组件、技能资源/脚本等未提交改动及旧HTML删除，继续时先看 `git status`，不得覆盖。
-- 当前分支审阅时为 main；远端历史登记为 `git@github.com:weike123/todaynew-wk.git`，本次未访问远端。代码/技能/文档的Git状态与实际能力要分开核验。
+- 当前分支审阅时为 main；远端历史登记为 `git@github.com:weike123/todaynew.git`，本次未访问远端。代码/技能/文档的Git状态与实际能力要分开核验。
 
 ## 本次复验结果
 
@@ -21,17 +21,36 @@
 
 ## 视频登记
 
+### 自动登记（2026-10-23）
+<!-- finalize:begin -->
+- 日期：2026-10-23
+- 主题：每日 AI 头条（7 条精选：Google Cloud 推出 Agen、Open AI 发布 Decisions、Codex 0.164.0 新增十个预设…）
+- 简介：2026-10-23 7 条 AI 头条一分钟速览
+- 主视频路径：`out\2026-10-23\每日ai热门新闻-2026-10-23.mp4`
+- 状态：READY（1080×1920 @30fps，53.1s，24.1MB，音轨正常，sha256 6f325ca2c870…）
+- TTS：edge-tts，align=auto，7 条/9 句
+- 封面：`out\2026-10-23\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-10-23\chapters.json`（9 条）
+- 发布物料：`out\2026-10-23\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+
+#### 发布结果（2026-10-23 16:40）
+- 抖音：✓ 成功（合集「每日全球AI大事」，选「内容由AI生成」；3:4 竖版大字封面已上传，封面门禁通过；「章节要点」弹窗未出现属已知非致命）
+- B站：✓ 成功（BV1psnb63Ete，tid 231，状态「审核中」）
+- 视频号：✓ 成功（3:4 竖版封面成功，短标题「1023AI头条智能体沙箱」；4:3 横版封面设置失败属已知非致命）
+<!-- finalize:end -->
+
 ### 自动登记（2026-09-06）
 <!-- finalize:begin -->
 - 日期：2026-09-06
 - 主题：每日 AI 头条（1 条精选：冒烟测试标题：验证 9:16 竖屏渲染链）
 - 简介：2026-09-06 1 条 AI 头条一分钟速览
-- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-09-06\每日ai热门新闻-2026-09-06.mp4`
+- 主视频路径：`out\2026-09-06\每日ai热门新闻-2026-09-06.mp4`
 - 状态：READY（1080×1920 @30fps，7.6s，1.0MB，音轨正常，sha256 bfe7273f476b…）
 - TTS：smoke-tts，align=smoke，1 条/3 句
-- 封面：`E:\workbuddy-workspace\todaynew\out\2026-09-06\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
-- 章节：`E:\workbuddy-workspace\todaynew\out\2026-09-06\chapters.json`（3 条）
-- 发布物料：`E:\workbuddy-workspace\todaynew\out\2026-09-06\publish.md`
+- 封面：`out\2026-09-06\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-09-06\chapters.json`（3 条）
+- 发布物料：`out\2026-09-06\publish.md`
 - 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
 <!-- finalize:end -->
 
@@ -132,13 +151,13 @@
 - QA 记录：11 帧抽帧目检通过，配图原文 3 / Pexels 4 / 缺失 0；首版 s4/s7 图库热图视觉重复，经 work/repair_1015.py 换图（s7→代码屏幕特写）后仅重跑 render 修复
 <!-- publish:end -->
 
-下列三期为既有作品。主视频绝对路径补列如下；原登记保留，发布状态未经本次在线复核，测量修正以上节为准。
+下列三期为既有作品。主视频路径补列如下；原登记保留，发布状态未经本次在线复核，测量修正以上节为准。
 
-| 日期 | 主视频绝对路径 | 本次实测时长 |
+| 日期 | 主视频路径 | 本次实测时长 |
 |---|---|---:|
-| 2026-10-14 | `E:\workbuddy-workspace\todaynew\out\2026-10-14\每日ai热门新闻-2026-10-14.mp4` | 46.61s |
-| 2026-10-13 | `E:\workbuddy-workspace\todaynew\out\2026-10-13\每日ai热门新闻-2026-10-13.mp4` | 51.90s |
-| 2026-10-12 | `E:\workbuddy-workspace\todaynew\out\2026-10-12\每日ai热门新闻-2026-10-12.mp4` | 52.00s |
+| 2026-10-14 | `out\2026-10-14\每日ai热门新闻-2026-10-14.mp4` | 46.61s |
+| 2026-10-13 | `out\2026-10-13\每日ai热门新闻-2026-10-13.mp4` | 51.90s |
+| 2026-10-12 | `out\2026-10-12\每日ai热门新闻-2026-10-12.mp4` | 52.00s |
 
 ### 自动登记（2026-10-14）
 - 日期：2026-10-14
@@ -189,7 +208,7 @@
 - 发布封面按现有外部video-upload大字模板重绘，仅传文字字段、加`--force-regen`，不传`--cover-*`绕过重绘；3:4和16:9均目检。副标题约18—20字符只是旧经验，不替代实际换行/边界检查。
 - 当前解析会写`work/seen_titles.json`且同日自去重；fetch会清空共享`remotion/public/images/`。本次未运行parse/fetch/smoke。续接先解决幂等或在隔离备份下操作，不能反复删正式状态凑通过。
 - 输入新闻当前E盘路径存在；旧提示词仍含G盘。共享运行时不得贸然搬迁。新装大依赖/缓存放F盘，统一插件配置仍走`F:\Migrated\.codex\pluginandskills.toml`与同步脚本。
-- 发布由外部 `E:\code\social-auto-upload` 管理。抖音合集“每日全球AI大事”、B站tid=231、署名“翻奇兽AI”。发布结果未知先核查，不盲重试；已成功平台不跟随补发。已发布版本处置/删除需用户明确授权。
+- 发布由外部 `<SOCIAL_AUTO_UPLOAD_DIR>` 管理。抖音合集“每日全球AI大事”、B站tid=231、署名“翻奇兽AI”。发布结果未知先核查，不盲重试；已成功平台不跟随补发。已发布版本处置/删除需用户明确授权。
 - `--only render`目前不会自动完整生成发布文案/报告；只换图重渲染后要留意报告缺失或过期。最终音频/图片/时间轴须同run，不能默认共享文件仍是对应日期。
 - 正式逻辑修改严格先行为Red再Green，五维质量评审；新规格/跨模块改造先确认。未经明确要求不提交、推送、重发或清理线上历史作品。
 
@@ -203,15 +222,15 @@
 
 ## 关键路径与只读复核命令
 
-- 方案：`E:\workbuddy-workspace\todaynew\docs\research\main-AI日报视频优化方案-20261014.md`。
+- 方案：`docs/research/main-AI日报视频优化方案-20261014.md`。
 - 原始42KB交接与历史视频/发布记录：`docs/research/evidence/2026-10-14/handoff-before-review.md`。更早视频登记、旧故障细节保存在该快照，不再在24KiB交接中重复堆积。
 - 现有旧方案：`docs/todayaihot-优化方案-20260914.md`，仅历史参考；续接先读新方案。
-- 当前源码：`skills/todayaihot/scripts/`、`remotion/src/`；提示词：`skills/定时任务提示词.md`；新闻源：`E:\Obsidian仓库\AI知识库\每日AI热点资讯\AI新闻推送_YYYY-MM-DD.md`。
+- 当前源码：`skills/todayaihot/scripts/`、`remotion/src/`；提示词：`skills/定时任务提示词.md`；新闻源：`<NEWS_DIR>/AI新闻推送_YYYY-MM-DD.md`。
 
 ```powershell
-Set-Location 'E:\workbuddy-workspace\todaynew'
+Set-Location '<项目根目录>'
 git status --short
-& 'C:\Python313\python.exe' -X utf8 skills/todayaihot/scripts/validate_output.py
+python -X utf8 skills/todayaihot/scripts/validate_output.py
 (Get-Item -LiteralPath '.\handoff.md').Length
 ```
 
@@ -246,7 +265,7 @@ git status --short
 - 封面：主标题「每日AI头条 10.22」副标题「12小时prompt缓存与vLLM量化内核」，门禁通过（AR 0.750，亮像素 17.7%）
 - 章节：chapters.json 9 条，占位「第N条」已回写为真实条目标题（去助读空格、截 22 字）
 - **缺陷修复（2026-10-22）**：发现并修复口播双标点缺陷 —— `merge_clauses` 按逗号切分标题后子句以「，」结尾，`ensure_period` 只识别句末标点却直接追加「。」，产出「xxx 缓存，。」这类双标点（当日 narration.json 实测 2 处）。修复：`ensure_period` 对逗号/顿号结尾做**替换**而非追加（E 盘运行版 + F 盘源同步）；新增 `tests/test_punct_normalization.py` 11 用例回归，全量 80 passed。修复后重跑 parse+fetch+TTS+render，narration.json 双标点计数 0。
-- **环境事实登记**：`E://workbuddy-workspace//todaynew//skills//todayaihot` 已是**实体目录而非 junction**，且与 `F://Migrated//.workbuddy//skills//todayaihot` 已分叉（E 盘含 10-21 残句修复 audit_spoken_clause，F 盘源为旧版无此函数；E 盘 SKILL.md 5514 字节 vs F 盘 44155 字节）。两处各自维护，修改需同步两份。
+- **环境事实登记**：`skills/todayaihot` 已是**实体目录而非 junction**，且与 `<WORKBUDDY_DATA>/skills/todayaihot` 已分叉（E 盘含 10-21 残句修复 audit_spoken_clause，F 盘源为旧版无此函数；E 盘 SKILL.md 5514 字节 vs F 盘 44155 字节）。两处各自维护，修改需同步两份。
 
 
 ## 2026-10-22 每日AI头条发布结果（fe33e700）
@@ -260,4 +279,4 @@ git status --short
 - 封面：主标题「每日AI头条 10.22」副标题「12小时prompt缓存与vLLM量化内核」，门禁通过（AR 0.750，亮像素 17.7%）
 - 章节：chapters.json 9 条，占位「第N条」已回写为真实条目标题（去助读空格、截 22 字）
 - **缺陷修复（2026-10-22）**：发现并修复口播双标点缺陷 —— `merge_clauses` 按逗号切分标题后子句以「，」结尾，`ensure_period` 只识别句末标点却直接追加「。」，产出「xxx 缓存，。」这类双标点（当日 narration.json 实测 2 处）。修复：`ensure_period` 对逗号/顿号结尾做**替换**而非追加（E 盘运行版 + F 盘源同步）；新增 `tests/test_punct_normalization.py` 11 用例回归，全量 80 passed。修复后重跑 parse+fetch+TTS+render，narration.json 双标点计数 0。
-- **环境事实登记**：`E://workbuddy-workspace//todaynew//skills//todayaihot` 已是**实体目录而非 junction**，且与 `F://Migrated//.workbuddy//skills//todayaihot` 已分叉（E 盘含 10-21 残句修复 audit_spoken_clause，F 盘源为旧版无此函数；E 盘 SKILL.md 5514 字节 vs F 盘 44155 字节）。两处各自维护，修改需同步两份。
+- **环境事实登记**：`skills/todayaihot` 已是**实体目录而非 junction**，且与 `<WORKBUDDY_DATA>/skills/todayaihot` 已分叉（E 盘含 10-21 残句修复 audit_spoken_clause，F 盘源为旧版无此函数；E 盘 SKILL.md 5514 字节 vs F 盘 44155 字节）。两处各自维护，修改需同步两份。

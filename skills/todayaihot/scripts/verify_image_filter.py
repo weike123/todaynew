@@ -4,8 +4,8 @@
      确认判别器在标注样本集上仍全部正确。
 
 用法：
-    C:/Python313/python.exe scripts/verify_image_filter.py
-    C:/Python313/python.exe scripts/verify_image_filter.py --samples <dir>
+    python.exe scripts/verify_image_filter.py
+    python.exe scripts/verify_image_filter.py --samples <dir>
 
 样本集（随 skill 走）：`references/imgsamples/{text,photo}/`
   - text/  8 张：AI HOT 品牌卡、ithome 标题卡、博客头图卡、OpenAI 渐变标题卡、

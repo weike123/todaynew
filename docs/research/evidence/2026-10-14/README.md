@@ -1,6 +1,6 @@
 # 2026-10-14 成片审阅证据
 
-项目根目录：`E:\workbuddy-workspace\todaynew`。
+项目根目录：`<PROJECT_ROOT>`。
 
 ## 采样与限制
 
@@ -11,7 +11,7 @@
 - 元数据通过项目 bundled FFmpeg 的 `-i` stderr 提取。该探测命令因未指定输出会返回非零，这是工具用法特征，不代表 MP4 损坏。
 - PCM 指标来自成片解码为24kHz单声道，反映该解码口径的样本峰值/RMS；不等于原始TTS的PCM峰值，也不等于LUFS或真峰值。
 - LUFS/真峰值来自 `loudnorm` 的 `input_i`/`input_tp`。对应日志内 `output_*` 是测量命令生成并丢弃的临时流，未写回视频。
-- `input-snapshot.json` 记录本次现有解释器和依赖版本；本次没有安装/升级依赖。运行环境工具 `load_workspace_dependencies` 返回无效请求后，使用已存在且能运行的 `C:\Python313\python.exe` 提取证据，不将其作为新装位置建议。
+- `input-snapshot.json` 记录本次现有解释器和依赖版本；本次没有安装/升级依赖。运行环境工具 `load_workspace_dependencies` 返回无效请求后，使用已存在且能运行的 `python` 提取证据，不将其作为新装位置建议。
 
 ## 文件说明
 
@@ -33,12 +33,12 @@
 在项目根目录使用PowerShell。所有命令只读取既有输入；不要为复核运行parse/fetch/smoke，它们目前会改变共享状态。
 
 ```powershell
-$auditFF = 'E:\workbuddy-workspace\todaynew\remotion\node_modules\@remotion\compositor-win32-x64-msvc\ffmpeg.exe'
-$auditVideo = 'E:\workbuddy-workspace\todaynew\out\2026-10-14\每日ai热门新闻-2026-10-14.mp4'
+$auditFF = 'remotion\node_modules\@remotion\compositor-win32-x64-msvc\ffmpeg.exe'
+$auditVideo = 'out\2026-10-14\每日ai热门新闻-2026-10-14.mp4'
 & $auditFF -hide_banner -i $auditVideo
 & $auditFF -hide_banner -filters
 & $auditFF -hide_banner -nostats -i $auditVideo -vn -af 'loudnorm=I=-14:TP=-1:LRA=11:print_format=json' -c:a pcm_s16le -f wav - > $null
-& 'C:\Python313\python.exe' -X utf8 skills/todayaihot/scripts/validate_output.py
+python -X utf8 skills/todayaihot/scripts/validate_output.py
 Get-FileHash -Algorithm SHA256 -LiteralPath $auditVideo
 ```
 

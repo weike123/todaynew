@@ -17,7 +17,7 @@
 
 ## 运行环境
 
-- 解释器：Python 3.10+（已验证 `C:/Python313/python.exe` 含 requests/bs4/lxml/PIL/numpy/edge-tts；run_all 子进程复用同一解释器）。
+- 解释器：Python 3.10+（已验证 `python.exe` 含 requests/bs4/lxml/PIL/numpy/edge-tts；run_all 子进程复用同一解释器）。
 - Remotion：`remotion/` 下 4.0.520，node 由 `render.py` 自动定位（WB_NODE → managed → 系统 PATH）。
 - 密钥：只从项目根 `.env` 或环境变量读取（PEXELS_API_KEY / PIXABAY_API_KEY / VOLC_TTS_API_KEY），不写入代码、日志、交接文件。
 - TTS 默认 `--backend edge`（云希 zh-CN-YunxiNeural，语速 +30%）；auto=火山优先失败降级；不主动拉起 GPT-SoVITS。

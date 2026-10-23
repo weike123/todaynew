@@ -46,7 +46,7 @@
 - A5 无 skill 自校验（参考 githubweektop10doc 的 `validate_skill.py`）
 - A6 `backup_edge_20260909/` 备份目录混在 skill 代码里，应归档清理
 - A7 运行日志只有 print，无结构化 run report（日期/后端/时长/失败项）
-- A8 硬编码路径多（`C:/Python313`、`E:/workbuddy-workspace`、音色默认值），虽有环境变量覆盖但默认值写死
+- A8 硬编码路径多（Python 解释器路径、项目根目录、音色默认值），虽有环境变量覆盖但默认值写死
 
 **B. TTS 与字幕对齐**
 - B1 **非 edge 后端（volc/gptsovits）只能句内均分时间戳，字幕漂移**——这是当前最大的技术短板

@@ -63,7 +63,9 @@ SKIP_IMG = re.compile(
     re.I,
 )
 # 聚合站自带的品牌摘要卡（文字图片）域名：一律不作为配图
-TEXT_CARD_DOMAINS = ("aihot.virxact.com",)
+# 注意同时保留新旧域名：旧域名 aihot.virxact.com 于 2026-10-31 停用，
+# 但历史缓存/往期 news.md 里仍可能存在旧域名链接
+TEXT_CARD_DOMAINS = ("aihot.virxact.com", "aihot.news")
 # img 标签上依次尝试的图片地址属性（覆盖常见懒加载方案）
 IMG_ATTRS = ("src", "data-orig", "data-original", "data-src",
              "data-lazy-src", "data-actualsrc")

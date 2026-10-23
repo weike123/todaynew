@@ -46,15 +46,15 @@
     },
     {
       "line": 64,
-      "text": "在第四步之后，使用 todayaihot skill 把第二步生成的 news.md 渲染成 9:16 竖屏口播短视频。成片**按日期归档到子文件夹**：`E:\\workbuddy-workspace\\todaynew\\out\\<YYYY-MM-DD>\\每日ai热门新闻-YYYY-MM-DD.mp4`（每天一个以日期命名的文件夹）。"
+      "text": "在第四步之后，使用 todayaihot skill 把第二步生成的 news.md 渲染成 9:16 竖屏口播短视频。成片**按日期归档到子文件夹**：`out\\<YYYY-MM-DD>\\每日ai热门新闻-YYYY-MM-DD.mp4`（每天一个以日期命名的文件夹）。"
     },
     {
       "line": 67,
-      "text": "`E:\\workbuddy-workspace\\todaynew\\.env` 中 `PEXELS_API_KEY` 与 `PIXABAY_API_KEY` 必须都非空。缺失会导致配图兜底静默失效、画面退化成文字卡（2026-09-16/17 两天事故根因），Key 值不得写入任何日志或正文。缺任一先补齐再继续。"
+      "text": "`.env` 中 `PEXELS_API_KEY` 与 `PIXABAY_API_KEY` 必须都非空。缺失会导致配图兜底静默失效、画面退化成文字卡（2026-09-16/17 两天事故根因），Key 值不得写入任何日志或正文。缺任一先补齐再继续。"
     },
     {
       "line": 76,
-      "text": "C:/Python313/python.exe scripts/run_all.py \"G:\\Obsidian仓库\\AI知识库\\每日AI热点资讯\\AI新闻推送_YYYY-MM-DD.md\" --backend edge --concurrency 2 --force-tts"
+      "text": "python.exe scripts/run_all.py \"<NEWS_DIR>\\AI新闻推送_YYYY-MM-DD.md\" --backend edge --concurrency 2 --force-tts"
     },
     {
       "line": 80,
@@ -70,7 +70,7 @@
     },
     {
       "line": 132,
-      "text": "- 章节兜底数据（可选）：由 `E:\\workbuddy-workspace\\todaynew\\work\\timeline.json` 的场景起始秒生成 `$D/chapters.json`（8-9 条，字段 `[{\"time\":\"MM:SS\",\"title\":\"...\"}]`），供抖音「章节要点」使用；章节要点弹窗未出现属已知非致命告警。章节标题建议渲染后用 narration.json 的真实条目标题回写替换「第N条」占位。"
+      "text": "- 章节兜底数据（可选）：由 `work\\timeline.json` 的场景起始秒生成 `$D/chapters.json`（8-9 条，字段 `[{\"time\":\"MM:SS\",\"title\":\"...\"}]`），供抖音「章节要点」使用；章节要点弹窗未出现属已知非致命告警。章节标题建议渲染后用 narration.json 的真实条目标题回写替换「第N条」占位。"
     }
   ],
   "skills/todayaihot/scripts/parse_news.py": [

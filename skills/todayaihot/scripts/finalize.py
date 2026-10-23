@@ -171,6 +171,18 @@ def merge_existing_publish(report: dict, report_path: str) -> dict:
     return report
 
 
+def _rel_to_root(path: str) -> str:
+    """相对项目根的路径。
+
+    handoff.md 是入库文档，不写本机绝对路径（否则每次跑流水线都会把
+    本机目录结构泄漏进 git 历史）。跨盘符等异常情况保持原样。
+    """
+    try:
+        return os.path.relpath(os.path.abspath(path), PROJECT_ROOT)
+    except ValueError:
+        return path
+
+
 def _handoff_generation_block(narration: dict, timeline: dict, video_path: str,
                               report: dict) -> str:
     date = narration.get("date", "")
@@ -180,6 +192,8 @@ def _handoff_generation_block(narration: dict, timeline: dict, video_path: str,
     backend = timeline.get("tts_backend", "edge")
     v = report["video"]
     status = report.get("status", "")
+    rel_video = _rel_to_root(video_path)
+    rel_dir = os.path.dirname(rel_video)
     lines = [
         f"### 自动登记（{date}）",
         FINALIZE_BEGIN,
@@ -187,17 +201,17 @@ def _handoff_generation_block(narration: dict, timeline: dict, video_path: str,
         f"- 主题：每日 AI 头条（{len(items)} 条精选：{'、'.join(titles[:3])}"
         f"{'…' if len(titles) > 3 else ''}）",
         f"- 简介：{date} {len(items)} 条 AI 头条一分钟速览",
-        f"- 主视频路径：`{video_path}`",
+        f"- 主视频路径：`{rel_video}`",
         f"- 状态：{status}（{v['width']}×{v['height']} @{v['fps']}fps，"
         f"{v['duration_sec']:.1f}s，{v['size_mb']}MB，"
         f"音轨{'正常' if v['has_audio'] else '缺失'}，sha256 {v['sha256'][:12]}…）",
         f"- TTS：{backend}-tts，align={timeline.get('align_mode', 'auto')}，"
         f"{len(items)} 条/{sum(len(s.get('clauses', [])) for s in timeline.get('scenes', []))} 句",
-        f"- 封面：`{os.path.join(os.path.dirname(video_path), 'covers')}/`"
+        f"- 封面：`{os.path.join(rel_dir, 'covers')}/`"
         f"（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）",
-        f"- 章节：`{os.path.join(os.path.dirname(video_path), 'chapters.json')}`"
+        f"- 章节：`{os.path.join(rel_dir, 'chapters.json')}`"
         f"（{len(timeline.get('scenes', []))} 条）",
-        f"- 发布物料：`{os.path.join(os.path.dirname(video_path), 'publish.md')}`",
+        f"- 发布物料：`{os.path.join(rel_dir, 'publish.md')}`",
         f"- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）",
         FINALIZE_END,
     ]
