@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="566" viewBox="0 0 1160 566" font-family="PingFang SC, Microsoft YaHei, Noto Sans SC, Helvetica Neue, Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M 0 0.5 L 10 5 L 0 9.5 z" fill="#6e7781"/></marker>
+<filter id="shadow" x="-4%" y="-8%" width="108%" height="124%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#1f2328" flood-opacity="0.10"/></filter>
+</defs>
+<rect x="0" y="0" width="1160" height="566" rx="14" fill="#ffffff"/>
+<text x="30" y="50" font-size="13" font-weight="700" fill="#8c959f" letter-spacing="1.5">采集 · 写稿</text>
+<text x="30" y="198" font-size="13" font-weight="700" fill="#8c959f" letter-spacing="1.5">素材 · 配音</text>
+<text x="30" y="346" font-size="13" font-weight="700" fill="#8c959f" letter-spacing="1.5">成片 · 发布</text>
+<g>
+<rect x="30" y="64" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="30" y="64" width="5" height="112" rx="2.5" fill="collect"/>
+<circle cx="64" cy="96" r="13" fill="collect" fill-opacity="0.12"/>
+<text x="64" y="101" font-size="13" font-weight="700" fill="collect" text-anchor="middle">▶</text>
+<text x="86" y="102" font-size="16" font-weight="700" fill="#1f2328">定时任务</text>
+<text x="52" y="132" font-size="12.5" fill="#57606a">每天 16:00 · Automation</text>
+<text x="52" y="152" font-size="12.5" fill="#57606a">占位符替换即可启用</text>
+</g>
+<g>
+<rect x="313" y="64" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="313" y="64" width="5" height="112" rx="2.5" fill="collect"/>
+<circle cx="347" cy="96" r="13" fill="collect" fill-opacity="0.12"/>
+<text x="347" y="101" font-size="13" font-weight="700" fill="collect" text-anchor="middle">①</text>
+<text x="369" y="102" font-size="16" font-weight="700" fill="#1f2328">AIHOT 采集</text>
+<text x="335" y="132" font-size="12.5" fill="#57606a">/api/v1/dailies/latest</text>
+<text x="335" y="152" font-size="12.5" fill="#57606a">/feed/all.xml 条目池</text>
+</g>
+<g>
+<rect x="596" y="64" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="596" y="64" width="5" height="112" rx="2.5" fill="collect"/>
+<circle cx="630" cy="96" r="13" fill="collect" fill-opacity="0.12"/>
+<text x="630" y="101" font-size="13" font-weight="700" fill="collect" text-anchor="middle">②</text>
+<text x="652" y="102" font-size="16" font-weight="700" fill="#1f2328">筛选 6–7 条</text>
+<text x="618" y="132" font-size="12.5" fill="#57606a">核心 · 细节 · 价值</text>
+<text x="618" y="152" font-size="12.5" fill="#57606a">每条带原文直链</text>
+</g>
+<g>
+<rect x="879" y="64" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="879" y="64" width="5" height="112" rx="2.5" fill="collect"/>
+<circle cx="913" cy="96" r="13" fill="collect" fill-opacity="0.12"/>
+<text x="913" y="101" font-size="13" font-weight="700" fill="collect" text-anchor="middle">③</text>
+<text x="935" y="102" font-size="16" font-weight="700" fill="#1f2328">落盘 news.md</text>
+<text x="901" y="132" font-size="12.5" fill="#57606a">AI新闻推送_YYYY-MM-DD</text>
+<text x="901" y="152" font-size="12.5" fill="#57606a">结构化条目</text>
+</g>
+<g>
+<rect x="879" y="212" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="879" y="212" width="5" height="112" rx="2.5" fill="render"/>
+<circle cx="913" cy="244" r="13" fill="render" fill-opacity="0.12"/>
+<text x="913" y="249" font-size="13" font-weight="700" fill="render" text-anchor="middle">④</text>
+<text x="935" y="250" font-size="16" font-weight="700" fill="#1f2328">parse 逐字稿</text>
+<text x="901" y="280" font-size="12.5" fill="#57606a">narration.json</text>
+<text x="901" y="300" font-size="12.5" fill="#57606a">分句 + 字数试算</text>
+</g>
+<g>
+<rect x="596" y="212" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="596" y="212" width="5" height="112" rx="2.5" fill="render"/>
+<circle cx="630" cy="244" r="13" fill="render" fill-opacity="0.12"/>
+<text x="630" y="249" font-size="13" font-weight="700" fill="render" text-anchor="middle">⑤</text>
+<text x="652" y="250" font-size="16" font-weight="700" fill="#1f2328">fetch 素材</text>
+<text x="618" y="280" font-size="12.5" fill="#57606a">原文要点 + 实拍配图</text>
+<text x="618" y="300" font-size="12.5" fill="#57606a">兜底 Pexels / Pixabay</text>
+</g>
+<g>
+<rect x="313" y="212" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="313" y="212" width="5" height="112" rx="2.5" fill="render"/>
+<circle cx="347" cy="244" r="13" fill="render" fill-opacity="0.12"/>
+<text x="347" y="249" font-size="13" font-weight="700" fill="render" text-anchor="middle">⑥</text>
+<text x="369" y="250" font-size="16" font-weight="700" fill="#1f2328">选 BGM</text>
+<text x="335" y="280" font-size="12.5" fill="#57606a">assets/bgm 免版权曲库</text>
+<text x="335" y="300" font-size="12.5" fill="#57606a">闪避混音待用</text>
+</g>
+<g>
+<rect x="30" y="212" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="30" y="212" width="5" height="112" rx="2.5" fill="render"/>
+<circle cx="64" cy="244" r="13" fill="render" fill-opacity="0.12"/>
+<text x="64" y="249" font-size="13" font-weight="700" fill="render" text-anchor="middle">⑦</text>
+<text x="86" y="250" font-size="16" font-weight="700" fill="#1f2328">gen_tts 配音</text>
+<text x="52" y="280" font-size="12.5" fill="#57606a">edge 云希 + WordBoundary</text>
+<text x="52" y="300" font-size="12.5" fill="#57606a">master.wav + timeline</text>
+</g>
+<g>
+<rect x="30" y="360" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="30" y="360" width="5" height="112" rx="2.5" fill="publish"/>
+<circle cx="64" cy="392" r="13" fill="publish" fill-opacity="0.12"/>
+<text x="64" y="397" font-size="13" font-weight="700" fill="publish" text-anchor="middle">⑧</text>
+<text x="86" y="398" font-size="16" font-weight="700" fill="#1f2328">validate 质量门</text>
+<text x="52" y="428" font-size="12.5" fill="#57606a">配图 · 残句 · 时间戳</text>
+<text x="52" y="448" font-size="12.5" fill="#57606a">0 ERROR 才放行</text>
+</g>
+<g>
+<rect x="313" y="360" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="313" y="360" width="5" height="112" rx="2.5" fill="publish"/>
+<circle cx="347" cy="392" r="13" fill="publish" fill-opacity="0.12"/>
+<text x="347" y="397" font-size="13" font-weight="700" fill="publish" text-anchor="middle">⑨</text>
+<text x="369" y="398" font-size="16" font-weight="700" fill="#1f2328">render + 抽帧</text>
+<text x="335" y="428" font-size="12.5" fill="#57606a">Remotion 1080×1920</text>
+<text x="335" y="448" font-size="12.5" fill="#57606a">混音 + loudnorm</text>
+</g>
+<g>
+<rect x="596" y="360" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="596" y="360" width="5" height="112" rx="2.5" fill="publish"/>
+<circle cx="630" cy="392" r="13" fill="publish" fill-opacity="0.12"/>
+<text x="630" y="397" font-size="13" font-weight="700" fill="publish" text-anchor="middle">⑩</text>
+<text x="652" y="398" font-size="16" font-weight="700" fill="#1f2328">物料 + 收尾</text>
+<text x="618" y="428" font-size="12.5" fill="#57606a">publish · chapters · covers</text>
+<text x="618" y="448" font-size="12.5" fill="#57606a">run_report + handoff</text>
+</g>
+<g>
+<rect x="879" y="360" width="249" height="112" rx="12" fill="#ffffff" stroke="#d0d7de" stroke-width="1.2" filter="url(#shadow)"/>
+<rect x="879" y="360" width="5" height="112" rx="2.5" fill="publish"/>
+<circle cx="913" cy="392" r="13" fill="publish" fill-opacity="0.12"/>
+<text x="913" y="397" font-size="13" font-weight="700" fill="publish" text-anchor="middle">⑪</text>
+<text x="935" y="398" font-size="16" font-weight="700" fill="#1f2328">三平台发布</text>
+<text x="901" y="428" font-size="12.5" fill="#57606a">抖音 · B站 · 视频号</text>
+<text x="901" y="448" font-size="12.5" fill="#57606a">封面重绘 + 回执登记</text>
+</g>
+<line x1="283" y1="120.0" x2="308" y2="120.0" stroke="#6e7781" stroke-width="2.1" marker-end="url(#arrow)"/>
+<line x1="566" y1="120.0" x2="591" y2="120.0" stroke="#6e7781" stroke-width="2.1" marker-end="url(#arrow)"/>
+<line x1="849" y1="120.0" x2="874" y2="120.0" stroke="#6e7781" stroke-width="2.1" marker-end="url(#arrow)"/>
+<line x1="874" y1="268.0" x2="849" y2="268.0" stroke="#6e7781" stroke-width="2.1" marker-end="url(#arrow)"/>
+<line x1="591" y1="268.0" x2="566" y2="268.0" stroke="#6e7781" stroke-width="2.1" marker-end="url(#arrow)"/>
+<line x1="308" y1="268.0" x2="283" y2="268.0" stroke="#6e7781" stroke-width="2.1" marker-end="url(#arrow)"/>
+<line x1="283" y1="416.0" x2="308" y2="416.0" stroke="#6e7781" stroke-width="2.1" marker-end="url(#arrow)"/>
+<line x1="566" y1="416.0" x2="591" y2="416.0" stroke="#6e7781" stroke-width="2.1" marker-end="url(#arrow)"/>
+<line x1="849" y1="416.0" x2="874" y2="416.0" stroke="#6e7781" stroke-width="2.1" marker-end="url(#arrow)"/>
+<path d="M 1003.5 179 L 1003.5 208" stroke="#6e7781" stroke-width="2.1" fill="none" marker-end="url(#arrow)"/>
+<path d="M 154.5 327 L 154.5 356" stroke="#6e7781" stroke-width="2.1" fill="none" marker-end="url(#arrow)"/>
+<rect x="30" y="498" width="1100" height="46" rx="10" fill="#fff8e1" stroke="#f0d58c"/>
+<text x="48" y="519" font-size="12.5" font-weight="700" fill="#7a5c00">硬门</text>
+<text x="88" y="519" font-size="12.5" fill="#5c4a00">缺实拍配图 / 口播残句 / 字幕时间戳异常 → validate_output 判 ERROR 并阻断出片（宁可当天不发）</text>
+<text x="48" y="535" font-size="12.5" fill="#5c4a00"><tspan font-weight="700" fill="#7a5c00">封面</tspan><tspan> 发布 JPG 必须由 social-auto-upload 的大字模板重绘，禁止用流水线 PNG 或视频首帧裁切图</tspan></text>
+</svg>

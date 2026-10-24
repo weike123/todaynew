@@ -10,33 +10,7 @@
 
 ## 全链路流程图
 
-```mermaid
-flowchart TD
-  A["定时任务 · 每天 16:00<br/>WorkBuddy Automation"] --> B["加载 todayaihot skill<br/>references/automation-prompt.md"]
-  B --> C["① AIHOT 采集<br/>dailies/latest + feed/all.xml"]
-  C --> D["② 筛选 6–7 条<br/>核心 · 细节 · 价值 · 原文直链"]
-  D --> E["③ 落盘 news.md"]
-  E --> F["④ parse_news<br/>逐字稿 narration.json"]
-  F --> G["⑤ fetch_news<br/>抓原文要点 + 原文实拍配图"]
-  G --> H{"配图是实拍照片？"}
-  H -->|否| I["Pexels / Pixabay 兜底"]
-  I --> J{"仍无实拍图？"}
-  H -->|是| K["⑥ 选 BGM<br/>assets/bgm 免版权曲库"]
-  J -->|是| X["validate_output 判 ERROR<br/>阻断出片"]
-  J -->|否| K
-  K --> L["⑦ gen_tts<br/>edge 云希 + WordBoundary<br/>master.wav + timeline.json"]
-  L --> M["⑧ validate_output<br/>配图 · 残句 · 时间戳 0 ERROR"]
-  M --> N["⑨ render · Remotion<br/>1080×1920 30fps<br/>BGM 闪避混音 + loudnorm"]
-  N --> O["⑩ 抽帧目检<br/>配图实拍 · KTV 黄白高亮"]
-  O --> P["⑪ gen_publish + finalize<br/>publish.md · chapters · covers<br/>run_report.json · handoff.md"]
-  P --> Q["⑫ social-auto-upload 发布<br/>封面大字模板重绘"]
-  Q --> R["抖音"]
-  Q --> S["B 站"]
-  Q --> T["微信视频号"]
-  R --> U["回执回写 handoff.md"]
-  S --> U
-  T --> U
-```
+<img src="docs/images/pipeline-flow.svg" alt="todaynew 全链路流程图" width="1160">
 
 三个不可让步的取舍：
 
@@ -207,7 +181,7 @@ todaynew/
 │   └── USAGE.md
 ├── remotion/                   # 渲染工程（src/scenes 场景、src/components 字幕与主题）
 ├── assets/bgm/                 # 20 首免版权 BGM（随仓库入库）
-├── docs/                       # 优化方案、审阅证据、示例图
+├── docs/                       # 优化方案、审阅证据、示例图；docs/diagrams 为流程图源脚本
 ├── out/<date>/                 # 成片与发布物料（不入库）
 ├── work/                       # 中间产物（不入库）
 └── handoff.md                  # 每次成片登记，供发布环节读取
@@ -269,6 +243,7 @@ python -m pytest tests/ -q          # 80 passed
 - **配置唯一来源**：`scripts/common.py`（`PROJECT_ROOT` / `BGM_DIR` / `WIDTH·HEIGHT·FPS` / `CONCURRENCY`）。
 - **新增场景**：`remotion/src/scenes/` 加组件 → `NewsVideo.tsx` 的 `SceneRouter` 加 case → `parse_news.py` 产出对应 `visual.type`。
 - **新增 TTS 后端**：在 `scripts/tts_backend.py` 实现 `synth()`，返回 `(wav 路径, 词边界列表)`。
+- **改流程图**：编辑 `docs/diagrams/generate_pipeline_flow.py` 后重跑它，会重新生成 `docs/images/pipeline-flow.svg`（4 列 × 3 排回行布局，避免竖向过长）。
 
 ## 安全与隐私
 
