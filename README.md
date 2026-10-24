@@ -1,259 +1,198 @@
 # todaynew · 每日 AI 头条短视频流水线
 
-把一份「每日 AI 新闻」Markdown，自动化做成可直接投放的 **9:16 竖屏口播短视频**：逐字稿 → 配音 → KTV 逐字字幕 → 实拍配图 → Remotion 渲染 → 发布物料 → 三平台发布。
+定时任务拉起 → 抓取今日 AI 要闻 → 写逐字稿 → 配音 / 逐字字幕 / 实拍配图 / 免版权 BGM → Remotion 渲染 9:16 成片 → `social-auto-upload` 三平台自动发布。整条链路**无人值守**，人工只在两处介入：写稿口径的可选微调，以及出片后的抽帧目检。
 
-**面向开发者**：不接任何新闻源的账号体系，不依赖任何付费服务；默认 TTS 用免费的 edge-tts，配图用原文实拍图 + Pexels/Pixabay 兜底。
+不接付费服务：TTS 默认免费 edge-tts，配图以原文实拍图为主、Pexels/Pixabay 兜底，新闻源用免费匿名的 AIHOT。
 
----
-
-## 目录
-
-- [它解决什么问题](#它解决什么问题)
-- [快速开始（5 分钟跑通）](#快速开始5-分钟跑通)
-- [环境要求](#环境要求)
-- [配置密钥](#配置密钥)
-- [新闻数据源（AIHOT）](#新闻数据源aihot)
-- [完整使用方法](#完整使用方法)
-- [目录结构](#目录结构)
-- [工作原理](#工作原理)
-- [质量门与验收](#质量门与验收)
-- [测试](#测试)
-- [常见问题排查](#常见问题排查)
-- [二次开发](#二次开发)
-- [安全与隐私](#安全与隐私)
-- [许可证](#许可证)
+**快速跳转**：[全链路流程图](#全链路流程图) · [示例成片](#示例成片--2026-10-24) · [5 分钟跑通](#5-分钟跑通) · [定时任务](#无人值守定时任务) · [测试](#测试)
 
 ---
 
-## 它解决什么问题
+## 全链路流程图
 
-每天做一条 AI 资讯短视频，重复劳动集中在四处：
+```mermaid
+flowchart TD
+  A["定时任务 · 每天 16:00<br/>WorkBuddy Automation"] --> B["加载 todayaihot skill<br/>references/automation-prompt.md"]
+  B --> C["① AIHOT 采集<br/>dailies/latest + feed/all.xml"]
+  C --> D["② 筛选 6–7 条<br/>核心 · 细节 · 价值 · 原文直链"]
+  D --> E["③ 落盘 news.md"]
+  E --> F["④ parse_news<br/>逐字稿 narration.json"]
+  F --> G["⑤ fetch_news<br/>抓原文要点 + 原文实拍配图"]
+  G --> H{"配图是实拍照片？"}
+  H -->|否| I["Pexels / Pixabay 兜底"]
+  I --> J{"仍无实拍图？"}
+  H -->|是| K["⑥ 选 BGM<br/>assets/bgm 免版权曲库"]
+  J -->|是| X["validate_output 判 ERROR<br/>阻断出片"]
+  J -->|否| K
+  K --> L["⑦ gen_tts<br/>edge 云希 + WordBoundary<br/>master.wav + timeline.json"]
+  L --> M["⑧ validate_output<br/>配图 · 残句 · 时间戳 0 ERROR"]
+  M --> N["⑨ render · Remotion<br/>1080×1920 30fps<br/>BGM 闪避混音 + loudnorm"]
+  N --> O["⑩ 抽帧目检<br/>配图实拍 · KTV 黄白高亮"]
+  O --> P["⑪ gen_publish + finalize<br/>publish.md · chapters · covers<br/>run_report.json · handoff.md"]
+  P --> Q["⑫ social-auto-upload 发布<br/>封面大字模板重绘"]
+  Q --> R["抖音"]
+  Q --> S["B 站"]
+  Q --> T["微信视频号"]
+  R --> U["回执回写 handoff.md"]
+  S --> U
+  T --> U
+```
 
-| 环节 | 手工做的事 | 本项目的自动化 |
-|---|---|---|
-| 选题 | 刷几十个源、凑 6–7 条 | 按 Markdown 结构化解析，直接吃现成简报 |
-| 配音 | 逐句 TTS、对时间轴 | 逐句合成 + 指纹缓存（改一句只重合成一句） |
-| 字幕 | 手动卡点、做 KTV 高亮 | 从 TTS 词边界直接生成逐字时间戳 |
-| 画面 | 找图、担心配图变成"满屏文字" | 原文实拍图优先，图库兜底，**文字卡直接阻断出片** |
+三个不可让步的取舍：
 
-**核心设计取舍**：宁可阻断出片，也不发一条画面是"标题文字卡"的视频。所以「缺配图」「口播残句」「字幕时间戳异常」都是 **ERROR 级硬门**，直接中止流水线。
+| 取舍 | 原因 |
+|---|---|
+| 缺配图 = ERROR，**阻断出片** | 文字卡视频比当天不发更伤账号；宁可断，不降级 |
+| 口播残句 = ERROR | "研究团队称……" 这类半句一旦播出无法修正 |
+| 发布封面**必须重绘** | 显式传封面会短路自动重绘且无告警，三平台封面会全部出错 |
 
 ---
 
-## 快速开始（5 分钟跑通）
+## 示例成片 · 2026-10-24
+
+| 成片预览（8 段截取） | 发布封面 3:4 |
+|---|---|
+| <img src="docs/images/example-2026-10-24.gif" width="240" alt="2026-10-24 成片预览"> | <img src="docs/images/example-2026-10-24-cover.jpg" width="240" alt="2026-10-24 发布封面"> |
+
+| 项目 | 实测值 |
+|---|---|
+| 成片 | 53.4s · 1080×1920 · 30fps · H.264 + AAC |
+| 口播 | 356 字 / 7 条要闻，edge-tts 云希（语速 +30%） |
+| 音频 | BGM 闪避混音，−15.5 LUFS / TP −0.8 dBTP / LRA 4.1 |
+| 配图 | 7 张实拍照片（原文 1 / Pexels 6 / 缺失 0），md5 去重，无文字卡 |
+| 字幕 | 逐字 KTV 高亮，分页不拆英文词与数字 |
+| 物料 | `publish.md` + `chapters.json`（9 条）+ 3:4 / 4:3 / 16:9 封面 |
+| 发布 | 抖音 ✅ · B 站 ✅ [BV1RpHP6bEvj](https://www.bilibili.com/video/BV1RpHP6bEvj) · 视频号 cookie 过期未发 |
+
+> 该期回顾时发现「第 3 条要点被 KTV 字幕压住」，已引入正文区 / 字幕安全区分离的版式常量（`videoConfig.ts` 的 `CONTENT_BOTTOM_LIMIT`）并重渲染；仓库内动图取自修复版，线上已发布版本仍是旧版式。
+
+---
+
+## 5 分钟跑通
 
 ```bash
-# 1. 克隆
-git clone <this-repo-url> todaynew
-cd todaynew
+git clone <this-repo-url> todaynew && cd todaynew
 
-# 2. 安装 Remotion 依赖（Node 18+）
-cd remotion && npm install && cd ..
-
-# 3. 安装 Python 依赖
+cd remotion && npm install && cd ..          # Node 18+
 pip install -r skills/todayaihot/requirements.txt
+cp .env.example .env                          # 填 PEXELS_API_KEY 与 PIXABAY_API_KEY
 
-# 4. 配置密钥
-cp .env.example .env
-# 编辑 .env，填入 PEXELS_API_KEY 与 PIXABAY_API_KEY（见下节）
-
-# 5. 先跑冒烟测试，确认渲染链路通畅（约 1–2 分钟，不需要任何 API Key）
 cd skills/todayaihot
-python scripts/run_all.py --smoke
+python scripts/run_all.py --smoke             # 冒烟：6 秒测试片，不需要任何 Key
 ```
 
-冒烟测试会生成 6 秒测试视频并渲染到 `out/2026-09-06/每日ai热门新闻-2026-09-06.mp4`，用来验证「Python → ffmpeg → Remotion」整条链路在你的机器上能跑通。
-
-> 冒烟数据自带一张现场生成的 PNG 配图，**不需要配置任何 API Key**，也不访问网络。
-> 它会覆盖 `work/narration.json` 与 `work/timeline.json`（中间产物，下次跑流水线会重新生成）。
-> 跑完可直接删除 `out/2026-09-06/`。
-
-**跑通后再跑真实内容**：
+冒烟产物在 `out/2026-09-06/`，验证「Python → ffmpeg → Remotion」链路通畅，可直接删除。随后跑真实内容：
 
 ```bash
-python scripts/run_all.py "/绝对路径/AI新闻推送_2026-10-23.md" --backend edge --concurrency 1
+python scripts/run_all.py "/绝对路径/AI新闻推送_2026-10-24.md" --backend edge --concurrency 1
 ```
 
----
-
-## 环境要求
+### 环境要求
 
 | 组件 | 版本 | 说明 |
 |---|---|---|
-| Python | 3.10+ | 需 `requests` `beautifulsoup4` `lxml` `pillow` `numpy` `edge-tts` `websocket-client` |
-| Node.js | 18+ | 仅用于 Remotion 渲染；`render.py` 会自动探测 node 位置 |
-| ffmpeg | 需支持 `asplit/aloop/sidechaincompress/amix/loudnorm` | **BGM 闪避混音必需**。Remotion 自带的是精简构建，不够用 |
+| Python | 3.10+ | `requests` `beautifulsoup4` `lxml` `pillow` `numpy` `edge-tts` `websocket-client` |
+| Node.js | 18+ | 仅渲染用；`render.py` 自动探测 node |
+| ffmpeg | 需含 `asplit/aloop/sidechaincompress/amix/loudnorm` | **BGM 闪避混音必需**，Remotion 自带的精简构建不够用 |
 | Chrome Headless Shell | 自动 | 首次渲染时 Remotion 自动下载 |
 
-### 关于 ffmpeg（最容易踩的坑）
-
-BGM 人声闪避混音依赖 `asplit` / `aloop` / `sidechaincompress` / `amix` / `loudnorm` 这一整条滤镜链。
-**Remotion 自带的 ffmpeg 是精简构建，缺这些滤镜**，用它混音必然失败。
-
-处理方式（二选一）：
+`check_deps.py` 会实测滤镜链并明确报告可用性。ffmpeg 两种处理：
 
 ```bash
-# 方式 A：设置环境变量指向完整构建（推荐）
-set TODAYAIHOT_FFMPEG=D:/path/to/ffmpeg/bin/ffmpeg.exe
-
-# 方式 B：本次禁用 BGM，只做响度归一
-python scripts/run_all.py "news.md" --no-bgm
+set TODAYAIHOT_FFMPEG=D:/path/to/ffmpeg/bin/ffmpeg.exe   # 方式 A：指向完整构建（推荐）
+python scripts/run_all.py "news.md" --no-bgm             # 方式 B：关 BGM，只做响度归一
 ```
 
-启动时 `check_deps.py` 会实测滤镜链能力并明确报告"可用/不可用"，不会让你跑到一半才发现。
+### 配置密钥
 
----
-
-## 配置密钥
-
-复制 `.env.example` 为 `.env`（`.env` 已在 `.gitignore` 中，**永远不会被提交**）：
-
-```bash
-cp .env.example .env
-```
+`.env` 已在 `.gitignore` 中，永不入库。
 
 | 变量 | 必需 | 说明 |
 |---|---|---|
-| `PEXELS_API_KEY` | ✅ | 实拍配图兜底。[申请地址](https://www.pexels.com/api/) |
-| `PIXABAY_API_KEY` | ✅ | 实拍配图兜底 + BGM 检索。[申请地址](https://pixabay.com/api/docs/) |
-| `VOLC_TTS_API_KEY` | ❌ | 火山引擎 seed-tts-2.0。填了才能用 `--backend volc` |
-| `TTS_EDGE_VOICE` | ❌ | edge-tts 音色，默认 `zh-CN-YunxiNeural`（云希） |
-| `TODAYAIHOT_ROOT` | ❌ | 项目根目录。默认自动从脚本位置推导 |
-| `TODAYAIHOT_FFMPEG` | ❌ | 完整 ffmpeg 路径 |
-| `TODAYAIHOT_BGM_DIR` | ❌ | BGM 目录，默认 `<项目根>/assets/bgm` |
+| `PEXELS_API_KEY` | ✅ | 实拍配图兜底 |
+| `PIXABAY_API_KEY` | ✅ | 实拍配图兜底 + BGM 检索 |
+| `VOLC_TTS_API_KEY` | ❌ | 火山 seed-tts-2.0，填了才能用 `--backend volc` |
+| `TTS_EDGE_VOICE` | ❌ | 默认 `zh-CN-YunxiNeural`（云希） |
+| `TODAYAIHOT_FFMPEG` / `TODAYAIHOT_BGM_DIR` | ❌ | 完整 ffmpeg 路径 / BGM 目录 |
 
-> ⚠️ **两个图库 Key 必须都填**。只填一个时，另一个源失效仍可能凑巧成功，但一旦原文抓图失败且只有一个源可用，配图兜底会静默失效，画面退化成文字卡——而这正是本项目要杜绝的情况。
+> 两个图库 Key **必须都填**。只留一个源时，一旦原文抓图失败，配图兜底会静默失效、画面退化成文字卡——正是本项目要杜绝的情况。
 
----
+### 新闻数据源（AIHOT）
 
-## 新闻数据源（AIHOT）
-
-本项目的每日 AI 新闻来自 [AIHOT](https://aihot.news/)——免费、免注册的 AI 行业动态聚合站（监控 884 个信源，每天 08:00 出 AI 日报）。
-
-**官方地址：<https://aihot.news/>**。旧域名 `aihot.virxact.com` 自 2026-10-31 起仅做跳转、之后停用，看到旧地址的教程、代码、文章请一律以新域名为准；本项目代码、定时任务与文档已于 2026-10-23 统一切换到新域名（`aihot` skill 与 `todayaihot` 脚本均已更新）。
-
-使用规则（来自 AIHOT 官方公告）：
-
-| 用途 | 是否需要授权 |
-|---|---|
-| 个人使用、公益项目、公司或其他组织内部使用 | 免费、匿名，直接用 |
-| 收费产品、客户服务、公开镜像等商业用途 | 需先联系 AIHOT 取得授权 |
-
-流水线用到的接口（API v2.0.0，匿名只读，**无需 API Key**）：
+免费匿名聚合站 [aihot.news](https://aihot.news)（监控 884 个信源，每日 08:00 出 AI 日报）。个人 / 公益 / 组织内部使用免费，商业用途需向 AIHOT 取得授权。旧域名 `aihot.virxact.com` 自 2026-10-31 起仅跳转。
 
 | 端点 | 用途 |
 |---|---|
-| `https://aihot.news/api/v1/dailies/latest` | 最新一期日报（精选条目 + 快讯） |
-| `https://aihot.news/api/v1/dailies?limit=7` | 日报索引 |
-| `https://aihot.news/feed/all.xml` | 全部 AI 动态 RSS（条目池） |
-| `https://aihot.news/items/{id}` | 条目详情页（AI 导读摘要 + 原文链接） |
+| `/api/v1/dailies/latest` | 最新日报（精选 + 快讯） |
+| `/api/v1/dailies?limit=7` | 日报索引 |
+| `/feed/all.xml` | 全部动态 RSS（条目池） |
+| `/items/{id}` | 条目详情页（AI 导读 + 原文链接） |
 
-AIHOT 官方的「把 AIHOT 接进你的 Agent」接入页（Skill / MCP / RSS / REST API 四种方式任选，图中安装参数已打码）：
+官方「把 AIHOT 接进你的 Agent」接入页（Skill / MCP / RSS / REST API 任选）：
 
 ![AIHOT Agent 接入页](docs/images/aihot-agent-integration.png)
 
-> 新闻简报也可以手写、或由其他来源生成——只要符合[每日新闻简报的格式要求](#每日新闻简报的格式要求)，流水线不绑定任何新闻源的账号体系。
+新闻简报也可手写或来自其他来源——只要符合下面的格式，流水线不绑定任何新闻源账号体系。
 
----
-
-## 完整使用方法
-
-### 每日新闻简报的格式要求
-
-流水线依赖这个结构（`#` 标题 + 条目 + 三行要点 + 原文直链）：
+### 简报格式（流水线硬依赖）
 
 ```markdown
-# AI 新闻推送 · 2026-10-23
+# AI 新闻推送 · 2026-10-24
 
-**1. OpenAI 发布 GPT-6.1 Sol Ultrafast**
-核心：推理速度提升 8 倍，API 定价 $12/$60 每百万 token。
-细节：Codex steering 即时生效，同步进入 ChatGPT Work。
-价值：编码 Agent 的 token 成本可下降约 40%，适合高并发 CI 场景。
+**1. 标题**
+核心：一句话概括。
+细节：关键更新点。
+价值：对开发者/企业的影响。
 原文：https://example.com/some-article
 ```
 
-要点：
-- 每条**必须**有 `原文：<直链>`（不是聚合站链接）——抓图环节靠它定位原文配图
-- 每条至少写满 `核心/细节/价值` 三行
-- 建议 6–7 条（对应成片 50–60 秒）；少于 6 条时长不达标
+每条**必须**有原文直链（抓图靠它定位），三行要点写满，建议 6–7 条（对应 50–60 秒）。
 
-### 一键跑完整条流水线
+---
+
+## 无人值守定时任务
+
+`skills/todayaihot/references/automation-prompt.md` 是可直接投喂**任意 agent** 的定时任务提示词：路径全部用占位符，不需要改代码。
+
+对 agent 说一句即可：
+
+> 读取 `<PROJECT_ROOT>/skills/todayaihot/references/automation-prompt.md`，替换占位符后创建每天 16:00 的定时任务。
+
+WorkBuddy 中等价于 `automation_update(mode="create", rrule="FREQ=DAILY;BYHOUR=16;BYMINUTE=0", prompt=...)`；其他 agent 用各自的 cron / schedule 能力即可。任务每天串起：AIHOT 采集 → 写 `news.md` → `run_all.py` 出片 → 抽帧目检 → 三平台发布 → 回写 `handoff.md`。
+
+不想自动发布就删掉提示词里的「第六步」（发布依赖外部 `social-auto-upload` 与三平台 cookie）。
+
+---
+
+## 命令与参数
 
 ```bash
-cd skills/todayaihot
-python scripts/run_all.py "/路径/AI新闻推送_2026-10-23.md" --backend edge --concurrency 1
+python scripts/run_all.py "news.md" [参数]
 ```
 
-依次执行 6 个环节：
+| 参数 | 说明 |
+|---|---|
+| `--preview` | 只解析并打印口播字数，**零副作用**（不写 `seen_titles.json`、不覆盖 `narration.json`）。改稿前先跑它 |
+| `--only parse\|fetch\|tts\|render` | 单环节执行（`--only render` 会顺带补 gen_publish + finalize） |
+| `--backend edge\|volc\|auto\|gptsovits` | TTS 后端，默认 `edge` |
+| `--force-tts` | 强制全量重合成。**正常重跑不需要**：缓存按「文本+后端+语速+音量」指纹复用 |
+| `--concurrency 1` | 渲染并发，默认 1（并发 2 曾 OOM） |
+| `--no-bgm` / `--skip-render` / `--check-links` / `--smoke` | 关 BGM / 只到时间轴 / 校验链接 / 冒烟 |
+
+六环节产物：
 
 | # | 环节 | 脚本 | 产物 |
 |---|---|---|---|
 | 1 | 解析 | `parse_news.py` | `work/narration.json` |
-| 2 | 抓取富化 | `fetch_news.py` | 补全要点 + `remotion/public/images/` 配图 |
-| 3 | 配音+时间轴 | `gen_tts.py` | `work/audio/master.wav` + `work/timeline.json` |
-| 4 | 渲染 | `render.py` | `out/<date>/每日ai热门新闻-<date>.mp4` + `covers/` + `chapters.json` |
+| 2 | 抓取富化 | `fetch_news.py` | 补全要点 + `remotion/public/images/` |
+| 3 | 配音 | `gen_tts.py` | `work/audio/master.wav` + `work/timeline.json` |
+| 4 | 渲染 | `render.py` | `out/<date>/*.mp4` + `covers/` + `chapters.json` |
 | 5 | 发布物料 | `gen_publish.py` | `out/<date>/publish.md` |
-| 6 | 收尾 | `finalize.py` | `out/<date>/run_report.json` + `handoff.md` 登记 |
+| 6 | 收尾 | `finalize.py` | `run_report.json` + `handoff.md` 登记 |
 
-### 分环节执行
+**改稿姿势**：改 md → `--preview` 确认 325–385 字 → `--skip-render` 验配音字幕 → 满意后跑完整流水线。
 
-```bash
-python scripts/run_all.py "news.md" --only parse    # 只解析
-python scripts/run_all.py "news.md" --only fetch    # 只抓图
-python scripts/run_all.py "news.md" --only tts      # 只配音
-python scripts/run_all.py "news.md" --only render   # 只渲染（仍会自动补跑 gen_publish + finalize）
-```
-
-### 常用参数
-
-| 参数 | 说明 |
-|---|---|
-| `--preview` | **只解析并打印口播字数**，不写 `seen_titles.json`、不覆盖正式 `narration.json`。零副作用，改稿前先跑它 |
-| `--backend edge\|volc\|auto\|gptsovits` | TTS 后端。默认 `edge`（免费、稳定） |
-| `--force-tts` | 强制全量重合成配音。**正常重跑不需要**——缓存按「文本+后端+语速+音量」指纹复用 |
-| `--concurrency 1` | 渲染并发。默认 1（并发 2 曾导致 OOM） |
-| `--no-bgm` | 关闭 BGM，只做响度归一 |
-| `--skip-render` | 只跑到时间轴，不渲染。改稿阶段用它最快 |
-| `--check-links` | 校验时检查新闻链接可访问性（慢） |
-| `--smoke` | 冒烟模式，生成 6 秒测试视频 |
-
-### 改稿的正确姿势
-
-1. 改 `news.md` → 跑 `--preview` 确认字数在 325–385 字（≈50–59 秒）
-2. 跑 `--skip-render` 验证配音与字幕
-3. 满意后跑完整流水线
-
-> 改稿后**不需要** `--force-tts`：配音缓存按内容指纹失效，只重合成真正改动的那几句。
-
-### 换配图（不改稿，只换图）
-
-某些原文的头图是"浅色渐变底 + 居中大字"的标题卡，会被当成合法图片通过过滤器。修法：
-
-1. 从 Pexels 找一张同主题实拍图，存到 `remotion/public/images/`
-2. 回写 `work/narration.json` **和** `work/timeline.json` 中 `narration.scenes[sN].visual`：
-   ```json
-   {
-     "images": ["images/你的文件名.jpg"],
-     "image_sizes": [[1920, 1080]],
-     "image_source": "pexels"
-   }
-   ```
-   ⚠️ 字段必须是 **plural 数组形态**（`images` / `image_sizes`）。写成 singular 的 `image` 字段会被前端忽略，画面仍是旧图。
-3. 只重跑渲染（约 2 分钟），无需重跑 parse/fetch/TTS：
-   ```bash
-   python scripts/render.py
-   ```
-
-### 发布到抖音 / B站 / 视频号
-
-发布由外部工具 `social-auto-upload`（独立仓库）负责，本项目只产出物料：
-
-- `out/<date>/publish.md` —— 备选标题、话题标签、简介、置顶评论
-- `out/<date>/chapters.json` —— B站章节（3–10 条，首章 00:00，标题 ≤20 字）
-- `out/<date>/covers/` —— 3:4 / 4:3 / 16:9 三种比例 PNG
-
-**封面分工（重要）**：本流水线产出的是 Remotion still 生成的 PNG，用于预览与备用。
-**正式发布的 JPG 封面必须由外部发布工具的 codebase-style 大字模板重绘**——不要把 PNG 或视频首帧裁切图直接当封面传过去，否则三平台封面会全部不对且无任何告警。
+**换配图**：改 `work/narration.json` 的 `visual.images`（**复数数组**）后重跑 `gen_tts.py` 再 `render.py`——render 读的是 `timeline.json` 内嵌快照，只改 narration 再 `--only render` 不会生效。
 
 ---
 
@@ -261,109 +200,40 @@ python scripts/run_all.py "news.md" --only render   # 只渲染（仍会自动�
 
 ```
 todaynew/
-├── skills/todayaihot/          # 流水线源码（Python）
-│   ├── scripts/
-│   │   ├── run_all.py          # 一键入口
-│   │   ├── parse_news.py       # md -> narration.json
-│   │   ├── fetch_news.py       # 抓取富化 + 配图（含文字卡识别）
-│   │   ├── gen_tts.py          # 配音 + KTV 时间轴
-│   │   ├── render.py           # Remotion 渲染 + 封面 + 章节
-│   │   ├── gen_publish.py      # 发布物料
-│   │   ├── finalize.py         # run_report + handoff 登记
-│   │   ├── validate_output.py  # 质量门（ERROR 阻断）
-│   │   └── common.py           # 路径与参数（唯一配置源）
-│   ├── references/             # 契约、规范、踩坑记录
+├── skills/todayaihot/          # 流水线源码
+│   ├── scripts/                # run_all / parse / fetch / gen_tts / render / gen_publish / finalize / validate_output / common
+│   ├── references/             # 契约、规范、踩坑记录、定时任务提示词
 │   ├── tests/                  # pytest 回归测试
-│   └── assets/bgm/             # 免版权 BGM（可选）
-├── remotion/                   # 渲染工程
-│   ├── src/
-│   │   ├── Root.tsx            # Composition 定义
-│   │   ├── NewsVideo.tsx       # 主视频场景编排
-│   │   ├── scenes/             # 开场 / 新闻卡 / 结尾
-│   │   ├── components/         # 字幕、主题、封面
-│   │   └── types/              # 类型声明
-│   └── public/                 # 配音与配图（运行时生成，不入库）
-├── assets/bgm/                 # 免版权 BGM
-├── docs/                       # 优化方案与审阅证据
-├── out/<date>/                 # 成片与发布物料
+│   └── USAGE.md
+├── remotion/                   # 渲染工程（src/scenes 场景、src/components 字幕与主题）
+├── assets/bgm/                 # 20 首免版权 BGM（随仓库入库）
+├── docs/                       # 优化方案、审阅证据、示例图
+├── out/<date>/                 # 成片与发布物料（不入库）
 ├── work/                       # 中间产物（不入库）
-└── handoff.md                  # 每次生成的视频登记
+└── handoff.md                  # 每次成片登记，供发布环节读取
 ```
 
 ---
 
-## 工作原理
+## 关键机制
 
-### 数据流
+**字幕为什么对得上音**：`gen_tts.py` 用 edge-tts 的 WordBoundary 词边界直接产出逐字相对时间戳（`chars[].t` 相对句首）。基准是 `master.wav = [0.1s 静音][逐句 PCM]` 且 `clause.start = 0.1 + 游标`；视频中音频从**第 0 帧**起播，于是「wav 位置 == 视频时间」严格成立。**不要**给 `<Audio>` 再套延迟 `Sequence`，否则字幕整体偏移 0.1 秒（`test_timing_contract.py` 已锁定）。
 
-```
-news.md ──parse──▶ narration.json ──fetch──▶ 富化narration + 配图
-                         │
-                         ├──tts──▶ master.wav + timeline.json
-                         │              (含逐字时间戳)
-                         └──render──▶ Remotion ──▶ out/<date>/*.mp4
-                                                    + covers/ + chapters.json
-                         └──gen_publish──▶ publish.md
-                         └──finalize──▶ run_report.json + handoff.md
-```
+**配图判定**：`looks_like_text_image()` 四判据（颜色唯一度 / 彩色度 / 主色占比 / 前 3 色集中度）。它是**高置信度过滤器而非完备判据**——厂商博客那种「浅色渐变底 + 居中大字」标题卡能全部通过，所以出片后必须抽帧目检。
 
-### 为什么字幕能对上音
+**版式安全区**：正文区止于 `CONTENT_BOTTOM_LIMIT`（`videoConfig.ts`），字幕贴底 `SUBTITLE_BOTTOM`，两者由同一组常量推导，避免正文被字幕压住。
 
-`gen_tts.py` 用 edge-tts 的 **WordBoundary 词边界**直接产出逐字相对时间戳，写入每个 clause 的 `chars[].t`。
+**质量门**：`validate_output.py` 在渲染前自动运行，0 ERROR 才放行——缺配图 / 配图损坏 / 口播残句 / 时间戳为负或逆序 / clause 时间轴不连续。`finalize.py` 给出 `READY`（可发布）/ `GENERATED`（物料不全）/ `BLOCKED`（不得发布）。
 
-时间基准是：`master.wav = [0.1s 静音][逐句 PCM]`，且 `clause.start = 0.1 + 游标`。
-视频中音频从**第 0 帧**起播（master 已内置那 0.1 秒静音），于是「wav 位置 == 视频时间」严格成立。
-
-> ⚠️ 改 `NewsVideo.tsx` 时注意：**不要**给 `<Audio>` 再套延迟 `<Sequence>`，否则静音被双计、字幕整体偏移 0.1 秒。
-> 这条契约由 `tests/test_timing_contract.py` 锁定。
-
-### 配图的硬规则
-
-画面**绝不允许**出现文字卡 / 海报卡 / 满屏文字截图。判定由 `looks_like_text_image()` 四判据执行（颜色唯一度、彩色度、主色占比、前 3 色集中度）。
-
-> 四判据是**高置信度过滤器**而非完备判据。厂商博客那种「浅色柔光渐变底 + 居中大字」的标题卡能通过全部四判据。
-> 所以**出片后必须抽帧目检**，不能只看日志。
-
-### 配图来源优先级
-
-1. 原文真实配图
-2. Pexels 实拍图
-3. Pixabay 实拍图
-
-三者都拿不到 → 校验判 **ERROR** → **阻断出片**（不留文字卡兜底）。
-
----
-
-## 质量门与验收
-
-`validate_output.py` 在渲染前自动运行，**0 ERROR 才放行**：
-
-| 级别 | 检查项 |
-|---|---|
-| ERROR | 缺配图 / 配图文件缺失或损坏 / 走了海报文字卡兜底 |
-| ERROR | 口播残句（截断成"研究团队称……"这类半句） |
-| ERROR | 字幕逐字时间戳为负、逆序、或超出句长 |
-| ERROR | clause 时间轴不连续（`start >= end`） |
-| WARN | 其它非致命项（如链接不可达） |
-
-`finalize.py` 生成的 `run_report.json` 有三种状态：
-
-| 状态 | 含义 |
-|---|---|
-| `READY` | 物料齐全且成片实测通过，可交外部发布 |
-| `GENERATED` | 文件已生成，但缺物料，未完成发布前验收 |
-| `BLOCKED` | 失败原因与恢复方式已记录，**不得发布** |
-
-### 出片后的人工抽帧检查（必做）
+**出片后抽帧（必做）**：
 
 ```bash
 ffmpeg -i out/<date>/每日ai热门新闻-<date>.mp4 -vf "select='eq(n\,90)+eq(n\,240)+eq(n\,390)'" -vsync vfr frames_%02d.jpg
 ```
 
-逐张确认：
-- ✅ 配图是**真实实拍照片**，不是文字卡
-- ✅ 各条配图**互不重复**
-- ✅ KTV 字幕有**黄白高亮**（已朗读变黄），不是全白
+确认：配图是真实照片、各条配图不重复、KTV 字幕有黄白高亮、要点未被字幕遮挡。
+
+**封面分工**：流水线用 Remotion still 产出 3:4 / 4:3 / 16:9 PNG（预览与备用）；**发布用 JPG 必须由 `social-auto-upload` 的 codebase-style 大字模板重绘**，不得把 PNG 或首帧裁切图当发布封面。
 
 ---
 
@@ -371,114 +241,39 @@ ffmpeg -i out/<date>/每日ai热门新闻-<date>.mp4 -vf "select='eq(n\,90)+eq(n
 
 ```bash
 cd skills/todayaihot
-python -m pytest tests/ -q
+python -m pytest tests/ -q          # 80 passed
 ```
 
-当前 **80 个用例全通过**，覆盖：
-
-| 测试文件 | 锁定的不变量 |
-|---|---|
-| `test_timing_contract.py` | 时间基准、Audio 0 帧起播、末场景覆盖尾部缓冲 |
-| `test_spoken_clause.py` | 口播残句三层防线 |
-| `test_validate_output.py` | 质量门判定逻辑 |
-| `test_gen_tts_cache.py` | 配音缓存指纹与失败重试 |
-| `test_parse_dedup.py` | 跨天去重 |
-| `test_finalize.py` | run_report 状态机、handoff 保留发布回执 |
-| `test_mix_chain.py` | ffmpeg 混音链路预检 |
-| `test_punct_normalization.py` | 标点归一化 |
-| `test_run_all_steps.py` | 环节编排 |
-
-部分用例需要完整 ffmpeg（生成真实视频 fixture）。找不到时该用例会 **skip** 而非失败。
+覆盖时间基准契约、口播残句三层防线、质量门判定、配音缓存指纹、跨天去重、run_report 状态机、混音链路预检、标点归一化、环节编排。需要完整 ffmpeg 的用例在缺失时 **skip** 而非失败。
 
 ---
 
-## 常见问题排查
+## 常见问题
 
-### `Cannot find module '../../work/timeline.json'`
-
-`work/` 是中间产物目录，已被 `.gitignore` 排除，新克隆的仓库里不存在它。
-
-- **只跑 `npm run typecheck`**：已由 `remotion/src/types/work-timeline.d.ts` 兜底，不会报错
-- **要真正渲染**：必须先生成 `work/timeline.json`，即先跑 `parse` + `tts`（或直接 `--smoke`）
-
-### 渲染报「混音链路预检未通过」
-
-你的 ffmpeg 不支持 BGM 闪避混音。设置 `TODAYAIHOT_FFMPEG` 指向完整构建，或加 `--no-bgm`。
-
-### 渲染报「No available ports found」
-
-Remotion 需要在 `3000-3100` 段找端口，而这段常被 Windows 的「排除端口范围」策略保留（企业安全软件、VPN 客户端会占用）：
-
-```powershell
-netsh int ipv4 show excludedportrange protocol=tcp
-```
-
-`render.py` 已内置**自动端口探测**：首次渲染失败时会自动改用可用端口重试（依次探测 3000-3100 → 4000-4100 → 18000-18050）。
-若仍失败，请关闭占用该端口段的代理/安全软件。
-
-### 画面全是文字卡
-
-图库 Key 没配或失效。检查 `.env` 里 `PEXELS_API_KEY` 和 `PIXABAY_API_KEY` **都**有值，且没过期。
-
-### KTV 字幕全程不变黄
-
-逐字时间戳时间基准错误。检查 `align_whisper.py` 写出的 `chars[].t` 是否是**相对句首**而非绝对全局时间。
-
-### 配音是女声 / 英文发音奇怪
-
-用了非 `edge` 后端。指定 `--backend edge`，默认音色是云希（`zh-CN-YunxiNeural`）。
-
-### 成片时长明显偏短
-
-条目被解析少了。用 `--preview` 检查口播字数与条目数，目标 325–385 字。
-
-### edge-tts 报 429 限流
-
-微软侧瞬时风控。等待几秒重试即可；`gen_tts.py` 已内置 4 次重试，通常能自愈。
-
-### 渲染 OOM
-
-`--concurrency 1`（默认值）。不要调大。
+| 现象 | 处理 |
+|---|---|
+| `Cannot find module '../../work/timeline.json'` | `work/` 不入库。只跑 typecheck 有 `.d.ts` 兜底；要渲染先跑 parse + tts（或 `--smoke`） |
+| 混音链路预检未通过 | ffmpeg 缺滤镜链，设 `TODAYAIHOT_FFMPEG` 或 `--no-bgm` |
+| `No available ports found` | 3000–3100 被 Windows 排除端口段占用；`render.py` 会自动改探 4000–4100 / 18000–18050，仍失败则关掉占用端口的代理或安全软件 |
+| 画面全是文字卡 | `.env` 两个图库 Key 没配或失效 |
+| KTV 字幕全程不变黄 | `chars[].t` 不是相对句首，检查 `align_whisper.py` |
+| 配音是女声 | 用了非 edge 后端；指定 `--backend edge` |
+| 成片明显偏短 | 条目被解析少了，用 `--preview` 看字数与条数 |
+| edge-tts 429 | 微软侧瞬时风控，`gen_tts.py` 内置 4 次重试，通常自愈 |
+| 渲染 OOM | `--concurrency 1`，不要调大 |
 
 ---
 
 ## 二次开发
 
-### 配置的唯一来源
-
-所有路径与参数集中在 `skills/todayaihot/scripts/common.py`：
-
-- `PROJECT_ROOT` —— 自动从脚本位置推导（`<root>/skills/todayaihot` → 上溯两级），也可用 `TODAYAIHOT_ROOT` 覆盖
-- `BGM_DIR` —— 优先 `<root>/assets/bgm`，其次 skill 内 `assets/bgm`，也可用 `TODAYAIHOT_BGM_DIR` 覆盖
-- `WIDTH/HEIGHT/FPS` —— 1080×1920 @ 30fps
-- `CONCURRENCY` —— 渲染并发，默认 1
-
-### 新增一个场景类型
-
-1. 在 `remotion/src/scenes/` 加组件
-2. 在 `remotion/src/NewsVideo.tsx` 的 `SceneRouter` 里加 `case`
-3. 在 `parse_news.py` 里产出对应的 `visual.type`
-
-### 加一个 TTS 后端
-
-在 `skills/todayaihot/scripts/tts_backend.py` 实现 `synth()`，返回 `(wav路径, 词边界列表)`。
-
----
+- **配置唯一来源**：`scripts/common.py`（`PROJECT_ROOT` / `BGM_DIR` / `WIDTH·HEIGHT·FPS` / `CONCURRENCY`）。
+- **新增场景**：`remotion/src/scenes/` 加组件 → `NewsVideo.tsx` 的 `SceneRouter` 加 case → `parse_news.py` 产出对应 `visual.type`。
+- **新增 TTS 后端**：在 `scripts/tts_backend.py` 实现 `synth()`，返回 `(wav 路径, 词边界列表)`。
 
 ## 安全与隐私
 
-- **`.env` 永不提交**：已在 `.gitignore`，仓库内只有 `.env.example`（无任何真实值）
-- **密钥只从环境变量读取**：代码中无任何明文默认值
-- **中间产物不入库**：`work/`、`out/`、`remotion/public/audio|images/`、音频视频文件均已忽略
-- **日志与交接文件不写密钥值**
-- 历史提交中未发现任何密钥泄露（已对全部 commit 做过 `git grep` 扫描）
-
-> 如果你 fork 后填了自己的 Key 并误提交，请立即到对应平台吊销并重置——Git 历史一旦推送，删除文件也不能抹除历史。
-
----
+`.env` 永不提交（仓库内只有无真值的 `.env.example`）；密钥只从环境变量读取，代码无明文默认值；`work/`、`out/`、`remotion/public/audio|images/`、音视频文件均已忽略；日志与交接文件不写密钥值。若 fork 后误提交了 Key，请立刻到平台吊销——Git 历史无法靠删文件抹除。
 
 ## 许可证
 
-本项目代码与文档采用 **MIT 许可证**，见 [LICENSE](LICENSE)。
-
-各类素材的授权范围（内置 BGM 的原始授权、新闻内容版权、署名标识说明）见 [NOTICE.md](NOTICE.md)。
+代码与文档采用 **MIT**，见 [LICENSE](LICENSE)。BGM 原始授权、新闻内容版权与署名说明见 [NOTICE.md](NOTICE.md)。

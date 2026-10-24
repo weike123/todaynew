@@ -18,3 +18,10 @@
 - 工作流：抓取每日 AI 新闻 → 生成逐字稿与配音 → Remotion 渲染 9:16 竖屏成片，输出到 `out/YYYY-MM-DD/`。
 - 产出文件优先放在本项目工作区内，命名清晰、可追溯。
 - 执行外部/破坏性操作前先评估风险，必要时征得用户确认。
+
+## 能力入口（任何 agent 先读这里）
+- **视频流水线 skill**：`skills/todayaihot/SKILL.md`（约束与验收）、`skills/todayaihot/USAGE.md`（命令）。
+- **定时任务提示词**：`skills/todayaihot/references/automation-prompt.md` —— 路径全用占位符，可直接交给任意 agent 创建每日任务：
+  > 读取 `skills/todayaihot/references/automation-prompt.md`，替换占位符后创建每天 16:00 的定时任务。
+- **数据契约**：`skills/todayaihot/references/pipeline-contract.md`；**踩坑记录**：`references/` 下同名主题文档。
+- 改动 `remotion/src/` 前先看 `tests/test_timing_contract.py`（时间基准不可回归），改完必须 `npm run typecheck` 与 `python -m pytest tests/ -q`（期望 80 passed）。

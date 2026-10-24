@@ -16,6 +16,14 @@ description: 将每日 AI 新闻 Markdown 生成可审阅的逐字稿、配音�
 - 已验证运行环境：Python 3.10+（含 requests/bs4/lxml/PIL/numpy/edge-tts）；Remotion 4.0.520 在 `remotion/`，首次渲染会自动下载 Chrome Headless Shell。
 - 若上述文件意外缺失（误删、junction 断裂），按 [还原检查清单](references/recovery-checklist.md) 排查；该清单仅作异常恢复参考，不代表当前状态。
 
+## 无人值守定时任务（任意 agent 可用）
+
+本 skill 自带一份**可移植的定时任务提示词**：[automation-prompt.md](references/automation-prompt.md)。它把「AIHOT 采集 → 写 news.md → 出片 → 三平台发布 → 回写 handoff」写成一条完整任务，路径全部用占位符（`<PROJECT_ROOT>` / `<NEWS_DIR>` / `<SOCIAL_AUTO_UPLOAD_DIR>` / `<PYTHON>`），clone 后不需要改代码。
+
+创建方式：对任意 agent 说「读取 `<PROJECT_ROOT>/skills/todayaihot/references/automation-prompt.md`，替换占位符后创建每天 16:00 的定时任务」，agent 会按其正文建 recurring 任务（WorkBuddy 等价于 `automation_update(mode="create", rrule="FREQ=DAILY;BYHOUR=16;BYMINUTE=0")`）。
+
+执行链路与人工执行完全一致（`run_all.py` 六环节 + 抽帧自检 + 发布），差异只在于三处强制项：图库 Key 前置检查、成片抽帧目检、发布封面必须重绘。不想自动发布时删掉提示词中的「第六步」即可。
+
 ## 不可回归的约束
 
 1. **逐字稿先行**：先生成并校验 `work/逐字稿_<date>.md`，再生成配音和字幕。
@@ -53,6 +61,7 @@ python scripts/run_all.py "<news.md 绝对路径>" --backend edge --concurrency 
 
 ## 相关参考
 
+- [定时任务提示词](references/automation-prompt.md)：可直接投喂任意 agent 的无人值守任务模板。
 - [流水线契约](references/pipeline-contract.md)：narration、timeline、音频、封面和 handoff 的数据不变量。
 - [封面规范](references/cover-style.md)：codebase-style 首帧和多比例封面要求。
 - [开场钩子库](references/hooks.md)：口播开场动态钩子类型与选择规则。

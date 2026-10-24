@@ -225,7 +225,7 @@
 - 方案：`docs/research/main-AI日报视频优化方案-20261014.md`。
 - 原始42KB交接与历史视频/发布记录：`docs/research/evidence/2026-10-14/handoff-before-review.md`。更早视频登记、旧故障细节保存在该快照，不再在24KiB交接中重复堆积。
 - 现有旧方案：`docs/todayaihot-优化方案-20260914.md`，仅历史参考；续接先读新方案。
-- 当前源码：`skills/todayaihot/scripts/`、`remotion/src/`；提示词：`skills/定时任务提示词.md`；新闻源：`<NEWS_DIR>/AI新闻推送_YYYY-MM-DD.md`。
+- 当前源码：`skills/todayaihot/scripts/`、`remotion/src/`；提示词：`skills/todayaihot/references/automation-prompt.md`（可移植定时任务模板）；新闻源：`<NEWS_DIR>/AI新闻推送_YYYY-MM-DD.md`。
 
 ```powershell
 Set-Location '<项目根目录>'
@@ -280,3 +280,16 @@ python -X utf8 skills/todayaihot/scripts/validate_output.py
 - 章节：chapters.json 9 条，占位「第N条」已回写为真实条目标题（去助读空格、截 22 字）
 - **缺陷修复（2026-10-22）**：发现并修复口播双标点缺陷 —— `merge_clauses` 按逗号切分标题后子句以「，」结尾，`ensure_period` 只识别句末标点却直接追加「。」，产出「xxx 缓存，。」这类双标点（当日 narration.json 实测 2 处）。修复：`ensure_period` 对逗号/顿号结尾做**替换**而非追加（E 盘运行版 + F 盘源同步）；新增 `tests/test_punct_normalization.py` 11 用例回归，全量 80 passed。修复后重跑 parse+fetch+TTS+render，narration.json 双标点计数 0。
 - **环境事实登记**：`skills/todayaihot` 已是**实体目录而非 junction**，且与 `<WORKBUDDY_DATA>/skills/todayaihot` 已分叉（E 盘含 10-21 残句修复 audit_spoken_clause，F 盘源为旧版无此函数；E 盘 SKILL.md 5514 字节 vs F 盘 44155 字节）。两处各自维护，修改需同步两份。
+
+## 2026-10-24 每日AI头条发布结果（fe33e700）
+- 成片：out/2026-10-24/每日ai热门新闻-2026-10-24.mp4（53.4s，1080x1920/30fps，23.3MB；edge+云希，口播 356 字）
+- 响度：-15.48 LUFS / TP -0.79 dBTP / LRA 4.1；BGM 闪避混音（allworldmusic-relaxed-upbeat-happy-lofi）
+- QA：8 帧抽帧通过（4/11/17/23/30/37/44/50s），7 张配图全为实拍照片且 md5 互异，KTV 黄白字幕高亮正常，无文字卡
+- 配图：原文 1 / Pexels 6 / Pixabay 0 / 缺失 0（fetch 自检通过）
+- 抖音：✅ 发布成功（合集「每日全球AI大事」，重绘 3:4 大字封面 --force-regen，比例门禁通过 AR 0.750 亮像素 19.9%；「章节要点」弹窗未出现属已知非致命）
+- B站：✅ 发布成功 BV1RpHP6bEvj（tid 231，审核中）
+- 视频号：❌ 发布失败 —— tencent/tencent1 cookie 无效（code=1）。首次三平台同跑时因 cookie 预检失败导致整批中止，随后改为仅发 douyin,bilibili 完成双平台发布；视频号需管理员扫码重新登录后补发
+- 封面：主标题「每日AI头条 10.24」副标题「Kimi K3.1 百万上下文 Nemotron 4GB 端侧」，已目检 3x4 与 16x9 文字无裁切
+- 章节：chapters.json 9 条，占位「第N条」已回写为真实条目标题
+- 配图返工记录：s2 NVIDIA 原文 og:image 为「NVIDIA Local AI」品牌宣传海报（文字卡）；s3/s4/s6 因检索词相同均落到机械臂类图库照片；s4 首轮 VPN 界面文字密集；s6/s7 均为服务器机柜 —— 逐条指定独立检索词重抓（电路板 / 手机测试 / 刷卡支付 / 服务器机柜 / 光纤线缆）后复检通过
+- **版式缺陷与修复（2026-10-25）**：回顾成片发现第 3 条要点被 KTV 字幕压住（subtitle 块 bottom=360 且两行大字向上覆盖 1408—1560 区间，正文区无底边约束）。修复：`videoConfig.ts` 新增 `SUBTITLE_BOTTOM=360` / `SUBTITLE_SAFE_HEIGHT=190` / `CONTENT_BOTTOM_LIMIT` / `CONTENT_BOTTOM_GAP`；`NewsItem.tsx` 正文改为绝对定位到 `CONTENT_BOTTOM_GAP` 并 `overflow:hidden` 硬裁剪，配图 430→340、要点 30→28px 且 3 行 line-clamp，`Subtitle.tsx` 改用共享常量；tsc 通过、80 用例全通过。已重渲染本机成片（53.4s / −15.48 LUFS / 19.8MB）并抽 8 帧复核：无遮挡、无文字卡、KTV 黄白正常。**线上抖音/B站已发布版本仍是旧版式**，如需一致须重发。

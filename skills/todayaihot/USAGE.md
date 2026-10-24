@@ -15,6 +15,8 @@
 
 入口 `run_all.py` 依次串起以上全部环节；`--only <环节>` 可单独跑某一步（注意 `--only render` 不补 gen_publish/finalize）。
 
+无人值守：用 [定时任务提示词](references/automation-prompt.md) 在任意 agent 中创建每日任务，无需改动代码。
+
 ## 运行环境
 
 - 解释器：Python 3.10+（已验证 `python.exe` 含 requests/bs4/lxml/PIL/numpy/edge-tts；run_all 子进程复用同一解释器）。
