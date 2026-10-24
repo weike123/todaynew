@@ -1,5 +1,6 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
+import { SUBTITLE_BOTTOM } from "../videoConfig";
 
 /**
  * KTV 卡拉OK 字幕（大字幕分页版）
@@ -121,7 +122,7 @@ export const KTVSubtitle: React.FC<{ timeline: any }> = ({ timeline }) => {
     position: "absolute",
     left: 70,
     right: 70,
-    bottom: 360,
+    bottom: SUBTITLE_BOTTOM,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",

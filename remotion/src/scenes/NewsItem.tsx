@@ -9,9 +9,12 @@ import {
   Easing,
 } from "remotion";
 import { Backdrop, COLORS, FONT, ProgressBar, sectionColor } from "../components/theme";
+import { CONTENT_BOTTOM_GAP } from "../videoConfig";
 
 const CONTENT_W = 904;    // 1080 - 88*2 页面内边距
-const IMG_BOX_MAX_H = 430; // 配图区最大高度（短图动态收紧，长图滚动上限）
+const IMG_BOX_MAX_H = 340; // 配图区最大高度（短图动态收紧，长图滚动上限）
+/** 单条要点最多显示行数：超出以省略号收口，绝不越界压到字幕 */
+const BULLET_CLAMP = 3;
 
 /**
  * 从标题提取海报关键词：优先最长的英文/数字词组（如 HydraFusion、Lean 4），
@@ -46,7 +49,7 @@ export const KeywordPoster: React.FC<{
   return (
     <div
       style={{
-        marginTop: 36,
+        marginTop: 28,
         height: IMG_BOX_MAX_H,
         borderRadius: 22,
         overflow: "hidden",
@@ -207,7 +210,7 @@ export const ImageViewer: React.FC<{
       });
 
   const outer: React.CSSProperties = {
-    marginTop: 36,
+    marginTop: 28,
     height: boxH,
     borderRadius: 22,
     overflow: "hidden",
@@ -280,10 +283,16 @@ export const NewsItem: React.FC<{
       <Backdrop hue={color} />
       <ProgressBar progress={progress} color={color} />
 
-      <AbsoluteFill
+      <div
         style={{
-          padding: "96px 88px 0",
+          position: "absolute",
+          top: 96,
+          left: 88,
+          right: 88,
+          bottom: CONTENT_BOTTOM_GAP,
+          overflow: "hidden",
           transform: `scale(${zoom})`,
+          transformOrigin: "center top",
         }}
       >
         {/* 顶部：分类 + 序号 */}
@@ -356,7 +365,7 @@ export const NewsItem: React.FC<{
               marginTop: 32,
               display: "flex",
               flexDirection: "column",
-              gap: 14,
+              gap: 12,
               opacity: interpolate(frame, [12, 28], [0, 1], {
                 extrapolateRight: "clamp",
               }),
@@ -369,8 +378,8 @@ export const NewsItem: React.FC<{
                   display: "flex",
                   alignItems: "flex-start",
                   gap: 18,
-                  fontSize: 30,
-                  lineHeight: 1.4,
+                  fontSize: 28,
+                  lineHeight: 1.42,
                   color: "#eef2ff",
                   fontWeight: 500,
                 }}
@@ -378,7 +387,7 @@ export const NewsItem: React.FC<{
                 <span
                   style={{
                     flex: "0 0 auto",
-                    marginTop: 11,
+                    marginTop: 10,
                     width: 13,
                     height: 13,
                     borderRadius: 999,
@@ -386,7 +395,17 @@ export const NewsItem: React.FC<{
                     boxShadow: `0 0 14px ${color}aa`,
                   }}
                 />
-                <span style={{ flex: 1 }}>{b}</span>
+                <span
+                  style={{
+                    flex: 1,
+                    display: "-webkit-box",
+                    WebkitLineClamp: BULLET_CLAMP,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {b}
+                </span>
               </div>
             ))}
           </div>
@@ -410,7 +429,7 @@ export const NewsItem: React.FC<{
             来源：{v.source}
           </div>
         ) : null}
-      </AbsoluteFill>
+      </div>
 
       {/* 左侧分类色条 */}
       <div
