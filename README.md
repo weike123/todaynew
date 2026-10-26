@@ -38,8 +38,6 @@
 | 物料 | `publish.md` + `chapters.json`（9 条）+ 3:4 / 4:3 / 16:9 封面 |
 | 发布 | 抖音 ✅ · B 站 ✅ [BV1RpHP6bEvj](https://www.bilibili.com/video/BV1RpHP6bEvj) · 视频号 cookie 过期未发 |
 
-> 该期回顾时发现「第 3 条要点被 KTV 字幕压住」，已引入正文区 / 字幕安全区分离的版式常量（`videoConfig.ts` 的 `CONTENT_BOTTOM_LIMIT`）并重渲染；仓库内动图取自修复版，线上已发布版本仍是旧版式。
-
 ---
 
 ## 5 分钟跑通
