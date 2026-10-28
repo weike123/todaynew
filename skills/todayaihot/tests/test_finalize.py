@@ -1,4 +1,5 @@
 """T1 最终成片报告：finalize 必须实测最终文件，缺物料不 READY，不覆盖平台回执。"""
+import json
 import os
 import sys
 
@@ -63,7 +64,7 @@ def test_missing_artifact_not_ready(tmp_path, ffmpeg):
 
 
 def test_ready_when_all_artifacts(tmp_path, ffmpeg):
-    """物料齐全时 status=READY。"""
+    """物料齐全 + 审阅记录齐全 + 混音/响度合格 → READY（P0-1 收紧后的就绪路径）。"""
     run = _setup_run(tmp_path, ffmpeg)
     with open(os.path.join(run["dir"], "publish.md"), "w", encoding="utf-8") as f:
         f.write("# 发布物料包\n")
@@ -72,6 +73,19 @@ def test_ready_when_all_artifacts(tmp_path, ffmpeg):
     for name in ("cover_3x4.png", "cover_4x3.png", "cover_16x9.png"):
         with open(os.path.join(run["dir"], "covers", name), "wb") as f:
             f.write(b"\x89PNG\r\n\x1a\n")
+    # render.py 产出的混音/响度实测（P0-1 后 READY 必须有这些记录）
+    write_json(os.path.join(run["dir"], "render_state.json"), {
+        "audio_mix": {"mode": "bgm_duck", "ok": True, "bgm_file": "a.mp3"},
+        "loudness": {"integrated_lufs": -14.2, "true_peak_dbtp": -1.4, "lra": 6},
+    })
+    _run_finalize(run)
+    report = read_json(os.path.join(run["dir"], "run_report.json"))
+    assert report["status"] == "GENERATED", "未人工审阅前只能是 GENERATED"
+    # 模拟人工审图 + 片尾检查后重跑 finalize → READY
+    report["quality"]["images_reviewed"] = True
+    report["quality"]["tail_frame_checked"] = True
+    with open(os.path.join(run["dir"], "run_report.json"), "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
     _run_finalize(run)
     report = read_json(os.path.join(run["dir"], "run_report.json"))
     assert report["status"] == "READY"

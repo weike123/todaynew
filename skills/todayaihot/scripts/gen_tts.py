@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import (  # noqa: E402
     AUDIO_DIR, NARRATION, PUBLIC_AUDIO, SAMPLE_RATE, SPEECH_RATE,
     LOUDNESS_RATE, TARGET_RMS, TIMELINE, TITLE_PAD, WORK_DIR, ensure_dirs,
+    sha256_file,
 )
 import tts_backend  # noqa: E402
 
@@ -51,10 +52,17 @@ def normalize(data: np.ndarray) -> np.ndarray:
 
 def cache_fingerprint(text: str, backend: str,
                       speech_rate: int = SPEECH_RATE,
-                      loudness_rate: int = LOUDNESS_RATE) -> str:
-    """缓存指纹：文本 + 后端 + 语速 + 音量。任一变化必须使缓存失效（T4）。"""
+                      loudness_rate: int = LOUDNESS_RATE,
+                      voice: str = "") -> str:
+    """缓存指纹：文本 + 后端 + 音色 + 语速 + 音量。任一变化必须使缓存失效（T4）。
+
+    v3：音色纳入指纹（P2-1）——此前只绑后端名，换音色会错误复用旧 wav。
+    voice 为空时按当前配置解析，保证旧调用方式也绑定实际音色。
+    """
     import hashlib
-    raw = f"v2|{backend}|{speech_rate}|{loudness_rate}|{text}"
+    if not voice:
+        voice = tts_backend.active_voice(backend)
+    raw = f"v3|{backend}|{voice}|{speech_rate}|{loudness_rate}|{text}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
@@ -324,6 +332,8 @@ def main():
         "scenes": scenes_out,
         "master_duration": round(len(master) / SAMPLE_RATE, 4),
         "content_duration": round(cursor, 4),
+        "master_sha256": sha256_file(master_path),   # P0-4：render 校验音频与时间轴同源
+        "master_voice": tts_backend.active_voice(backend),
         "speech_rate": SPEECH_RATE,
         "loudness_rate": LOUDNESS_RATE,
         "title_pad": TITLE_PAD,

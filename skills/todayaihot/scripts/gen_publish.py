@@ -5,12 +5,19 @@
                           [--out out/2026-09-03/publish.md]
 
 不依赖 LLM，纯规则模板 + 关键词提取。
+
+P1-1 约定：
+- 来源名缺失时用原文 URL 域名兜底，绝不输出 `[]`；
+- 置顶评论/简介必须覆盖全部新闻条目并附原文链接；
+- 章节数据唯一 schema：{"date","chapters":[...]}；顶层 list 为历史遗留，
+  可读但会显式告警，解析失败必须报告而非静默吞掉。
 """
 import argparse
 import json
 import os
 import re
 import sys
+from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import NARRATION, OUT_DIR, TIMELINE  # noqa: E402
@@ -70,8 +77,40 @@ def gen_titles(items: list, date: str, total: int) -> list:
     return titles[:3]
 
 
+def _source_label(it: dict) -> str:
+    """来源名：source 缺失/为空时用原文 URL 域名兜底（P1-1，杜绝 `[]`）。"""
+    src = (it.get("source") or "").strip()
+    if src:
+        return src
+    link = (it.get("link") or "").strip()
+    if link:
+        host = urlparse(link).netloc
+        if host:
+            return host
+    return "来源未标注"
+
+
+def load_chapters(chapters_path: str) -> list:
+    """读取章节数据，返回 chapter list（P1-1 统一入口）。
+
+    唯一 schema：{"chapters": [...]}；顶层 list 为历史遗留可读但告警。
+    解析失败抛 ValueError（调用方显式报告，不静默吞错）。
+    """
+    if not chapters_path or not os.path.exists(chapters_path):
+        return []
+    with open(chapters_path, encoding="utf-8") as f:
+        ch = json.load(f)
+    if isinstance(ch, dict):
+        return ch.get("chapters", [])
+    if isinstance(ch, list):
+        print("[gen_publish] 警告: chapters.json 为顶层 list（历史遗留格式），"
+              "请统一为 {\"chapters\":[…]} schema")
+        return ch
+    raise ValueError(f"chapters.json 格式无法识别: {type(ch).__name__}")
+
+
 def gen_description(items: list, date: str, chapters_path: str = "") -> str:
-    """生成视频简介（含章节，如果有 chapters 文件）。"""
+    """生成视频简介（含章节导航与全部原文链接）。"""
     lines = [
         f"📅 {date} 每日 AI 头条",
         f"📊 本期 {len(items)} 条精选，一分钟速览",
@@ -84,17 +123,27 @@ def gen_description(items: list, date: str, chapters_path: str = "") -> str:
     if len(items) > 5:
         lines.append(f"  …还有 {len(items) - 5} 条")
 
-    # B站章节
-    if chapters_path and os.path.exists(chapters_path):
-        try:
-            with open(chapters_path, encoding="utf-8") as f:
-                ch = json.load(f)
+    # B站章节：解析失败显式告警，绝不静默省略（P1-1）
+    try:
+        chapters = load_chapters(chapters_path)
+        if chapters:
             lines.append("")
             lines.append("⏱ 章节导航：")
-            for c in ch.get("chapters", []):
+            for c in chapters:
                 lines.append(f"{c['time']} {c['title']}")
-        except Exception:
-            pass
+    except (json.JSONDecodeError, KeyError, ValueError) as e:
+        lines.append("")
+        lines.append(f"⚠️ 章节数据异常，未生成章节导航: {e}")
+        print(f"[gen_publish] 章节数据异常: {e}")
+
+    # 来源与原文链接：覆盖全部条目（P1-1）
+    links = [(it.get("title", ""), it.get("link", "")) for it in items]
+    if any(l for _, l in links):
+        lines.append("")
+        lines.append("🔗 原文链接：")
+        for i, (title, link) in enumerate(links, 1):
+            if link:
+                lines.append(f"{i}. {title[:36]} {link}")
 
     lines.append("")
     lines.append("🤖 本视频由 AI 辅助生成，内容仅供参考")
@@ -103,14 +152,18 @@ def gen_description(items: list, date: str, chapters_path: str = "") -> str:
 
 
 def gen_pinned_comment(items: list) -> str:
-    """生成置顶评论。"""
+    """生成置顶评论：覆盖全部条目并附原文链接，来源缺失用域名兜底。"""
     lines = [
         "📝 本期新闻来源汇总：",
     ]
-    for i, it in enumerate(items[:5], 1):
-        src = it.get("source", "未知来源")
+    for i, it in enumerate(items, 1):
+        src = _source_label(it)
         title = it.get("title", "")[:30]
-        lines.append(f"{i}. [{src}] {title}")
+        line = f"{i}. [{src}] {title}"
+        link = (it.get("link") or "").strip()
+        if link:
+            line += f" {link}"
+        lines.append(line)
     lines.append("")
     lines.append("💬 你最关注哪条？评论区聊聊")
     return "\n".join(lines)
@@ -142,6 +195,12 @@ def main():
             })
 
     total = len(items)
+    # P1-1：缺原文链接/来源的条目显式告警（不阻断，但必须在日志可见）
+    n_no_link = sum(1 for it in items if not (it.get("link") or "").strip())
+    if n_no_link:
+        print(f"[gen_publish] 警告: {n_no_link}/{total} 条新闻缺少原文链接，"
+              "发布物料将无法提供来源溯源，请检查 narration.json 的 visual.link")
+
     out_path = args.out or os.path.join(OUT_DIR, date, "publish.md")
     out_dir = os.path.dirname(os.path.abspath(out_path))
     os.makedirs(out_dir, exist_ok=True)

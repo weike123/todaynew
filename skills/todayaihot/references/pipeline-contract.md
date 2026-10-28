@@ -67,16 +67,22 @@
 - 发布 JPG 由外部 video-upload 大字模板重绘；run_report/manifest 标明实际采用文件与来源（流水线 PNG / 外部重绘）。
 - 禁止视频首帧裁切图、ffmpeg 垫底图充当发布封面。
 
-## run_report 与 READY 门（T1/T2 落地中）
+## run_report 与 READY 门（2026-10-28 P0-1 落地）
 
 run_report.json 在现有字段上扩充，语义：
 
-- `status`: `READY`（完整校验通过，可交外部发布）｜`GENERATED`（文件已生成但未过发布前验收）｜`BLOCKED`（失败阶段与恢复方式已记录）。
-- `READY` 必须由完整校验生成，不能由字段是否存在判断；发布器须核对同一 SHA256。
-- `video` 记录最终文件实测：path / sha256 / duration_sec / width / height / fps；不用 master_duration 充数。
-- `quality` 记录 tts_failed / images_missing / images_reviewed / audio_mix_status / integrated_lufs / true_peak_dbtp / tail_frame_checked；0/null/false 为未测状态。
-- 平台回执单独保存，finalize 合入展示，不覆盖既有成功回执。
+- `status`: `READY`（物料齐全 + 混音/响度实测合格 + 人工审图与片尾检查已记录，可交外部发布）｜`GENERATED`（成片可用但必选质量检查未完成）｜`BLOCKED`（TTS 失败句 / 混音失败 / 成片不可测，不得发布）。
+- `READY` 与 `quality.video_sha256` 绑定：人工审阅（images_reviewed / tail_frame_checked / reviewed_by）只对同一哈希有效，重渲染产生新哈希即自动失效；发布器须核对同一 SHA256。
+- `video` 记录最终文件实测：path / sha256 / duration_sec / width / height / fps / streams（音视频流级时长与帧数，P0-2）；不用 master_duration 充数。
+- `quality` 记录 video_sha256 / tts_failed / images_missing / images_reviewed / reviewed_by / audio_mix_ok / audio_mix_status / integrated_lufs / true_peak_dbtp / tail_frame_checked；0/null/false 为未测状态，绝不写成成功。
+- 响度门：-14±1 LUFS、真峰值 ≤ -1 dBTP；未测按未通过处理（不能 READY）。
+- 平台回执单独保存在 `publish`，finalize 合入时按视频哈希绑定：哈希一致原样保留；哈希不一致（新版成片）不继承旧回执；历史报告无哈希时继承但登记 `_legacy_without_sha`。
 
 ## handoff
 
-每次视频会话结束时更新根目录 `handoff.md`。同一日期只保留一个自动登记块；主视频路径必须是绝对路径，封面、逐字稿、配音、时间轴、时长和分辨率尽量一并记录。发布结果（平台/成功或失败/回执）由发布技能回写同一日期块，与生成信息分区展示。
+每次视频会话结束时更新根目录 `handoff.md`。同一日期只保留一个自动登记块；主视频路径必须是绝对路径（P0-3），封面、逐字稿、配音、时间轴、时长和分辨率尽量一并记录。发布结果（平台/成功或失败/回执）由发布技能回写同一日期块，与生成信息分区展示。补做旧日 finalize 只在该日期块内替换，不得覆盖其他日期。文件超过 24 KiB 时自动把历史日期块归档到 `handoff-archive-<时间戳>.md`（保留当前日期与其后 2 个日期块）。
+
+## 流水线互斥与输入绑定（P0-4）
+
+- run_all 启动时在 `work/.pipeline.lock` 创建独占锁（记录 PID）；已有活锁时拒绝并发/重入，残留死锁自动接管。脚本异常退出后如需强制继续，先确认无实例再删锁文件。
+- gen_tts 把 `master_sha256` 与 `master_voice` 写入 timeline；render 校验 timeline 与 master.wav 同源、内嵌 narration 日期一致，错配即阻断（提示重跑 gen_tts）。

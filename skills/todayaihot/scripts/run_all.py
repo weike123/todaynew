@@ -14,7 +14,9 @@
     6. finalize.py    收尾              -> out/<date>/run_report.json + handoff.md
 
 可用 --only parse|fetch|tts|render 单独跑某一环节，--skip-render 只做前两步（快速验证配音/字幕）。
-注意：--only render 只渲染，不补跑 gen_publish/finalize；返工重渲染后须显式补收尾。
+--only render 同样会补跑 gen_publish/finalize（E14：返工重渲染后必须重新收尾）。
+启动时获取流水线互斥锁（P0-4）：同一项目目录禁止并发/重入，防止共享的
+images/、audio/、timeline.json 被两次运行交叉写入造成串片。
 """
 import argparse
 import json
@@ -26,7 +28,70 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable
 
 sys.path.insert(0, HERE)
-from common import NARRATION, OUT_DIR, TIMELINE, output_name  # noqa: E402
+from common import NARRATION, OUT_DIR, PROJECT_ROOT, TIMELINE, output_name  # noqa: E402
+
+LOCK_PATH = os.path.join(PROJECT_ROOT, "work", ".pipeline.lock")
+
+
+def _pid_alive(pid: int) -> bool:
+    """Windows 下判断进程是否存活（ctypes OpenProcess，仅查询权限）。"""
+    if pid <= 0:
+        return False
+    if os.name != "nt":
+        try:
+            os.kill(pid, 0)
+            return True
+        except OSError:
+            return False
+    import ctypes
+    PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+    STILL_ACTIVE = 259
+    k32 = ctypes.windll.kernel32
+    h = k32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+    if not h:
+        return False
+    try:
+        code = ctypes.c_ulong()
+        if not k32.GetExitCodeProcess(h, ctypes.byref(code)):
+            return True     # 查询失败按存活处理（宁可误拒不可误放行）
+        return code.value == STILL_ACTIVE
+    finally:
+        k32.CloseHandle(h)
+
+
+def acquire_lock() -> bool:
+    """获取流水线锁：O_CREAT|O_EXCL 独占创建；残留锁按 PID 判死活，死锁可接管。"""
+    os.makedirs(os.path.dirname(LOCK_PATH), exist_ok=True)
+    while True:
+        try:
+            fd = os.open(LOCK_PATH, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, str(os.getpid()).encode())
+            os.close(fd)
+            return True
+        except FileExistsError:
+            pass
+        try:
+            with open(LOCK_PATH, encoding="utf-8") as f:
+                pid = int(f.read().strip() or "0")
+        except (OSError, ValueError):
+            pid = 0
+        if _pid_alive(pid):
+            print(f"FAIL: 检测到流水线已在运行（PID {pid}，锁 {LOCK_PATH}），"
+                  "拒绝并发/重入（P0-4）。确认无其他实例后删除锁文件可强制继续。")
+            return False
+        print(f"[run_all] 发现残留锁（PID {pid} 已退出），接管并继续")
+        try:
+            os.remove(LOCK_PATH)
+        except OSError as e:
+            print(f"FAIL: 残留锁删除失败: {e}")
+            return False
+
+
+def release_lock():
+    try:
+        os.remove(LOCK_PATH)
+    except OSError:
+        pass
 
 
 def run(script, extra):
@@ -106,6 +171,15 @@ def main():
     if not args.skip_check:
         check_deps()
 
+    if not acquire_lock():
+        return 1
+    try:
+        return _run(args)
+    finally:
+        release_lock()
+
+
+def _run(args):
     steps = plan_steps(args.only, args.no_fetch, args.skip_render)
 
     # ---------- 预览模式：只解析，无任何记账副作用 ----------

@@ -13,7 +13,15 @@
 | 发布物料 | `gen_publish.py` | `out/<date>/publish.md` |
 | 收尾 | `finalize.py` | `out/<date>/run_report.json` + `handoff.md` 登记 |
 
-入口 `run_all.py` 依次串起以上全部环节；`--only <环节>` 可单独跑某一步（注意 `--only render` 不补 gen_publish/finalize）。
+入口 `run_all.py` 依次串起以上全部环节；`--only <环节>` 可单独跑某一步（`--only render` 同样补跑 gen_publish/finalize）。启动时获取流水线互斥锁，并发/重入直接拒绝。
+
+### 发布就绪状态门（2026-10-28 P0-1）
+
+`run_report.json` 状态：`READY`（可发布）／`GENERATED`（待质量审阅）／`BLOCKED`（不得发布）。
+
+- finalize 跑完通常为 **GENERATED**：人工抽帧审图、确认末帧后，把 `quality.images_reviewed` / `tail_frame_checked` 改为 true（可填 reviewed_by），再重跑 `finalize.py` 升级 READY；
+- TTS 失败句、混音失败 → BLOCKED；响度未测或偏离 -14±1 LUFS / TP ≤ -1 dBTP → 不能 READY；
+- 审阅与回执均绑定 `quality.video_sha256`：重渲染后旧审阅/旧回执自动失效。
 
 无人值守：用 [定时任务提示词](references/automation-prompt.md) 在任意 agent 中创建每日任务，无需改动代码。
 

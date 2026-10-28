@@ -33,6 +33,24 @@ GSV_TIMEOUT = int(os.environ.get("GSV_TIMEOUT", "900"))
 BACKENDS = ("volc", "edge", "gptsovits")
 
 
+def active_voice(backend: str) -> str:
+    """返回当前后端实际使用的音色标识（供 TTS 缓存指纹绑定，P2-1）。
+
+    音色变化必须使缓存失效：指纹只含「后端名」时，换音色会错误复用旧 wav。
+    """
+    if backend == "volc":
+        return os.environ.get("VOLC_TTS_VOICE", VOLC_VOICE)
+    if backend == "edge":
+        return EDGE_VOICE
+    if backend == "gptsovits":
+        try:
+            voice, _, _ = _gsv_voice_info()
+            return voice
+        except (OSError, RuntimeError, ValueError):
+            return GSV_VOICE or "gsv-default"
+    return backend
+
+
 def _gsv_voice_info():
     """从音色注册表取 (ref_audio, ref_text)。默认取注册表 default 音色。"""
     import json

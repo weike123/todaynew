@@ -43,7 +43,7 @@ automation_update(mode="create",
 ```bash
 cd <PROJECT_ROOT>/skills/todayaihot
 <PYTHON> scripts/check_deps.py          # Python 依赖 / ffmpeg 滤镜链 / node 探针
-<PYTHON> -m pytest tests/ -q            # 期望 80 passed
+<PYTHON> -m pytest tests/ -q            # 期望 106 passed
 ```
 
 - `.env` 中 `PEXELS_API_KEY` 与 `PIXABAY_API_KEY` **必须都非空**，否则配图兜底静默失效、画面退化成文字卡。
@@ -153,7 +153,8 @@ cd <PROJECT_ROOT>\skills\todayaihot
 要点：
 
 - `--concurrency 1`：并发 2 曾 OOM，不要改回 2。
-- 链路：parse（md → narration.json，同日重跑幂等）→ fetch（抓要点 + 配图）→ tts（云希，语速 +30%，生成 master.wav + timeline.json，缓存按「文本+后端+语速+音量」指纹复用，**正常重跑不需要 `--force-tts`**）→ render（Remotion 1080×1920/30fps）→ gen_publish（publish.md）→ finalize（run_report.json + handoff 登记）。
+- 链路：parse（md → narration.json，同日重跑幂等）→ fetch（抓要点 + 配图）→ tts（云希，语速 +30%，生成 master.wav + timeline.json，缓存按「文本+后端+音色+语速+音量」指纹复用，**正常重跑不需要 `--force-tts`**）→ render（Remotion 1080×1920/30fps）→ gen_publish（publish.md）→ finalize（run_report.json + handoff 登记）。
+- **发布就绪状态门（2026-10-28 起）**：finalize 完成后 `run_report.json` 通常为 `GENERATED`（待审）而非 `READY`。必须完成下一步「成片审阅」并把状态升到 READY，才允许进入第六步发布。`BLOCKED`（TTS 失败句/混音失败）不得发布，先修复重跑。
 - 成片自动落在 `out/<YYYY-MM-DD>/每日ai热门新闻-YYYY-MM-DD.mp4`，目录不存在会自动创建。
 - 渲染约 1–4 分钟，建议后台执行；完成后用 ffprobe 校验时长（目标 50–60 秒，明显短于 35 秒说明条目被解析少了）。
 - **口播时长试算（开跑前必做）**：`<PYTHON> scripts/run_all.py "<md>" --preview` 试算口播字数，目标 325–385 字（≈50–59 秒）。预览模式不写 `seen_titles.json`、不覆盖正式 narration，无副作用；**严禁**手动删 seen 当日键（同日重跑已幂等）。
@@ -169,6 +170,15 @@ cd <PROJECT_ROOT>\skills\todayaihot
 - 个别原文链接抓不到图（x.com 等反爬）会走图库兜底，属预期，不要因此中断。
 
 **KTV 字幕自检（与配图自检同等强制）**：抽帧时必须看到字幕有**黄色高亮**（已朗读变黄、未朗读白色）。整屏全白即 `chars[].t` 时间基准错误，须检查 `align_whisper.py`（只允许写相对句首时间戳），修复后重跑 TTS + render。同时确认第 3 条要点未被字幕压住（正文区止于字幕安全区 `CONTENT_BOTTOM_LIMIT`）。
+
+### 第五步半：成片审阅与 READY 门（2026-10-28 起，发布前必做）
+
+finalize 完成后 `out/<YYYY-MM-DD>/run_report.json` 通常为 `GENERATED`。人工/agent 审阅通过后按以下步骤升级 READY，**未 READY 严禁发布**：
+
+1. 按上文抽帧目检要求确认：每条配图均为真实实拍照片（无文字卡/海报）、互不重复、KTV 黄白高亮正常、末帧为结束页而非纯背景；
+2. 检查 `run_report.json`：`quality.audio_mix_ok` 必须为 true、`integrated_lufs` 在 -14±1、`true_peak_dbtp` ≤ -1、`tts_failed` 为空；任何一项不满足 → 先修复重跑，不得放行；
+3. 审阅通过后把 `quality.images_reviewed`、`quality.tail_frame_checked` 改为 `true`（可填 `reviewed_by`），再重跑一次 finalize：`<PYTHON> scripts/finalize.py`，确认 `status=READY`；
+4. 审阅绑定 `quality.video_sha256`：若中途重渲染过成片，旧审阅自动失效，必须按新哈希重新审图。
 
 ### 第六步：成片自动发布（social-auto-upload）
 
@@ -208,7 +218,7 @@ PROCESSOR_ARCHITECTURE=AMD64 "$PYTHON" skills/video-upload/scripts/publish_all.p
 ```
 
 - 发布命令**前台执行**（`timeout` 595000）：后台模式会丢句柄并杀掉浏览器。
-- 章节数据：由 `work/timeline.json` 场景起始秒生成 `$D/chapters.json`（8–9 条，`[{"time":"MM:SS","title":"…"}]`），渲染后用 narration.json 的真实标题回写「第N条」占位。
+- 章节数据：`render` 已自动按 narration 真实标题生成 `$D/chapters.json`（8–9 条，`[{"time":"MM:SS","title":"…"}]`）。若出现「第N条」占位，说明 timeline 缺内嵌 narration 或 narration 缺标题，须检查 gen_tts/parse 环节；gen_publish 生成的简介章节与 chapters.json 同源。
 - 抖音合集固定「每日全球AI大事」。
 - 发布后核验各平台结果（B 站可用 `check_bili_status.py` 取 BV 号），并把发布结果写回 `<PROJECT_ROOT>/handoff.md`（覆盖当日条目，写明各平台成功/失败）。
 - 抖音单条失败重试上限 2 次，超过冷却 ≥3 小时补发，禁止短时间反复重试。cookie 过期需扫码时如实登记失败原因，不得重复发布同一条视频。

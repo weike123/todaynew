@@ -301,6 +301,67 @@ def measure_loudness(path: str) -> dict | None:
         return None
 
 
+def ffprobe_path() -> str:
+    """定位 ffprobe：完整构建同目录 > PATH。找不到返回空串（调用方降级）。"""
+    from shutil import which
+    try:
+        ff = ffmpeg_path()
+    except FileNotFoundError:
+        ff = ""
+    if ff:
+        cand = os.path.join(os.path.dirname(ff),
+                            "ffprobe" + (".exe" if os.name == "nt" else ""))
+        if os.path.exists(cand):
+            return cand
+    return which("ffprobe") or ""
+
+
+def probe_streams(path: str) -> dict | None:
+    """用 ffprobe 实测音/视频流各自的时长与帧数（P0-2）。
+
+    容器 Duration 掩盖流级结束差异（10-27 实测音轨比视频流长 0.133s），
+    该函数把差异显式暴露出来。ffprobe 不可用或解析失败返回 None（未测≠零）。
+    """
+    import json as _json
+    import subprocess
+    fp = ffprobe_path()
+    if not fp or not os.path.isfile(path):
+        return None
+    try:
+        r = subprocess.run(
+            [fp, "-v", "error", "-print_format", "json",
+             "-show_entries",
+             "stream=codec_type,duration,nb_frames,nb_read_frames",
+             "-show_entries", "format=duration", path],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            timeout=60,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if r.returncode != 0:
+        return None
+    try:
+        data = _json.loads(r.stdout or "{}")
+    except _json.JSONDecodeError:
+        return None
+    out: dict = {"video_duration": None, "audio_duration": None,
+                 "video_frames": None, "audio_frames": None}
+    for st in data.get("streams", []):
+        kind = st.get("codec_type")
+        if kind not in ("video", "audio"):
+            continue
+        dur = st.get("duration")
+        frames = st.get("nb_frames")
+        if frames is None:
+            frames = st.get("nb_read_frames")
+        try:
+            out[f"{kind}_duration"] = round(float(dur), 3) if dur else None
+            out[f"{kind}_frames"] = int(frames) if frames not in (None, "N/A") else None
+        except (TypeError, ValueError):
+            pass
+    return out
+
+
 def ensure_dirs():
     for d in (WORK_DIR, AUDIO_DIR, OUT_DIR, os.path.dirname(PUBLIC_AUDIO), IMAGES_DIR):
         os.makedirs(d, exist_ok=True)

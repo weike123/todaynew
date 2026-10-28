@@ -22,7 +22,7 @@ import common
 from common import (  # noqa: E402
     AUDIO_DIR, BGM_DIR, CRF, CONCURRENCY, FPS, HEIGHT, OUT_DIR,
     PUBLIC_AUDIO, REMOTION_DIR, TIMELINE, WIDTH, ffmpeg_path,
-    output_name, probe_video,
+    output_name, probe_streams, probe_video,
 )
 
 def _find_node() -> str:
@@ -89,16 +89,23 @@ def write_render_state(out_dir: str, date: str, final_path: str,
                        bgm_path: str, mix_ok: bool, mix_mode: str,
                        loudness: dict | None = None):
     """把本次渲染的混音状态与最终文件实测写到 out_dir/render_state.json，
-    供 finalize 合入 run_report（混音失败不得伪装成完成）。"""
+    供 finalize 合入 run_report（混音失败不得伪装成完成）。
+
+    P0-2：额外记录音/视频流级时长与帧数（容器 Duration 掩盖流级差异，
+    10-27 实测音轨比视频流长 0.133s），及最终文件哈希。
+    """
+    streams = probe_streams(final_path)
     state = {
         "date": date,
         "final_path": os.path.abspath(final_path),
+        "final_sha256": common.sha256_file(final_path),
         "audio_mix": {
             "mode": mix_mode,            # bgm_duck / lufs_only / none
             "ok": bool(mix_ok),
             "bgm_file": os.path.basename(bgm_path) if bgm_path else "",
         },
         "loudness": loudness,            # {"integrated_lufs", "true_peak_dbtp", "lra"}；未测为 None
+        "streams": streams,              # {"video_duration","audio_duration","video_frames","audio_frames"}；未测为 None
         "probe": probe_video(final_path),
         "rendered_at": __import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
@@ -107,6 +114,10 @@ def write_render_state(out_dir: str, date: str, final_path: str,
         json.dump(state, f, ensure_ascii=False, indent=2)
     lufs = loudness.get("integrated_lufs") if loudness else None
     print(f"[render] 状态存档 -> {path} (mix={mix_mode}, ok={mix_ok}, LUFS={lufs})")
+    if streams and streams.get("video_duration") and streams.get("audio_duration"):
+        diff = streams["audio_duration"] - streams["video_duration"]
+        print(f"[render] 流级时长: 视频 {streams['video_duration']:.3f}s / "
+              f"音频 {streams['audio_duration']:.3f}s（差异 {diff:+.3f}s）")
     return path
 
 
@@ -228,23 +239,34 @@ def generate_chapters(timeline: dict, out_dir: str) -> str:
     """从 timeline 生成 B站章节文件 chapters.json + bilibili_chapters.txt。
 
     B站规范：3-10 条，首章 00:00，标题 ≤20 字。
+    标题来源（P1-1 统一 schema）：timeline.scenes[] 现只含 id/clauses，
+    语义标题在内嵌 narration.scenes[] 中，按 scene id 匹配；
+    旧版 timeline 的 scenes[].visual 兼容保留。
     返回 chapters.json 路径。
     """
     scenes = timeline.get("scenes", [])
+    narr_scenes = {
+        s.get("id"): s for s in (timeline.get("narration") or {}).get("scenes", [])
+    }
+
+    def scene_title(sc: dict) -> str:
+        vtype = sc.get("visual", {}).get("type", "")
+        if vtype == "news_hook":
+            return "开场速览"
+        if vtype == "news_outro":
+            return "结尾"
+        title = sc.get("visual", {}).get("title", "")
+        if not title and sc.get("id") in narr_scenes:
+            title = narr_scenes[sc["id"]].get("visual", {}).get("title", "")
+        return title
+
     chapters = []
     for sc in scenes:
         clauses = sc.get("clauses", [])
         if not clauses:
             continue
         start = clauses[0].get("start", 0)
-        # 标题：news_hook=开场，news_outro=结尾，news_item=visual.title
-        vtype = sc.get("visual", {}).get("type", "")
-        if vtype == "news_hook":
-            title = "开场速览"
-        elif vtype == "news_outro":
-            title = "结尾"
-        else:
-            title = sc.get("visual", {}).get("title", "")
+        title = scene_title(sc)
         title = title[:20].strip()
         if not title:
             title = f"第{len(chapters)+1}条"
@@ -317,6 +339,24 @@ def generate_covers(out_dir: str) -> list:
     return results
 
 
+def check_input_binding(tl: dict, master_path: str) -> list:
+    """P0-4 输入绑定校验：timeline 与音频/日期必须同源，错配返回问题列表。"""
+    problems = []
+    date = tl.get("date") or ""
+    inner_date = (tl.get("narration") or {}).get("date", "")
+    if inner_date and inner_date != date:
+        problems.append(f"timeline 日期({date}) 与内嵌 narration 日期({inner_date}) 不一致，"
+                        "疑似跨次错配；请重跑 gen_tts.py 重建 timeline")
+    master_sha = common.sha256_file(master_path)
+    tl_sha = tl.get("master_sha256", "")
+    if tl_sha and master_sha and tl_sha != master_sha:
+        problems.append("timeline.master_sha256 与当前 master.wav 不一致，"
+                        "音频与时间轴非同一次生成；请重跑 gen_tts.py")
+    elif not tl_sha:
+        print("[render] 警告: timeline 缺少 master_sha256（旧版时间轴），跳过音频同源校验")
+    return problems
+
+
 def main():
     ap = argparse.ArgumentParser(description="Remotion 渲染 9:16 成片")
     ap.add_argument("--timeline", default=TIMELINE)
@@ -347,6 +387,13 @@ def main():
     date = tl.get("date") or ""
     if not date:
         print("FAIL: timeline.json 缺少 date 字段")
+        return 1
+
+    # ---- 输入绑定校验（P0-4）：timeline 与音频必须同源，错配即阻断 ----
+    problems = check_input_binding(tl, master)
+    if problems:
+        for p in problems:
+            print(f"FAIL: {p}")
         return 1
 
     # ---- 混音链路预检（T6/E9）：不支持的组合在渲染前失败，不静默归档未混音成片 ----
@@ -425,6 +472,7 @@ def main():
     mix_mode = "bgm_duck" if bgm_path else "lufs_only"
     processed_out = tmp_out.replace(".mp4", "_processed.mp4")
     mix_ok = post_process_audio(tmp_out, processed_out, bgm_path, ff=mix_ff)
+    mix_failed_reason = ""
     if mix_ok:
         source_for_archive = processed_out
         # AV 一致性：视频流 copy 帧数不变；音视频结束偏差 ≤ 1 帧目标（容器容差 0.15s）
@@ -433,9 +481,11 @@ def main():
         if av_diff > 0.15:
             print(f"[audio] 后处理前后时长偏差 {av_diff:.3f}s 超过 1 帧目标，按失败处理")
             mix_ok = False
+            mix_failed_reason = f"后处理前后时长偏差 {av_diff:.3f}s"
             source_for_archive = tmp_out
     else:
-        source_for_archive = tmp_out  # 后处理失败时用原片，状态如实记录
+        mix_failed_reason = "音频后处理（BGM 闪避/loudnorm）执行失败"
+        source_for_archive = tmp_out  # 后处理失败时保留候选原片，但不得伪装成功
 
     # ---- 归档命名 ----
     # 目标已存在时 shutil.move 会退化为 copy+delete；沙箱的批量删除防护
@@ -457,12 +507,23 @@ def main():
     generate_covers(os.path.dirname(os.path.abspath(final)))
 
     # ---- 渲染状态存档（混音状态 + 最终文件实测 + 响度，供 finalize 合入报告）----
-    loudness = common.measure_loudness(final) if mix_ok else None
+    # P0-2：无论混音成败都实测响度（未测≠合格）；混音失败仍归档候选片，
+    # 但退出码非 0，finalize 会把该成片标为 BLOCKED，不得进入发布。
+    loudness = common.measure_loudness(final)
     if loudness:
         print(f"[render] 成片响度实测: {loudness['integrated_lufs']} LUFS / "
               f"TP {loudness['true_peak_dbtp']} dBTP / LRA {loudness['lra']}")
+        if abs(loudness["integrated_lufs"] + 14) > 1.0:
+            print(f"[render] 警告: 综合响度 {loudness['integrated_lufs']} LUFS 偏离 -14±1 目标")
+        if loudness["true_peak_dbtp"] > -1.0:
+            print(f"[render] 警告: 真峰值 {loudness['true_peak_dbtp']} dBTP 超过 -1 目标")
     write_render_state(os.path.dirname(os.path.abspath(final)), date, final,
                        bgm_path, mix_ok, mix_mode, loudness=loudness)
+
+    if not mix_ok:
+        print(f"FAIL: 混音未通过（{mix_failed_reason}），候选片已归档但状态记为失败，"
+              "不得发布；请检查 ffmpeg 完整构建后重跑 render")
+        return 1
 
     print(f"DONE -> {final}")
     print(f"      {info['width']}x{info['height']} | {info['duration']:.1f}s | {size_mb:.1f} MB")

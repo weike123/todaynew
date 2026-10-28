@@ -48,7 +48,17 @@ cd <PROJECT_ROOT>/skills/todayaihot
 python scripts/run_all.py "<news.md 绝对路径>" --backend edge --concurrency 1
 ```
 
-分环节执行用 `--only parse|fetch|tts|render`。注意：`--only render` 目前不补跑 gen_publish/finalize，返工重渲染后必须显式补收尾（见 T1 修复项）；render 前会自动跑 validate_output，ERROR 即中止。
+分环节执行用 `--only parse|fetch|tts|render`（2026-10-28 起 `--only render` 同样补跑 gen_publish/finalize，E14）；render 前会自动跑 validate_output，ERROR 即中止。
+
+### 发布就绪状态门（2026-10-28 P0-1 收紧）
+
+`finalize.py` 的状态语义：`BLOCKED`（TTS 失败句 / 混音失败 / 成片不可测，不得发布）＞`GENERATED`（成片可用但必选质量检查未完成）＞`READY`（物料齐全 + 混音/响度实测合格 + 人工审图与片尾检查已有记录）。规则：
+
+- `run_report.json` 的 `quality.images_reviewed` / `tail_frame_checked` 默认 false；人工抽帧审图并确认末帧后**直接改该文件对应字段为 true（可填 reviewed_by）**，再重跑 `finalize.py` 即升级 READY。
+- 审阅记录与 `quality.video_sha256` 绑定：重渲染产生新哈希 → 旧审阅自动失效，必须重审。
+- 平台发布回执同样绑定视频哈希：新版成片不继承旧版回执。
+- 响度门：-14±1 LUFS、真峰值 ≤ -1 dBTP；未测按未通过处理。
+- 启动时 run_all 获取流水线互斥锁（work/.pipeline.lock），并发/重入直接拒绝；render 校验 timeline 与 master.wav 的 SHA256 同源。
 
 ## Remotion 前端约定
 
