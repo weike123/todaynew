@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-27",
+  "final_path": "E:\\workbuddy-workspace\\todaynew\\out\\2026-10-27\\每日ai热门新闻-2026-10-27.mp4",
+  "audio_mix": {
+    "mode": "bgm_duck",
+    "ok": true,
+    "bgm_file": "kulakovka-chill-pop-275624.mp3"
+  },
+  "loudness": {
+    "integrated_lufs": -14.81,
+    "true_peak_dbtp": -0.76,
+    "lra": 3.0
+  },
+  "probe": {
+    "duration": 51.4,
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "has_audio": true,
+    "pix_fmt": "yuvj420p",
+    "exists": true
+  },
+  "rendered_at": "2026-10-27 10:05:32"
+}

@@ -1,0 +1,122 @@
+{
+  "skills\\todayaihot\\scripts\\align_whisper.py": {
+    "sha256": "b4294861aedffdf897672c323cafda5a965cf121c44f12abd32f502b213db892",
+    "size_bytes": 11833
+  },
+  "skills\\todayaihot\\scripts\\check_deps.py": {
+    "sha256": "d9570a893eefac642d6c3a36c6e79aa0f54e633dc4e76fec2d0a1e172459dde9",
+    "size_bytes": 3738
+  },
+  "skills\\todayaihot\\scripts\\common.py": {
+    "sha256": "d9d09ed610358b99b7ea8322069e7201fc792ea7e84c6e2d0a94f3d5eb2826c2",
+    "size_bytes": 15145
+  },
+  "skills\\todayaihot\\scripts\\fetch_news.py": {
+    "sha256": "16a70e1c5a4cfb5f6187bb6a0ebea1a012316df9e040fd9e3f8ed2f69dd43708",
+    "size_bytes": 35482
+  },
+  "skills\\todayaihot\\scripts\\finalize.py": {
+    "sha256": "ee0d47d4802ee3796bc1307661f9c32bc08531d3cee7049bd70cbcc2834eef3e",
+    "size_bytes": 13534
+  },
+  "skills\\todayaihot\\scripts\\gen_publish.py": {
+    "sha256": "c24665afcab284aa298b32a299a696545454fcca64b75b8852e39b58e55ac90d",
+    "size_bytes": 6775
+  },
+  "skills\\todayaihot\\scripts\\gen_tts.py": {
+    "sha256": "ba17e27de413e2d1ba77f0d7a22df0dc43c264cd3f8fddea268f2fa3a7a02526",
+    "size_bytes": 15282
+  },
+  "skills\\todayaihot\\scripts\\parse_news.py": {
+    "sha256": "0447247fc22e872ea5e5500cb9220fb3d33d349f1e1f3a354bb511d64dc6117c",
+    "size_bytes": 26531
+  },
+  "skills\\todayaihot\\scripts\\render.py": {
+    "sha256": "57e75cb117945cf723046852e3a065d0caabf3b6631c84d2010d935e71ee3b9e",
+    "size_bytes": 19524
+  },
+  "skills\\todayaihot\\scripts\\run_all.py": {
+    "sha256": "281853bfaeb888b914f2a3f87cdb94755f0ec055aa44e192f5a3bb3d3c6a5c6a",
+    "size_bytes": 8882
+  },
+  "skills\\todayaihot\\scripts\\smoke_fixture.py": {
+    "sha256": "693d16d0ac0be73788c30f1a4943bf7af91dc260d04cc63523527d1fed18b47f",
+    "size_bytes": 5916
+  },
+  "skills\\todayaihot\\scripts\\tts_backend.py": {
+    "sha256": "2c4a8aeb8fc09492e6941ecf95eb2daf3772c05e521a9e0c292d9aedb021a5a3",
+    "size_bytes": 10031
+  },
+  "skills\\todayaihot\\scripts\\tts_client.py": {
+    "sha256": "ae7b5200ecdf5511a727dc3b8bb3ca88e41372b45f0e56a13d3dab8142c934f9",
+    "size_bytes": 6568
+  },
+  "skills\\todayaihot\\scripts\\tts_normalize.py": {
+    "sha256": "9d9150577b15efb14702669924c255758ccb499df3c0c1419612b13cc0f2a130",
+    "size_bytes": 22228
+  },
+  "skills\\todayaihot\\scripts\\validate_output.py": {
+    "sha256": "a0f5eab471d5dfb4348d7e281daf693f99e2bdfc3b902028909e137da3f3e9d9",
+    "size_bytes": 17197
+  },
+  "skills\\todayaihot\\scripts\\verify_image_filter.py": {
+    "sha256": "23418f183e2fe781d916ae89a449e0d7090bf783a24383d812a171391bc13a45",
+    "size_bytes": 2787
+  },
+  "remotion\\src\\index.tsx": {
+    "sha256": "957e481dd33a29b4a55ae0e95dbf763b7e48c37c427ca4bd1275faf34bc07a74",
+    "size_bytes": 109
+  },
+  "remotion\\src\\NewsVideo.tsx": {
+    "sha256": "cf17c4c2248e4fda25fa7cf88f8be8d9a885d8df5c5aa5f5f86d35db763f8750",
+    "size_bytes": 3243
+  },
+  "remotion\\src\\Root.tsx": {
+    "sha256": "6fdfa410c4eb0f71abb9bc87726503d398898ea0509c255970ebc1f122eb41f0",
+    "size_bytes": 1736
+  },
+  "remotion\\src\\components\\CodebaseCover.tsx": {
+    "sha256": "1a9f23f94c0b2c49e0948c432b70f50f4d452306481a9072ad4c05fede4d79a7",
+    "size_bytes": 6211
+  },
+  "remotion\\src\\components\\Subtitle.tsx": {
+    "sha256": "0725265de644a2a3c884a6000f2faddb8fff2c5c68f648b7259e635e64fa4a19",
+    "size_bytes": 6533
+  },
+  "remotion\\src\\components\\theme.tsx": {
+    "sha256": "536b91917aa0f14fc82bc6ddc9c373db0d2196f841d5e5556b0878ba0bd794a9",
+    "size_bytes": 2437
+  },
+  "remotion\\src\\scenes\\CoverImage.tsx": {
+    "sha256": "038249e5282536729cb3159c418305a78551d0257e6ec2e3557efcaf443d68df",
+    "size_bytes": 657
+  },
+  "remotion\\src\\scenes\\NewsHook.tsx": {
+    "sha256": "8034766f1932be0f85cc54a6240622659cf4e873642161966d12a7d11e9a8d0f",
+    "size_bytes": 3694
+  },
+  "remotion\\src\\scenes\\NewsItem.tsx": {
+    "sha256": "c2814a5582915788eebc1e1e2687a015488e576216914e6e21e51c83fac02511",
+    "size_bytes": 13128
+  },
+  "remotion\\src\\scenes\\NewsOutro.tsx": {
+    "sha256": "2a593be449a96b38870fe049d7cc8b5dd5a0488e0b169743cd422c03f9a125c0",
+    "size_bytes": 2379
+  },
+  "remotion\\src\\scenes\\TitleCard.tsx": {
+    "sha256": "6c4a8dcded5de2706d97e4784140e70f7b5eca3474858cae526961a52480ba1f",
+    "size_bytes": 689
+  },
+  "remotion\\src\\useTitleData.ts": {
+    "sha256": "5cd54fcd54ace263cdfd4972b2195bb60b2682e8b84d00f2937a350c773d5a5e",
+    "size_bytes": 676
+  },
+  "remotion\\src\\videoConfig.ts": {
+    "sha256": "ae69ead6b679491a3cb3cc1249d1bf65fa70ea22c7b05fc620cc78d36fe4b528",
+    "size_bytes": 1322
+  },
+  "remotion\\src\\types\\work-timeline.d.ts": {
+    "sha256": "759a24b04c5ee4138996d7caaba0135c58fa67f9b20a1c58e97a59f5433cf7e7",
+    "size_bytes": 886
+  }
+}

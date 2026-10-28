@@ -1,0 +1,23 @@
+[
+  {
+    "date": "2026-10-27",
+    "integrated_lufs": -14.81,
+    "true_peak_dbtp": -0.76,
+    "lra": 3.0,
+    "method": "ffmpeg loudnorm analysis; input_* only"
+  },
+  {
+    "date": "2026-10-26",
+    "integrated_lufs": -15.05,
+    "true_peak_dbtp": -0.68,
+    "lra": 3.9,
+    "method": "ffmpeg loudnorm analysis; input_* only"
+  },
+  {
+    "date": "2026-10-24",
+    "integrated_lufs": -15.48,
+    "true_peak_dbtp": -0.79,
+    "lra": 4.1,
+    "method": "ffmpeg loudnorm analysis; input_* only"
+  }
+]

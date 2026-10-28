@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-24",
+  "chapters": [
+    {
+      "time": "00:00",
+      "seconds": 0.1,
+      "title": "第1条"
+    },
+    {
+      "time": "00:02",
+      "seconds": 2.79,
+      "title": "第2条"
+    },
+    {
+      "time": "00:09",
+      "seconds": 9.41,
+      "title": "第3条"
+    },
+    {
+      "time": "00:15",
+      "seconds": 15.99,
+      "title": "第4条"
+    },
+    {
+      "time": "00:21",
+      "seconds": 21.82,
+      "title": "第5条"
+    },
+    {
+      "time": "00:28",
+      "seconds": 28.4,
+      "title": "第6条"
+    },
+    {
+      "time": "00:35",
+      "seconds": 35.33,
+      "title": "第7条"
+    },
+    {
+      "time": "00:42",
+      "seconds": 42.48,
+      "title": "第8条"
+    },
+    {
+      "time": "00:48",
+      "seconds": 48.92,
+      "title": "第9条"
+    }
+  ]
+}

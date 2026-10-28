@@ -1,32 +1,88 @@
 # todaynew 项目交接说明
 
-## 当前任务与状态（2026-10-14）
+## 当前任务与状态（2026-10-28）
 
-- 项目目标：AIHOT 每日新闻 → 简报/视频稿 → edge 云希配音与 KTV 字幕 → Remotion 1080×1920/30fps → 抖音、B站、视频号。
-- 本次用户要求：重点审阅 `skills/todayaihot/` 与 `skills/定时任务提示词.md`，读取最近产出视频，制定优化方案到 `docs/`。本次已完成该文档任务，未进入代码改造。
-- 当前方案：[docs/research/main-AI日报视频优化方案-20261014.md](docs/research/main-AI日报视频优化方案-20261014.md)。目录索引：[docs/README.md](docs/README.md)。首轮建议 T0—T6：文档/配置、实测报告、正式质量门、幂等解析、TTS缓存、时间基准/片尾、混音与并发；第二轮再做显示稿/朗读稿分离、版式选图和发布回执。
-- 本次没有生成新视频、发布/补发、修改现有技能/提示词/定时配置、安装依赖、commit或push。修改范围是新方案/证据与本交接。原工作树已有 `.env.example`、Remotion封面组件、技能资源/脚本等未提交改动及旧HTML删除，继续时先看 `git status`，不得覆盖。
-- 当前分支审阅时为 main；远端历史登记为 `git@github.com:weike123/todaynew.git`，本次未访问远端。代码/技能/文档的Git状态与实际能力要分开核验。
+- 项目目标：AIHOT 每日新闻 → 简报与视频稿 → edge 云希配音和 KTV 字幕 → Remotion 1080×1920 / 30fps 竖屏成片，交由外部流程发布到抖音、B站和视频号。
+- 本次用户要求：以 `skills/todayaihot/` 为核心，读取最近成片并制定优化方案到 `docs/`。**已完成方案与证据，未实施改造。**当前入口：[2026-10-28 优化方案](docs/research/main-AI日报视频优化方案-20261028.md)；[证据和复现](docs/research/evidence/2026-10-28/README.md)；[文档索引](docs/README.md)。
+- 本次仅审阅 10-24、10-26、10-27 本地视频；未生成/重渲染视频、未发布、未修改产品代码或技能、未安装依赖、未 commit/push。任务前 `handoff.md` 已有用户工作树改动，完整原文及历史登记保存在 [本次审阅前交接](docs/research/evidence/2026-10-28/handoff-before-review.md)，更早历史在 [10-14 快照](docs/research/evidence/2026-10-14/handoff-before-review.md)。本文件因原有 33,987 字节超限而压缩，保留近期逐日登记并以快照承载历史。
 
-## 本次复验结果
+## 本次发现和验证
 
-- 读取最终MP4：10-14=46.61秒；10-13=51.90秒；10-12=52.00秒；均1080×1920/30fps、H.264、AAC 48kHz双声道。详情、SHA256与44张抽帧见 [证据目录](docs/research/evidence/2026-10-14/README.md)。
-- 三期尾部抽帧均有至少约1.2秒的纯背景窗口。10-14数字4渐变卡和模型品牌横幅不能计为实拍；部分人像与主题关联弱。旧登记的“7/7实拍”结论已被本次原帧证据修正。
-- 原片响度实测10-14=-17.92、10-13=-17.57、10-12=-17.06 LUFS；真峰值分别-1.19/-1.42/-1.39 dBTP。未人工听审，不据此宣称发音/听感已验收。
-- 当前FFmpeg支持loudnorm/amix，缺少asplit/aloop/sidechaincompress。历史“缺loudnorm”的说法不能再作为当前完整根因；真实混音链路仍需预检。NumPy备用混音的峰值/RMS不等于综合响度归一化。
-- 10-14 `work/narration.json` 与 timeline内嵌narration一致，当前9句、380原始字符、content=44.952秒、master=45.052秒、failed_clauses=[]；旧登记16句不适用于当前快照。逐字相对时间未发现负值/逆序/越界；master已有0.1秒静音而前端再次延后3帧存在静态同步风险，尚未用点击声fixture/听审确认。
-- 既有 `validate_output.py` 退出0，0 ERROR/8 WARN；不代表完整成片/配图/听感通过。10-14目录没有run_report.json、publish.md；10-12/13报告把master_duration写成视频时长，未反映最后混音成片。
-- `SKILL.md`/`USAGE.md`仍称流水线未恢复，与实际scripts/work/out不符；提示词E/G路径、封面职责与代码存在冲突。本次只提出修订稿，没有改现行执行入口。
-- 本次没有核验新闻原文真实性、平台当前发布状态、cookie或正在运行的定时器prompt；原交接发布结果是历史记录。
+- 10-27、10-26、10-24 容器时长分别 51.4、55.8、53.4 秒；最终音轨综合响度/真峰值分别 −14.81/−0.76、−15.05/−0.68、−15.48/−0.79 LUFS/dBTP。三期真峰值均高于项目内部 ≤−1 dBTP 目标；音视频流有 0.067—0.133 秒结束差异。三期末尾抽帧均为结束页，未复现旧报告中的纯背景空尾。
+- **纠正 10-26 历史 QA**：第 1 条 7.755 秒的配图区是大面积白底宣传文案，非合格实拍；旧记录的“7 张全实拍、无文字卡”不能沿用。第 7 条是工作站实拍，关联性另议。10-27 的 `M3.1` 跨行拆开，正文有省略；开场“Cohere直接发布”缺对象。
+- 10-27/26 的现有报告显示 READY，但 `images_reviewed` 与 `tail_frame_checked` 为 false；隔离 fixture 已证明质量失败仍可 READY。混音失败仍可能归档原片并返回 0。10-27 发布稿为五个空来源 `[]`、没有原文 URL，章节与当前 JSON 不一致。**不要将历史 READY/QA 登记视为新的完整发布验收。**
+- 历史平台回执摘要（均未在线重验）：10-26 抖音/B站 `BV1bonQ6mE8L` 成功，视频号当日补发成功；10-22 三平台成功，B站 `BV1sZnm6hE1M`；10-21 抖音/B站 `BV1M2ni6gEro` 成功，视频号当时失败；10-19 三平台成功，B站 `BV1WPnj6TEKD`；10-16 抖音/B站 `BV1wAJ96zEfk` 成功，视频号当时失败。完整细节见审阅前快照。
+- `finalize.py` 补写旧日可能覆盖最新日自动块，且继承旧发布回执未核对视频哈希；隔离复现见证据。`fetch_news.py` 清理共享图片，音频和时间轴也有跨次错配风险。正式重跑前须隔离或备份，避免在共享工作目录并行生产。
+- 当前实际代码已实现同日解析幂等、preview 隔离、部分 TTS 缓存、混音预检、Audio 第 0 帧起播、尾部场景覆盖、部分媒体实测及 `--only render` 后补发布物料/收尾；后两项与现有技能文档部分描述不一致。10-14 方案不是全部未实施。
+- 基线：`python -X utf8 -m pytest skills/todayaihot/tests/ -q` 为 **80 passed**；`remotion/` 的 `npm run typecheck` 通过；当前 `validate_output.py` 为 0 ERROR / 6 WARN。未进行连续观看、人工听审、真机预览、全量新闻事实核查或在线回执核验，不能据此宣称视频通过完整验收。
+
+## 继续时的约束与下一步
+
+1. 先阅读 10-28 方案与当前源码；优先讨论质量门、混音失败处理、日期块与回执绑定、章节来源，然后处理运行隔离、实拍审核与样片版式。跨模块状态和显示稿/朗读稿契约在实施前按项目规则确认；严格先写可复现失败测试，再实现与回归。
+2. 仍保持每条新闻真实实拍照片、禁止文字卡/海报；图库照片若与事件无直接关系，应标为示意并审相关性。更改为允许官方界面、录屏或图表需要另行确认。固定 edge 云希 `zh-CN-YunxiNeural`、语速 +30%、音量 +50%；不要主动启动 GPT-SoVITS。
+3. 发布封面由外部 video-upload 大字模板重绘，按现有流程 `--force-regen`、不传显式封面绕过重绘；抖音合集“每日全球AI大事”、B站 tid=231、署名“翻奇兽AI”。线上状态未知先核验；不同平台及不同视频哈希分别记录，已成功的平台不要跟随补发。
+4. 历史未闭事项：10-14、10-21、10-24 视频号曾因 cookie 失败，当前线上状态未重新核验；10-16 亦有视频号失败登记，需以实际回执核验。09-18 首版与修复版曾在线并存，删除/重发须用户明确授权。10-24 本地版是 10-25 修正版，线上当时仍为旧版。
+5. 现有 handoff 自动写入日期块有已复现缺陷；在修复前不要用 `finalize.py` 对旧日做正式回写。10-12 曾对本机 edge-tts 安装打补丁，升级包可能覆盖；以归档记录和现状核实，勿盲目重打。新依赖和缓存遵循 F 盘迁移约定，配置插件/MCP 走统一 TOML 真相源。
+
+## 关键路径与命令
+
+- 技能与契约：`skills/todayaihot/SKILL.md`、`skills/todayaihot/USAGE.md`、`skills/todayaihot/references/pipeline-contract.md`、`skills/todayaihot/references/automation-prompt.md`。
+- 生产脚本：`skills/todayaihot/scripts/`；前端：`remotion/src/`；现有中间文件：`work/`，可能被后续运行覆盖。
+- 只读验证：项目根执行 `python -X utf8 -m pytest skills/todayaihot/tests/ -q` 和 `python -X utf8 skills/todayaihot/scripts/validate_output.py`；进入 `remotion/` 执行 `npm run typecheck`。
+- 更新本交接时保持 ≤24,576 字节，同日期更新而非重复；执行前先核对日期和自动块范围。历史回执原文见归档，不得因为归档而删除仍有效事实。
 
 ## 视频登记
+
+下列 `READY` 是历史流水线原始状态，不代表 10-28 新增质量标准已通过；平台结果为历史登记，未在线重验。每条视频的主路径使用绝对路径，保留自动登记块以供后续接续。
+
+### 自动登记（2026-10-27）
+<!-- finalize:begin -->
+- 日期：2026-10-27
+- 主题：每日 AI 头条（7 条精选：Open AI 发布 G P T 六.1、Open AI 宣布模型连下三项科学突破、Cloudflare 披露 G L M …）
+- 简介：2026-10-27 7 条 AI 头条一分钟速览
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-27\每日ai热门新闻-2026-10-27.mp4`
+- 状态：READY（1080×1920 @30fps，51.4s，16.7MB，音轨正常，sha256 862fce484d68…）
+- TTS：edge-tts，align=auto，7 条/9 句
+- 封面：`out\2026-10-27\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-10-27\chapters.json`（9 条）
+- 发布物料：`out\2026-10-27\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+- 发布结果（2026-10-27 10:11 完成）：抖音✓（合集「每日全球AI大事」+ --force-regen 重绘 3:4 大字封面，封面目检通过）/ B站✓ BV1EoxK6UEWV（审核中）/ 视频号✓（3:4 竖版封面成功，4:3 横版失败属已知非致命）
+- QA：8 帧初检 + 4 帧复检通过；4 处配图返工（OpenAI Discover 海报 / Cloudflare 插画 / North 2 海报 / MiniMax 宣传图）→ repair_1027.py 换 Pexels 实拍后重建 timeline 重渲染；KTV 黄白字幕正常，配图缺失 0，7 张配图互不重复
+<!-- finalize:end -->
+
+### 自动登记（2026-10-26）
+<!-- finalize:begin -->
+- 日期：2026-10-26
+- 主题：每日 AI 头条（7 条精选：南北阁发布 Nanbeige4.3-33、斯坦福与伯克利发布 TokenGate 、HumanLayer 提出 Agent …）
+- 简介：2026-10-26 7 条 AI 头条一分钟速览
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-26\每日ai热门新闻-2026-10-26.mp4`
+- 状态：READY（1080×1920 @30fps，55.8s，21.0MB，音轨正常，sha256 2fab582b558c…）
+- TTS：edge-tts，align=auto，7 条/9 句
+- 封面：`out\2026-10-26\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-10-26\chapters.json`（9 条）
+- 发布物料：`out\2026-10-26\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+<!-- finalize:end -->
+
+### 自动登记（2026-10-24）
+<!-- finalize:begin -->
+- 日期：2026-10-24
+- 主题：每日 AI 头条（Kimi、Nemotron、Agent 与开源模型等 7 条精选）
+- 简介：2026-10-24 的 7 条 AI 新闻一分钟速览。
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-24\每日ai热门新闻-2026-10-24.mp4`
+- 状态：本地修正版 1080×1920 / 30fps、53.4 秒，SHA256 `99cfa5f433422574d4077fa16d5b320bd1d4aa0a8053278c50de82765bfddc10`；当前目录无 run_report.json。
+- 封面：`E:\workbuddy-workspace\todaynew\out\2026-10-24\covers\`；章节：`E:\workbuddy-workspace\todaynew\out\2026-10-24\chapters.json`。
+- 历史发布：抖音、B站成功（`BV1RpHP6bEvj`），视频号因 cookie 失败，是否后续补发未知；当时线上版本早于本地 10-25 版式修正，未在线复核。
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）。
+<!-- finalize:end -->
 
 ### 自动登记（2026-10-23）
 <!-- finalize:begin -->
 - 日期：2026-10-23
 - 主题：每日 AI 头条（7 条精选：Google Cloud 推出 Agen、Open AI 发布 Decisions、Codex 0.164.0 新增十个预设…）
 - 简介：2026-10-23 7 条 AI 头条一分钟速览
-- 主视频路径：`out\2026-10-23\每日ai热门新闻-2026-10-23.mp4`
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-23\每日ai热门新闻-2026-10-23.mp4`
 - 状态：READY（1080×1920 @30fps，53.1s，24.1MB，音轨正常，sha256 6f325ca2c870…）
 - TTS：edge-tts，align=auto，7 条/9 句
 - 封面：`out\2026-10-23\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
@@ -40,26 +96,12 @@
 - 视频号：✓ 成功（3:4 竖版封面成功，短标题「1023AI头条智能体沙箱」；4:3 横版封面设置失败属已知非致命）
 <!-- finalize:end -->
 
-### 自动登记（2026-09-06）
-<!-- finalize:begin -->
-- 日期：2026-09-06
-- 主题：每日 AI 头条（1 条精选：冒烟测试标题：验证 9:16 竖屏渲染链）
-- 简介：2026-09-06 1 条 AI 头条一分钟速览
-- 主视频路径：`out\2026-09-06\每日ai热门新闻-2026-09-06.mp4`
-- 状态：READY（1080×1920 @30fps，7.6s，1.0MB，音轨正常，sha256 bfe7273f476b…）
-- TTS：smoke-tts，align=smoke，1 条/3 句
-- 封面：`out\2026-09-06\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
-- 章节：`out\2026-09-06\chapters.json`（3 条）
-- 发布物料：`out\2026-09-06\publish.md`
-- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
-<!-- finalize:end -->
-
 ### 自动登记（2026-10-22）
 <!-- finalize:begin -->
 - 日期：2026-10-22
 - 主题：每日 AI 头条（7 条精选：Open AI A P I 支持 12 、蚂蚁集团与 v L L M 社区开源量化、Wiz 披露 LiteLLM PyPI …）
 - 简介：2026-10-22 7 条 AI 头条一分钟速览
-- 主视频路径：`out\2026-10-22\每日ai热门新闻-2026-10-22.mp4`
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-22\每日ai热门新闻-2026-10-22.mp4`
 - 状态：READY（1080×1920 @30fps，46.1s，16.6MB，音轨正常，sha256 3c165d30ef90…）
 - TTS：edge-tts，align=auto，7 条/12 句
 - 封面：`out\2026-10-22\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
@@ -73,7 +115,7 @@
 - 日期：2026-10-21
 - 主题：每日 AI 头条（7 条精选：Deep Seek 全面开源内部推理框架、Google 与 Meta 推出 Tor、A M D 与英特尔统一 PyTorch…）
 - 简介：2026-10-21 7 条 AI 头条一分钟速览
-- 主视频路径：`out\2026-10-21\每日ai热门新闻-2026-10-21.mp4`
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-21\每日ai热门新闻-2026-10-21.mp4`
 - 状态：READY（1080×1920 @30fps，44.9s，14.5MB，音轨正常，sha256 6a451b6db58f…）
 - TTS：edge-tts，align=auto，7 条/11 句
 - 封面：`out\2026-10-21\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
@@ -87,7 +129,7 @@
 - 日期：2026-10-20
 - 主题：每日 AI 头条（7 条精选：MiniMax 发布 M3.1 Flas、Open AI 开源 MultiLang、扩散语言模型 Mercury 3 上线 …）
 - 简介：2026-10-20 7 条 AI 头条一分钟速览
-- 主视频路径：`out\2026-10-20\每日ai热门新闻-2026-10-20.mp4`
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-20\每日ai热门新闻-2026-10-20.mp4`
 - 状态：READY（1080×1920 @30fps，52.0s，15.2MB，音轨正常，sha256 79438039e563…）
 - TTS：edge-tts，align=auto，7 条/13 句
 - 封面：`out\2026-10-20\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
@@ -103,7 +145,7 @@
 - 日期：2026-10-19
 - 主题：每日 AI 头条（7 条精选：Anthropic 内部研究：初级技术岗、Deep Seek-V4.1-Flash、实测 Google Muse、Grok …）
 - 简介：2026-10-19 7 条 AI 头条一分钟速览
-- 主视频路径：`out\2026-10-19\每日ai热门新闻-2026-10-19.mp4`
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-19\每日ai热门新闻-2026-10-19.mp4`
 - 状态：READY（1080×1920 @30fps，47.8s，14.8MB，音轨正常，sha256 fd112b381ae9…）
 - TTS：edge-tts，align=auto，7 条/12 句
 - 封面：`out\2026-10-19\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
@@ -117,7 +159,7 @@
 - 日期：2026-10-16
 - 主题：每日 AI 头条（7 条精选：Meta 开源 816B 巨兽 Muse、Anthropic Code Revie、微软 MAI-Base-2：算力效率 4…）
 - 简介：2026-10-16 7 条 AI 头条一分钟速览
-- 主视频路径：`out\2026-10-16\每日ai热门新闻-2026-10-16.mp4`
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-16\每日ai热门新闻-2026-10-16.mp4`
 - 状态：READY（1080×1920 @30fps，49.2s，15.0MB，音轨正常，sha256 1b9b6e873766…）
 - TTS：edge-tts，align=auto，7 条/16 句
 - 封面：`out\2026-10-16\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
@@ -126,18 +168,12 @@
 - 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
 <!-- finalize:end -->
 
-### 发布结果（2026-10-16，人工登记）
-- 抖音：✓ 发布成功（合集「每日全球AI大事」+ 重绘 3:4 大字封面；「章节要点」弹窗未出现，已知非致命告警）
-- B站：✓ 发布成功 `BV1wAJ96zEfk`（tid=231，审核中）
-- 视频号：✗ 失败——tencent/tencent1 cookie 失效（code=1），需管理员微信扫码重新登录后补发
-- 说明：首跑因视频号 cookie 无效整体中止，改 --platforms douyin,bilibili 完成发布；未重复发布
-
 ### 自动登记（2026-10-15）
 <!-- finalize:begin -->
 - 日期：2026-10-15
 - 主题：每日 AI 头条（7 条精选：Visual Studio Copilo、微软 Work IQ 知识编译引擎：不换、Claude Code 空闲压缩机制详解…）
 - 简介：2026-10-15 7 条 AI 头条一分钟速览
-- 主视频路径：`out\2026-10-15\每日ai热门新闻-2026-10-15.mp4`
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-15\每日ai热门新闻-2026-10-15.mp4`
 - 状态：READY（1080×1920 @30fps，50.7s，17.0MB，音轨正常，sha256 4316d3b82a3a…）
 - TTS：edge-tts，align=auto，7 条/11 句
 - 封面：`out\2026-10-15\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
@@ -163,7 +199,7 @@
 - 日期：2026-10-14
 - 主题：每日 AI 头条（7 条精选：Gemini 4 Argon 1M 上下文、Anthropic 自研 Scion 替代 Git、Argon 无人值守优化 ADK 20 万行、LangChain langchain-scaledown、Liquid AI LFM2.5-24B-A2B、XBOW Chrome 漏洞赏金、RTX Spark 笔记本上市）
 - 简介：2026-10-14 7 条 AI 头条一分钟速览
-- 主视频路径：`out/2026-10-14\每日ai热门新闻-2026-10-14.mp4`
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-14\每日ai热门新闻-2026-10-14.mp4`
 - 状态：成片已生成，历史发布回执见下；本次实测46.61s、-17.92 LUFS、-1.19 dBTP。存在文字/品牌卡漏检、弱相关配图和空尾，不能沿用历史“7/7实拍合格”的结论。
 - TTS：edge-tts（云希），align=auto；当前快照7条/9句、无failed_clauses。历史过程故障：edge 429限流（首跑失败、重试成功）；concurrency=2时Chrome内存不足，降为1成功。
 - 封面：`out/2026-10-14/covers/`（3:4 竖版 / 16:9 宽屏，大字模板重绘 --force-regen）
@@ -175,7 +211,7 @@
 - 日期：2026-10-13
 - 主题：每日 AI 头条（7 条精选：微软发布自研芯片 Maia 300，明年、Epic Games 转向 AI 先行开、Vapi 自研 AI 代码审查机器人，P…）
 - 简介：2026-10-13 7 条 AI 头条一分钟速览
-- 主视频路径：`out/2026-10-13\每日ai热门新闻-2026-10-13.mp4`
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-13\每日ai热门新闻-2026-10-13.mp4`
 - 状态：成片已生成，历史发布回执见下；本次实测51.90s、-17.57 LUFS、-1.42 dBTP。存在密集正文、关联较弱的素材和纯背景空尾；历史QA不等于本次完整质量通过。
 - TTS：edge-tts，align=auto，7 条/16 句
 - 封面：`out/2026-10-13/covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏，大字模板重绘）
@@ -188,7 +224,7 @@
 - 日期：2026-10-12
 - 主题：每日 AI 头条（7 条精选：Open AI 将 G P T 六.1 、Beyond Naive R A G：9、UC San Diego 用心理模型奖励…）
 - 简介：2026-10-12 7 条 AI 头条一分钟速览
-- 主视频路径：`out/2026-10-12\每日ai热门新闻-2026-10-12.mp4`
+- 主视频路径：`E:\workbuddy-workspace\todaynew\out\2026-10-12\每日ai热门新闻-2026-10-12.mp4`
 - 状态：成片已生成，本次测量最终混音MP4为1080×1920 @30fps、52.00s、17,081,680字节、音轨存在；旧报告50.452s为master时长，不是最终视频时长。
 - TTS：edge-tts，align=auto，7 条/14 句
 - 封面：`out/2026-10-12/covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏）
@@ -200,96 +236,16 @@
 - 成片修正：BGM 闪避混音流水线失败，已用 `work/audio_fix_1009.py` 兜底，52.0s、峰值 -1.50 dBFS
 - QA：原交接曾登记抽帧10帧合格；本次发现三行字幕、正文过密、显示专名被TTS定读污染和空尾，完整质量验收尚未通过。
 
-## 必须保留的执行约束
-
-- TTS固定 `--backend edge`、`zh-CN-YunxiNeural`（云希男声）、语速+30%、音量+50%；不要探测/启动GPT-SoVITS。仅用户当次明确要求克隆音色时另行确认参考音色。
-- KTV `chars[].t`必须相对句首；生成后逐条取句中帧看黄白高亮，并进行实际听审，不能仅看时间戳通过。
-- 新闻必须相关实拍照片，禁止文字/海报卡。缺失图片、静音失败、图片不合格应阻断正式发布；现有校验器尚未完整实现这些门，见新方案。
-- 发布封面按现有外部video-upload大字模板重绘，仅传文字字段、加`--force-regen`，不传`--cover-*`绕过重绘；3:4和16:9均目检。副标题约18—20字符只是旧经验，不替代实际换行/边界检查。
-- 当前解析会写`work/seen_titles.json`且同日自去重；fetch会清空共享`remotion/public/images/`。本次未运行parse/fetch/smoke。续接先解决幂等或在隔离备份下操作，不能反复删正式状态凑通过。
-- 输入新闻当前E盘路径存在；旧提示词仍含G盘。共享运行时不得贸然搬迁。新装大依赖/缓存放F盘，统一插件配置仍走`F:\Migrated\.codex\pluginandskills.toml`与同步脚本。
-- 发布由外部 `<SOCIAL_AUTO_UPLOAD_DIR>` 管理。抖音合集“每日全球AI大事”、B站tid=231、署名“翻奇兽AI”。发布结果未知先核查，不盲重试；已成功平台不跟随补发。已发布版本处置/删除需用户明确授权。
-- `--only render`目前不会自动完整生成发布文案/报告；只换图重渲染后要留意报告缺失或过期。最终音频/图片/时间轴须同run，不能默认共享文件仍是对应日期。
-- 正式逻辑修改严格先行为Red再Green，五维质量评审；新规格/跨模块改造先确认。未经明确要求不提交、推送、重发或清理线上历史作品。
-
-## 待处理与下一步
-
-1. 本次方案任务无阻塞；实现尚未开始。下一步按方案T0—T6作独立切片，并在涉及新内容契约前确认规格。不要把本报告完成当作改造完成。
-2. 10-14视频号历史登记失败，需管理员恢复登录后仅该平台补发；此前抖音/B站已登记成功，本次未重复发布也未在线重验。
-3. 09-18首版女声/字幕缺陷视频与修复版历史记录显示在线并存，是否删除首版仍待用户决定；未经授权不得处理。
-4. 字幕正文布局、文字卡漏检、跨期重复图库、BGM临时兜底、TTS缓存/失败静音、去重自锁与报告可信度均纳入新方案，不再视为“卡点无”。
-5. 继续时读取本交接、方案及当前Git状态；工作目录可能已被次日定时任务覆盖，以证据快照核对本次结论。
-
-## 关键路径与只读复核命令
-
-- 方案：`docs/research/main-AI日报视频优化方案-20261014.md`。
-- 原始42KB交接与历史视频/发布记录：`docs/research/evidence/2026-10-14/handoff-before-review.md`。更早视频登记、旧故障细节保存在该快照，不再在24KiB交接中重复堆积。
-- 现有旧方案：`docs/todayaihot-优化方案-20260914.md`，仅历史参考；续接先读新方案。
-- 当前源码：`skills/todayaihot/scripts/`、`remotion/src/`；提示词：`skills/todayaihot/references/automation-prompt.md`（可移植定时任务模板）；新闻源：`<NEWS_DIR>/AI新闻推送_YYYY-MM-DD.md`。
-
-```powershell
-Set-Location '<项目根目录>'
-git status --short
-python -X utf8 skills/todayaihot/scripts/validate_output.py
-(Get-Item -LiteralPath '.\handoff.md').Length
-```
-
-完整媒体复核命令见证据README；本次未跑新的渲染、TTS或产品回归测试，不能把只读检查说成实现Green。handoff必须≤24,576字节，长期历史与证据放docs并由本文件引用。
-
-## 2026-10-19 每日AI头条发布结果（fe33e700）
-- 成片：out/2026-10-19/每日ai热门新闻-2026-10-19.mp4（47.8s，edge+云希，357 字口播）
-- QA：8 帧抽帧通过，配图原文 2 / Pexels 5 / 缺失 0，实拍互不重复，KTV 黄白字幕正常
-- 抖音：✅ 发布成功（合集「每日全球AI大事」，重绘 3:4 大字封面；章节要点弹窗未出现，非致命）
-- B站：✅ 发布成功 BV1WPnj6TEKD（审核中）
-- 视频号：✅ 补发成功（16:14，cookie 恢复后单平台重发；短标题「1019AI头条速览」，3:4 封面成功、4:3 横版失败属已知非致命）
-
-
-## 2026-10-21 每日AI头条发布结果（fe33e700）
-- 成片：out/2026-10-21/每日ai热门新闻-2026-10-21.mp4（44.9s，edge+云希，328 字口播，7 条条目）
-- QA：11 帧抽帧通过，全部实拍照片互不重复，KTV 黄白字幕正常；TorchTPU 原文配图为 profiling 截图已替换为 Pexels 实拍；MemCurrent/Voxtral 缺图经 Pexels 修复后缺失 0
-- 抖音：✅ 发布成功（合集「每日全球AI大事」，重绘 3:4 大字封面 --force-regen；章节要点弹窗未出现，非致命）
-- B站：✅ 发布成功 BV1M2ni6gEro（tid 231，审核中）
-- 视频号：❌ 未发布（cookie 已失效需扫码重登，无人值守无法扫码，如实登记阻塞；待 cookie 恢复后单平台补发）
-- 封面：主标题「每日AI头条 10.21」副标题「DeepSeek开源推理框架」，门禁通过（AR 0.750，亮像素 18.2%）
-- **缺陷登记（2026-10-21 晚修复）**：已发布成片中第 1、3 条口播/字幕为残句（"DeepSeek 将内部生产级推理框架。"、"AMD 与英特尔宣布在 PyTorch 的 x86。"）——`_spoken_bullet` 在 ASCII 空格处截断要点所致。用户明确不重新生成视频，故未重渲染未重发。修复已落入 skill：`_spoken_bullet` 重写（只认中文标点边界）+ `audit_spoken_clause` 组装期审计 + `validate_output` 残句 ERROR 硬门 + `split_long_clause`/`build_bullets` 同源缺陷修复 + 时长估算改非空白字符基数；`tests/test_spoken_clause.py` 19 用例回归，全量 70 passed；对当日 narration.json 实跑校验精确报 2 ERROR 无误报。如需更正版：cookie 恢复后完整流水线重跑并单平台补发，补发前须与用户确认旧版处置方式，详见 `skills/todayaihot/references/spoken-clause-completeness.md`。
-
-
-## 2026-10-22 每日AI头条发布结果（fe33e700）
-- 成片：out/2026-10-22/每日ai热门新闻-2026-10-22.mp4（46.1s，edge+云希，365 字口播，7 条条目；1080x1920/30fps，16.6MB）
-- 响度：-14.85 LUFS / TP -0.72 dBTP / LRA 3.1；BGM 闪避混音（leberch-ambient-piano）
-- QA：7 帧抽帧通过（3/9/15/21/28/35/42s），全部实拍照片互不重复（7 张 md5 全异），KTV 黄白字幕高亮正常，无文字卡
-- 配图：原文 2 / Pexels 5 / Pixabay 0 / 缺失 0
-- 抖音：✅ 发布成功（合集「每日全球AI大事」，重绘 3:4 大字封面 --force-regen；章节要点弹窗未出现，非致命）
-- B站：✅ 发布成功 BV1sZnm6hE1M（tid 231，转码中）
-- 视频号：✅ 发布成功（短标题「12小时prompt缓存+Cl」；3:4 竖版封面成功、4:3 横版失败属已知非致命）
-- 封面：主标题「每日AI头条 10.22」副标题「12小时prompt缓存与vLLM量化内核」，门禁通过（AR 0.750，亮像素 17.7%）
-- 章节：chapters.json 9 条，占位「第N条」已回写为真实条目标题（去助读空格、截 22 字）
-- **缺陷修复（2026-10-22）**：发现并修复口播双标点缺陷 —— `merge_clauses` 按逗号切分标题后子句以「，」结尾，`ensure_period` 只识别句末标点却直接追加「。」，产出「xxx 缓存，。」这类双标点（当日 narration.json 实测 2 处）。修复：`ensure_period` 对逗号/顿号结尾做**替换**而非追加（E 盘运行版 + F 盘源同步）；新增 `tests/test_punct_normalization.py` 11 用例回归，全量 80 passed。修复后重跑 parse+fetch+TTS+render，narration.json 双标点计数 0。
-- **环境事实登记**：`skills/todayaihot` 已是**实体目录而非 junction**，且与 `<WORKBUDDY_DATA>/skills/todayaihot` 已分叉（E 盘含 10-21 残句修复 audit_spoken_clause，F 盘源为旧版无此函数；E 盘 SKILL.md 5514 字节 vs F 盘 44155 字节）。两处各自维护，修改需同步两份。
-
-
-## 2026-10-22 每日AI头条发布结果（fe33e700）
-- 成片：out/2026-10-22/每日ai热门新闻-2026-10-22.mp4（46.1s，edge+云希，365 字口播，7 条条目；1080x1920/30fps，16.6MB）
-- 响度：-14.85 LUFS / TP -0.72 dBTP / LRA 3.1；BGM 闪避混音（leberch-ambient-piano）
-- QA：7 帧抽帧通过（3/9/15/21/28/35/42s），全部实拍照片互不重复（7 张 md5 全异），KTV 黄白字幕高亮正常，无文字卡
-- 配图：原文 2 / Pexels 5 / Pixabay 0 / 缺失 0
-- 抖音：✅ 发布成功（合集「每日全球AI大事」，重绘 3:4 大字封面 --force-regen；章节要点弹窗未出现，非致命）
-- B站：✅ 发布成功 BV1sZnm6hE1M（tid 231，转码中）
-- 视频号：✅ 发布成功（短标题「12小时prompt缓存+Cl」；3:4 竖版封面成功、4:3 横版失败属已知非致命）
-- 封面：主标题「每日AI头条 10.22」副标题「12小时prompt缓存与vLLM量化内核」，门禁通过（AR 0.750，亮像素 17.7%）
-- 章节：chapters.json 9 条，占位「第N条」已回写为真实条目标题（去助读空格、截 22 字）
-- **缺陷修复（2026-10-22）**：发现并修复口播双标点缺陷 —— `merge_clauses` 按逗号切分标题后子句以「，」结尾，`ensure_period` 只识别句末标点却直接追加「。」，产出「xxx 缓存，。」这类双标点（当日 narration.json 实测 2 处）。修复：`ensure_period` 对逗号/顿号结尾做**替换**而非追加（E 盘运行版 + F 盘源同步）；新增 `tests/test_punct_normalization.py` 11 用例回归，全量 80 passed。修复后重跑 parse+fetch+TTS+render，narration.json 双标点计数 0。
-- **环境事实登记**：`skills/todayaihot` 已是**实体目录而非 junction**，且与 `<WORKBUDDY_DATA>/skills/todayaihot` 已分叉（E 盘含 10-21 残句修复 audit_spoken_clause，F 盘源为旧版无此函数；E 盘 SKILL.md 5514 字节 vs F 盘 44155 字节）。两处各自维护，修改需同步两份。
-
-## 2026-10-24 每日AI头条发布结果（fe33e700）
-- 成片：out/2026-10-24/每日ai热门新闻-2026-10-24.mp4（53.4s，1080x1920/30fps，23.3MB；edge+云希，口播 356 字）
-- 响度：-15.48 LUFS / TP -0.79 dBTP / LRA 4.1；BGM 闪避混音（allworldmusic-relaxed-upbeat-happy-lofi）
-- QA：8 帧抽帧通过（4/11/17/23/30/37/44/50s），7 张配图全为实拍照片且 md5 互异，KTV 黄白字幕高亮正常，无文字卡
-- 配图：原文 1 / Pexels 6 / Pixabay 0 / 缺失 0（fetch 自检通过）
-- 抖音：✅ 发布成功（合集「每日全球AI大事」，重绘 3:4 大字封面 --force-regen，比例门禁通过 AR 0.750 亮像素 19.9%；「章节要点」弹窗未出现属已知非致命）
-- B站：✅ 发布成功 BV1RpHP6bEvj（tid 231，审核中）
-- 视频号：❌ 发布失败 —— tencent/tencent1 cookie 无效（code=1）。首次三平台同跑时因 cookie 预检失败导致整批中止，随后改为仅发 douyin,bilibili 完成双平台发布；视频号需管理员扫码重新登录后补发
-- 封面：主标题「每日AI头条 10.24」副标题「Kimi K3.1 百万上下文 Nemotron 4GB 端侧」，已目检 3x4 与 16x9 文字无裁切
-- 章节：chapters.json 9 条，占位「第N条」已回写为真实条目标题
-- 配图返工记录：s2 NVIDIA 原文 og:image 为「NVIDIA Local AI」品牌宣传海报（文字卡）；s3/s4/s6 因检索词相同均落到机械臂类图库照片；s4 首轮 VPN 界面文字密集；s6/s7 均为服务器机柜 —— 逐条指定独立检索词重抓（电路板 / 手机测试 / 刷卡支付 / 服务器机柜 / 光纤线缆）后复检通过
-- **版式缺陷与修复（2026-10-25）**：回顾成片发现第 3 条要点被 KTV 字幕压住（subtitle 块 bottom=360 且两行大字向上覆盖 1408—1560 区间，正文区无底边约束）。修复：`videoConfig.ts` 新增 `SUBTITLE_BOTTOM=360` / `SUBTITLE_SAFE_HEIGHT=190` / `CONTENT_BOTTOM_LIMIT` / `CONTENT_BOTTOM_GAP`；`NewsItem.tsx` 正文改为绝对定位到 `CONTENT_BOTTOM_GAP` 并 `overflow:hidden` 硬裁剪，配图 430→340、要点 30→28px 且 3 行 line-clamp，`Subtitle.tsx` 改用共享常量；tsc 通过、80 用例全通过。已重渲染本机成片（53.4s / −15.48 LUFS / 19.8MB）并抽 8 帧复核：无遮挡、无文字卡、KTV 黄白正常。**线上抖音/B站已发布版本仍是旧版式**，如需一致须重发。
+### 自动登记（2026-09-06）
+<!-- finalize:begin -->
+- 日期：2026-09-06
+- 主题：每日 AI 头条（1 条精选：冒烟测试标题：验证 9:16 竖屏渲染链）
+- 简介：2026-09-06 1 条 AI 头条一分钟速览
+- 主视频路径：`out\2026-09-06\每日ai热门新闻-2026-09-06.mp4`
+- 状态：READY（1080×1920 @30fps，7.6s，1.0MB，音轨正常，sha256 bfe7273f476b…）
+- TTS：smoke-tts，align=smoke，1 条/3 句
+- 封面：`out\2026-09-06\covers/`（3:4 竖版 / 4:3 横版 / 16:9 宽屏；发布 JPG 由 video-upload 重绘）
+- 章节：`out\2026-09-06\chapters.json`（3 条）
+- 发布物料：`out\2026-09-06\publish.md`
+- 目标发布平台：抖音 / B站 / 视频号（署名翻奇兽AI）
+<!-- finalize:end -->

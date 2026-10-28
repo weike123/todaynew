@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-24",
+  "final_path": "E:\\workbuddy-workspace\\todaynew\\out\\2026-10-24\\每日ai热门新闻-2026-10-24.mp4",
+  "audio_mix": {
+    "mode": "bgm_duck",
+    "ok": true,
+    "bgm_file": "allworldmusic-relaxed-upbeat-happy-lofi-276874.mp3"
+  },
+  "loudness": {
+    "integrated_lufs": -15.48,
+    "true_peak_dbtp": -0.79,
+    "lra": 4.1
+  },
+  "probe": {
+    "duration": 53.4,
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "has_audio": true,
+    "pix_fmt": "yuvj420p",
+    "exists": true
+  },
+  "rendered_at": "2026-10-25 00:17:23"
+}

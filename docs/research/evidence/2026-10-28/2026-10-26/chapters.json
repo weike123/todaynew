@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-26",
+  "chapters": [
+    {
+      "time": "00:00",
+      "seconds": 0.1,
+      "title": "开场速览"
+    },
+    {
+      "time": "00:04",
+      "seconds": 4.11,
+      "title": "南北阁开源Nanbeige4.3-33B"
+    },
+    {
+      "time": "00:11",
+      "seconds": 11.4,
+      "title": "TokenGate长上下文提速"
+    },
+    {
+      "time": "00:18",
+      "seconds": 18.6,
+      "title": "Agent Skill上下文取舍"
+    },
+    {
+      "time": "00:25",
+      "seconds": 25.11,
+      "title": "大模型推理101实测手册"
+    },
+    {
+      "time": "00:32",
+      "seconds": 32.04,
+      "title": "Jev-Mem记忆提速六倍"
+    },
+    {
+      "time": "00:38",
+      "seconds": 38.79,
+      "title": "谷歌托管智能体中心"
+    },
+    {
+      "time": "00:44",
+      "seconds": 44.84,
+      "title": "KRAFTON开源Raon-1 mini"
+    },
+    {
+      "time": "00:51",
+      "seconds": 51.27,
+      "title": "结尾"
+    }
+  ]
+}

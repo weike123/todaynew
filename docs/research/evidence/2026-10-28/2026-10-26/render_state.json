@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-26",
+  "final_path": "E:\\workbuddy-workspace\\todaynew\\out\\2026-10-26\\每日ai热门新闻-2026-10-26.mp4",
+  "audio_mix": {
+    "mode": "bgm_duck",
+    "ok": true,
+    "bgm_file": "leberch-ambient-580528.mp3"
+  },
+  "loudness": {
+    "integrated_lufs": -15.05,
+    "true_peak_dbtp": -0.68,
+    "lra": 3.9
+  },
+  "probe": {
+    "duration": 55.8,
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "has_audio": true,
+    "pix_fmt": "yuvj420p",
+    "exists": true
+  },
+  "rendered_at": "2026-10-26 09:35:36"
+}
