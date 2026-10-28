@@ -24,4 +24,4 @@
 - **定时任务提示词**：`skills/todayaihot/references/automation-prompt.md` —— 路径全用占位符，可直接交给任意 agent 创建每日任务：
   > 读取 `skills/todayaihot/references/automation-prompt.md`，替换占位符后创建每天 16:00 的定时任务。
 - **数据契约**：`skills/todayaihot/references/pipeline-contract.md`；**踩坑记录**：`references/` 下同名主题文档。
-- 改动 `remotion/src/` 前先看 `tests/test_timing_contract.py`（时间基准不可回归），改完必须 `npm run typecheck` 与 `python -m pytest tests/ -q`（期望 80 passed）。
+- 改动 `remotion/src/` 前先看 `tests/test_timing_contract.py`（时间基准不可回归），改完必须 `npm run typecheck` 与 `python -m pytest tests/ -q`（期望 111 passed）。

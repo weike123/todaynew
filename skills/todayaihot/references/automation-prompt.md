@@ -153,7 +153,8 @@ cd <PROJECT_ROOT>\skills\todayaihot
 要点：
 
 - `--concurrency 1`：并发 2 曾 OOM，不要改回 2。
-- 链路：parse（md → narration.json，同日重跑幂等）→ fetch（抓要点 + 配图）→ tts（云希，语速 +30%，生成 master.wav + timeline.json，缓存按「文本+后端+音色+语速+音量」指纹复用，**正常重跑不需要 `--force-tts`**）→ render（Remotion 1080×1920/30fps）→ gen_publish（publish.md）→ finalize（run_report.json + handoff 登记）。
+- **流水线互斥锁（2026-10-28 起）**：run_all 启动时在 `work/.pipeline.lock` 创建独占锁，检测到另一实例在运行会拒绝并退出——这属正常防护，不得删除活锁强跑；确认无实例后若残留死锁可删除锁文件重试。
+- 链路：parse（md → narration.json，同日重跑幂等）→ fetch（抓要点 + 配图）→ tts（云希，语速 +30%，生成 master.wav + timeline.json，缓存按「文本+后端+音色+语速+音量」指纹复用（2026-10-28 起音色纳入指纹），**正常重跑不需要 `--force-tts`**）→ render（Remotion 1080×1920/30fps）→ gen_publish（publish.md）→ finalize（run_report.json + handoff 登记）。
 - **发布就绪状态门（2026-10-28 起）**：finalize 完成后 `run_report.json` 通常为 `GENERATED`（待审）而非 `READY`。必须完成下一步「成片审阅」并把状态升到 READY，才允许进入第六步发布。`BLOCKED`（TTS 失败句/混音失败）不得发布，先修复重跑。
 - 成片自动落在 `out/<YYYY-MM-DD>/每日ai热门新闻-YYYY-MM-DD.mp4`，目录不存在会自动创建。
 - 渲染约 1–4 分钟，建议后台执行；完成后用 ffprobe 校验时长（目标 50–60 秒，明显短于 35 秒说明条目被解析少了）。
