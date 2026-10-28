@@ -43,7 +43,7 @@ automation_update(mode="create",
 ```bash
 cd <PROJECT_ROOT>/skills/todayaihot
 <PYTHON> scripts/check_deps.py          # Python 依赖 / ffmpeg 滤镜链 / node 探针
-<PYTHON> -m pytest tests/ -q            # 期望 106 passed
+<PYTHON> -m pytest tests/ -q            # 期望 111 passed
 ```
 
 - `.env` 中 `PEXELS_API_KEY` 与 `PIXABAY_API_KEY` **必须都非空**，否则配图兜底静默失效、画面退化成文字卡。
@@ -166,6 +166,7 @@ cd <PROJECT_ROOT>\skills\todayaihot
 - fetch 日志自检：末尾 `配图来源：原文 N / Pexels M / Pixabay K / 缺失 0` 中**缺失必须为 0**；出现 `[CRITICAL] … 关键词文字卡` 或缺失 >0 即配图链路故障（多为 Key 失效或网络），**不得进入发布**，先排查重跑 fetch。
 - `validate_output.py` 把「某条无配图」判 **ERROR 并阻断渲染**：流水线在此中止属保护性拦截，不是 bug；修好配图重跑即可。
 - **原文 og:image 常是品牌宣传海报**（NVIDIA 标题图、"Build more responsive apps" 这类），文字图识别未必拦得住。出片后必须**抽帧目检**：抽 6–8 帧（`-ss 3 / 9 / 14 / 19 / 26 / 31 / 37 / 46 -frames:v 1`）逐张确认是照片而非文字卡，并确认各条配图**互不重复**（图库相近检索词会返回同一张热图，代码已按 md5 去重）。
+- **配图溯源清单（2026-10-28 起）**：fetch 会生成 `work/image_manifest.json`（逐图登记来源/URL/检索词，review=pending）。目检时按清单逐条核对画面，通过后把各条 review 改为 approved；被拒的图走「改配图正确链路」换图。反例样本见 `skills/todayaihot/assets/imgsamples/README.md`（2026-10-26 海报漏判案例）。
 - **改配图的正确链路**：`render` 读的是 `work/timeline.json` 内嵌的 narration 快照。只改 `work/narration.json` 后重跑 `--only render` **不生效**；必须「改 narration.json → 重跑 gen_tts.py（重建 timeline，配音按指纹复用）→ 再 render」。字段必须是 plural 数组形态：`visual.images` / `visual.image_sizes`；写 singular `image` 会被前端忽略。
 - 个别原文链接抓不到图（x.com 等反爬）会走图库兜底，属预期，不要因此中断。
 

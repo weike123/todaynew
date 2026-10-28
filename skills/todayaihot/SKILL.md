@@ -60,6 +60,13 @@ python scripts/run_all.py "<news.md 绝对路径>" --backend edge --concurrency 
 - 响度门：-14±1 LUFS、真峰值 ≤ -1 dBTP；未测按未通过处理。
 - 启动时 run_all 获取流水线互斥锁（work/.pipeline.lock），并发/重入直接拒绝；render 校验 timeline 与 master.wav 的 SHA256 同源。
 
+### 显示稿与朗读稿（2026-10-28 P1-5）
+
+- narration 条目 `visual.title` 为**显示稿**（官方拼写 `GPT-6.1`/`M3.1`/`150GB` 原样）；`title_tts` 为**朗读稿**（助读拼写）。口播/字幕消费朗读稿，画面标题/章节/发布物料消费显示稿；助读空格不得进入用户可见文案。
+- NewsItem 标题与正文把型号/数值渲染为 nowrap 词元，`M3.1` 等不再拆行；正文 40px、配图区上限 300px（排版预算见 pipeline-contract.md）。
+- 开场钩子主体/动作/对象必须同条同源（`_hook_triples`），对象按词元边界截断，禁止「X直接Y」无对象残句。
+- fetch 生成配图溯源清单 `work/image_manifest.json`（review=pending），审图后逐条回填；反例样本在 `assets/imgsamples/`。
+
 ## Remotion 前端约定
 
 - 画布：1080×1920，30fps；时间常量统一放在 `remotion/src/videoConfig.ts`。

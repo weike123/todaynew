@@ -86,3 +86,11 @@ run_report.json 在现有字段上扩充，语义：
 
 - run_all 启动时在 `work/.pipeline.lock` 创建独占锁（记录 PID）；已有活锁时拒绝并发/重入，残留死锁自动接管。脚本异常退出后如需强制继续，先确认无实例再删锁文件。
 - gen_tts 把 `master_sha256` 与 `master_voice` 写入 timeline；render 校验 timeline 与 master.wav 同源、内嵌 narration 日期一致，错配即阻断（提示重跑 gen_tts）。
+
+## 显示稿/朗读稿分离与配图溯源（2026-10-28 P1 批次）
+
+- **显示稿与朗读稿同源异形**：narration 条目 `visual.title` 为显示稿（官方拼写，`GPT-6.1`/`M3.1`/`150GB` 原样），`title_tts` 为朗读稿（助读拼写）。口播 clauses、字幕、timeline 只消费朗读稿；画面标题、章节、发布物料只消费显示稿。助读空格不得出现在任何用户可见文案。
+- **词元不拆行**：NewsItem 标题与正文把 `GPT-6.1`、`Qwen3.8-Flash-Next`、`150GB` 等渲染为 nowrap 词元，换行只发生在词元之间（protectTokens）。
+- **排版预算（P1-4）**：标题 64/56/48 三档、正文 40px×1.45×3 行 clamp、配图区上限 300px；总预算 1195 < 内容区 1274px。超预算的解决方式是缩稿，不是加大截断。
+- **开场钩子（P1-3）**：主体/动作/对象必须取自同一条新闻标题（_hook_triples），对象按词元边界截断（_trim_object，≥1 整词保留，放不下则降级无对象句式）；禁止跨条拼接出「X直接Y」无对象残句。
+- **配图溯源清单（P1-2）**：fetch 阶段写 `work/image_manifest.json`（每图 file/source/url/query/review=pending）；人工抽帧目检后逐条回填 review，再置 run_report `images_reviewed=true`。反例样本在 `skills/todayaihot/assets/imgsamples/`（10-26 海报漏判反例 + 有效实拍参照）。

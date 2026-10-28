@@ -37,7 +37,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import (IMAGES_DIR, NARRATION, PEXELS_API_KEY, PIXABAY_API_KEY,  # noqa: E402
-                    PIXABAY_API_URL, ensure_dirs)
+                    PIXABAY_API_URL, WORK_DIR, ensure_dirs)
 from parse_news import clean_for_tts, ensure_period, merge_clauses  # noqa: E402
 
 UA = (
@@ -161,6 +161,29 @@ def pixabay_urls(query: str, sess) -> list:
 STOCK_SOURCES = (("pexels", pexels_urls), ("pixabay", pixabay_urls))
 
 
+# ---------------------------------------------------------------- 配图溯源清单（P1-2）
+# 每张入选配图登记：文件 / 来源类别 / 原始 URL / 检索词 / 尺寸 / 审核状态。
+# 审图人按此清单逐条目检并把 review 改为 approved；run_report.images_reviewed
+# 只反映整体审阅结论，清单提供逐图可追溯记录（2026-10-26 海报漏放事故的对策）。
+_IMAGE_MANIFEST: list = []
+
+
+def _manifest_add(scene_id: str, fn: str, source: str, url: str, query: str,
+                  dims, note: str = ""):
+    entry = {
+        "scene_id": scene_id,
+        "file": fn,
+        "source": source,          # original / pexels / pixabay
+        "url": url,
+        "query": query,
+        "size": list(dims) if dims else [],
+        "review": "pending",       # 人工目检后改为 approved / rejected
+        "note": note,
+    }
+    _IMAGE_MANIFEST.append(entry)
+    return entry
+
+
 def _remove(path: str):
     try:
         os.remove(path)
@@ -173,6 +196,7 @@ def stock_fallback(item_id: str, title: str, sess, images: list, image_sizes: li
 
     候选按序尝试：文字图、本片已用过的图都会被跳过，因此同一条会一直试到
     拿到「可用且不与前文重复」的照片为止。
+    命中时同步登记配图溯源清单（P1-2）：来源 / 检索词 / URL。
     """
     for src_name, fetch_urls in STOCK_SOURCES:
         for q in stock_queries(title):
@@ -187,6 +211,8 @@ def stock_fallback(item_id: str, title: str, sess, images: list, image_sizes: li
                     continue
                 images.append(f"images/{fn}.jpg")
                 image_sizes.append(list(dims))
+                _manifest_add(item_id, f"images/{fn}.jpg", src_name, url, q, dims,
+                              note="图库兜底示意画面，与事件关联度需人工评估")
                 print(f"    [{src_name}] 「{q}」配图 {dims[0]}x{dims[1]}")
                 return src_name
     return ""
@@ -698,6 +724,8 @@ def enrich_scene(scene: dict, sess: requests.Session):
                 images.append(f"images/{fn}.jpg")
                 image_sizes.append(list(dims))
                 v["image_source"] = "original"
+                _manifest_add(item_id, f"images/{fn}.jpg", "original", img_url,
+                              "", dims, note="原文配图")
 
     # 原文没有可用实拍图（或全是文字卡）-> 图库检索真实摄影图
     if not images:
@@ -708,6 +736,8 @@ def enrich_scene(scene: dict, sess: requests.Session):
             v["image_source"] = src
         else:
             # 用户明令禁止文字图片：走到这里说明图库 Key 缺失/全部失败，画面会退化成关键词文字卡
+            _manifest_add(item_id, "", "missing", "", "", None,
+                          note="无配图：原文无可用实拍图且图库兜底全部失败")
             print("    [CRITICAL] 配图缺失：原文无可用实拍图，且图库兜底（Pexels/Pixabay）全部失败"
                   " → 本条画面将退化为关键词文字卡（用户已明令禁止）")
 
@@ -782,6 +812,7 @@ def main():
         except OSError:
             pass
     _USED_IMG_HASHES.clear()   # 去重指纹只在本轮内生效
+    _IMAGE_MANIFEST.clear()    # 溯源清单每次抓取重建（与图片目录同生命周期）
     n_enriched = 0
     stat = {"original": 0, "pexels": 0, "pixabay": 0, "": 0}
     for sc in scenes:
@@ -797,6 +828,20 @@ def main():
     print(f"DONE 富化 {n_enriched} 条新闻 -> {args.narration}")
     print(f"  配图来源：原文 {stat['original']} / Pexels {stat['pexels']} / "
           f"Pixabay {stat['pixabay']} / 缺失 {stat['']}")
+
+    # --- 配图溯源清单（P1-2）：逐图登记来源/URL/检索词，审图后回填 review ---
+    if _IMAGE_MANIFEST:
+        manifest_path = os.path.join(WORK_DIR, "image_manifest.json")
+        manifest = {
+            "date": narr.get("date", ""),
+            "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "review_hint": "人工抽帧目检后把每条 review 改为 approved/rejected，"
+                           "并在 out/<date>/run_report.json 置 images_reviewed=true 后重跑 finalize",
+            "images": _IMAGE_MANIFEST,
+        }
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, ensure_ascii=False, indent=2)
+        print(f"  配图溯源清单 -> {manifest_path}（{len(_IMAGE_MANIFEST)} 条，review=pending 待审）")
     if stat[""]:
         print(f"  [CRITICAL] {stat['']} 条新闻无配图，画面将出现关键词文字卡（用户明令禁止）。"
               f"请检查 .env 的 PEXELS_API_KEY / PIXABAY_API_KEY 是否有效")

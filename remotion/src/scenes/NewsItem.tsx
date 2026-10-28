@@ -12,9 +12,47 @@ import { Backdrop, COLORS, FONT, ProgressBar, sectionColor } from "../components
 import { CONTENT_BOTTOM_GAP } from "../videoConfig";
 
 const CONTENT_W = 904;    // 1080 - 88*2 页面内边距
-const IMG_BOX_MAX_H = 340; // 配图区最大高度（短图动态收紧，长图滚动上限）
+const IMG_BOX_MAX_H = 300; // 配图区最大高度（2026-10-28 P1-4：正文提号后压缩配图区，保排版总预算）
 /** 单条要点最多显示行数：超出以省略号收口，绝不越界压到字幕 */
 const BULLET_CLAMP = 3;
+
+/**
+ * 版式模型（2026-10-28 P1-4 高度预算，内容区高度 = 1920 - 96 顶 - 550 字幕安全区）：
+ * 标题 ≤2 行(48px) ≈ 125 + 配图 300 + 要点 3×(40px×1.45×3行) ≈ 550
+ * + 来源 ~64 + 间距 ~156 = 1195 < 1274 ✓——超出预算的改法是缩稿，不是硬塞。
+ */
+const TITLE_SIZE_LARGE = 64;   // ≤22 字
+const TITLE_SIZE_MID = 56;     // ≤34 字
+const TITLE_SIZE_SMALL = 48;   // >34 字
+const BULLET_FONT_SIZE = 40;   // P1-4：正文 28 → 40（360px 宽预览下约 13px，手机可读）
+
+/**
+ * P1-5 词元整体换行保护：`GPT-6.1`、`M3.1`、`Qwen3.8-Flash-Next`、`150GB`
+ * 等型号/数值作为不可拆词元渲染（nowrap span），换行只发生在词元之间，
+ * 杜绝 10-27 成片「M3.1 被拆到两行」的事故形态。
+ */
+const TOKEN_RE = /[A-Za-z0-9][A-Za-z0-9.+#\-]*/g;
+
+export const protectTokens = (text: string): React.ReactNode[] => {
+  const nodes: React.ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(TOKEN_RE)) {
+    const idx = m.index ?? 0;
+    if (idx > last) {
+      nodes.push(text.slice(last, idx));
+    }
+    nodes.push(
+      <span key={`tok-${idx}`} style={{ whiteSpace: "nowrap" }}>
+        {m[0]}
+      </span>,
+    );
+    last = idx + m[0].length;
+  }
+  if (last < text.length) {
+    nodes.push(text.slice(last));
+  }
+  return nodes;
+};
 
 /**
  * 从标题提取海报关键词：优先最长的英文/数字词组（如 HydraFusion、Lean 4），
@@ -273,7 +311,8 @@ export const NewsItem: React.FC<{
   });
 
   const title: string = v.title || "";
-  const titleSize = title.length > 34 ? 52 : title.length > 22 ? 60 : 70;
+  const titleSize =
+    title.length > 34 ? TITLE_SIZE_SMALL : title.length > 22 ? TITLE_SIZE_MID : TITLE_SIZE_LARGE;
   const tags: string[] = (v.tags || []).slice(0, 3);
   const bullets: string[] = (v.bullets || []).slice(0, 3);
   const images: string[] = v.images || [];
@@ -331,7 +370,7 @@ export const NewsItem: React.FC<{
           </div>
         </div>
 
-        {/* 标题 */}
+        {/* 标题（P1-5：型号/数值词元整体换行，不拆行） */}
         <div
           style={{
             marginTop: 56,
@@ -345,7 +384,7 @@ export const NewsItem: React.FC<{
             textShadow: "0 6px 30px rgba(0,0,0,0.55)",
           }}
         >
-          {title}
+          {protectTokens(title)}
         </div>
 
         {/* 抓取配图：完整展示（contain），长图在场景内匀速竖向滚动；无图时用关键词海报卡兜底 */}
@@ -378,8 +417,8 @@ export const NewsItem: React.FC<{
                   display: "flex",
                   alignItems: "flex-start",
                   gap: 18,
-                  fontSize: 28,
-                  lineHeight: 1.42,
+                  fontSize: BULLET_FONT_SIZE,
+                  lineHeight: 1.45,
                   color: "#eef2ff",
                   fontWeight: 500,
                 }}
@@ -387,7 +426,7 @@ export const NewsItem: React.FC<{
                 <span
                   style={{
                     flex: "0 0 auto",
-                    marginTop: 10,
+                    marginTop: 16,
                     width: 13,
                     height: 13,
                     borderRadius: 999,
@@ -404,7 +443,7 @@ export const NewsItem: React.FC<{
                     overflow: "hidden",
                   }}
                 >
-                  {b}
+                  {protectTokens(b)}
                 </span>
               </div>
             ))}

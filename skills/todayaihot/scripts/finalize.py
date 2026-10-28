@@ -258,7 +258,9 @@ def merge_existing_publish(report: dict, report_path: str) -> dict:
               "旧版发布回执不继承，需重新发布后回写")
         return report
     if old_sha:
-        report["publish"] = old_pub
+        report["publish"] = dict(old_pub)
+        report["publish"]["_bound_sha256"] = new_sha          # P2-2：回执绑定版本可审计
+        report["publish"]["_bound_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     else:
         legacy = dict(old_pub)
         legacy["_legacy_without_sha"] = True

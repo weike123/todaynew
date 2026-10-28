@@ -45,11 +45,15 @@ SECTION_ALIAS = {
 }
 
 
-def clean_for_tts(text: str) -> str:
+def clean_for_tts(text: str, assist: bool = True) -> str:
     """把 markdown 正文洗成适合 TTS 朗读的纯中文口语文本。
 
     顺序很重要：先去 markdown 噪声，再做半角→全角标点归一
     （否则正文里的半角逗号无法作为断句依据）。
+
+    assist=False（P1-5 显示稿模式）：跳过缩写助读与数值口语化替换，
+    保留 `GPT-6.1`、`M3.1`、`150GB` 等官方拼写——显示稿与朗读稿
+    必须从同一原文派生，但拼写形态分离，助读空格不得进入用户可见文案。
     """
     t = text.strip()
     # --- markdown 噪声 ---
@@ -60,7 +64,8 @@ def clean_for_tts(text: str) -> str:
     t = re.sub(r"<!--.*?-->", " ", t)        # 注释
 
     # --- 缩写定读 + 多音字处理（必须在标点归一之前，匹配原始半角缩写）---
-    t = tts_normalize(t)
+    if assist:
+        t = tts_normalize(t)
 
     # --- 数值保护：千分位与时间里的半角标点不能转成全角 ---
     t = re.sub(r"(?<=\d),(?=\d{3}\b)", "", t)     # 1,100% -> 1100%
@@ -84,9 +89,10 @@ def clean_for_tts(text: str) -> str:
     t = re.sub(r"[“”„‟『』「」’‘]", "", t)
     t = t.replace('"', " ").replace("'", " ")
 
-    # --- 数值/符号口语化 ---
-    for pat, rep in TTS_REPLACES:
-        t = re.sub(pat, rep, t)
+    # --- 数值/符号口语化（朗读专用；显示稿保留原符号）---
+    if assist:
+        for pat, rep in TTS_REPLACES:
+            t = re.sub(pat, rep, t)
 
     # --- 收尾清理 ---
     t = re.sub(r"\s+", " ", t)
@@ -186,7 +192,9 @@ def _new_item(index, title_rest, section):
     title = re.sub(r"[（(]未进入精选[）)]", "", title).strip()
     return {
         "index": int(index),
-        "title": clean_for_tts(title),
+        # P1-5：显示稿保留官方拼写（GPT-6.1 / M3.1），朗读稿单独派生 title_tts
+        "title": clean_for_tts(title, assist=False),
+        "title_tts": clean_for_tts(title),
         "section": section or "今日要闻",
         "link": link,
         "tags": [],
@@ -387,33 +395,80 @@ def _extract_number(title: str) -> str:
     return ""
 
 
+def _trim_object(obj: str, limit: int = 12) -> str:
+    """按词元边界截断对象短语，绝不把 `GPT-6.1` 拦腰切成 `GPT-6.1 Terr` 残句。
+
+    以空格分词整词累加（保留词间空格），超限即停；
+    一个完整词都放不下时返回空串（调用方降级为无对象句式）。
+    """
+    out = ""
+    for w in obj.split():
+        cand = (out + " " + w).strip()
+        if len(cand) > limit:
+            break
+        out = cand
+    return out
+
+
+def _hook_triples(items: list) -> list:
+    """从同一条新闻标题内提取 (主体, 动作, 对象) 三元组（P1-3）。
+
+    旧实现的致命缺陷：companies/actions 是跨条目各自收集后按下标拼接，
+    会产出「Cohere直接发布」这类主体来自 A 条、动作来自 B 条的无对象残句。
+    现在主体与动作必须出现在**同一条标题**里，对象取动作后的同句短语，
+    并按词元边界截断（P1-3：钩子不得出现被切碎的残句形态）。
+    """
+    triples = []
+    for it in items:
+        t = it.get("title", "") or it.get("title_tts", "")
+        c = _extract_company(t)
+        a = _extract_action(t)
+        if not (c and a):
+            continue
+        obj = ""
+        ai = t.find(a)
+        rest = t[ai + len(a):].strip(" ，,：:、")
+        if rest:
+            obj = re.split(r"[，,。；;：]", rest)[0].strip()
+            obj = _trim_object(obj)
+        triples.append((c, a, obj))
+    return triples
+
+
 def generate_hook(items: list, date: str, weekday: str) -> str:
     """根据当天新闻特征动态生成开场钩子，≤30 字（约 6 秒口播）。
 
     钩子类型按日期哈希轮换，优先级：H1 数字冲击 > H2 公司对比 > H3 结果前置 > H4 时间锚点。
+    P1-3：主体/动作/对象必须同源（同一条新闻），不跨条拼接、不出无对象残句。
     """
     total = len(items)
     date_spoken = spoken_date(date)
 
-    companies, actions, numbers = [], [], []
+    triples = _hook_triples(items)
+    companies = [c for c, _, _ in triples]
+    numbers = []
     for it in items:
-        t = it.get("title", "")
-        c, a, n = _extract_company(t), _extract_action(t), _extract_number(t)
-        if c and c not in companies:
-            companies.append(c)
-        if a and a not in actions:
-            actions.append(a)
+        n = _extract_number(it.get("title", ""))
         if n and n not in numbers:
             numbers.append(n)
 
     day_hash = sum(ord(c) for c in date) % 4
 
-    # H1 数字冲击
-    if (day_hash == 0 or day_hash == 2) and numbers and companies:
-        return f"今天 AI 圈有 {total} 件大事，{companies[0]}直接{actions[0] if actions else '搞事'}。"
-    # H2 公司对比
-    if (day_hash == 1 or day_hash == 3) and len(companies) >= 2 and len(actions) >= 2:
-        return f"{companies[0]} 刚{actions[0]}，{companies[1]} 就{actions[1]}。"
+    # H1 数字冲击：主体+动作+对象必须来自同一条新闻
+    if (day_hash == 0 or day_hash == 2) and numbers and triples:
+        c, a, obj = triples[0]
+        if obj:
+            sep_obj = " " if obj[0].isascii() else ""   # 拉丁宾语与动词之间留空格
+            sep_c = " " if c[-1].isascii() and not a[0].isascii() else ""
+            hook = f"今天 AI 圈有 {total} 件大事，{c}{sep_c}{a}{sep_obj}{obj}。"
+            return hook if len(hook) <= 40 else f"今天 AI 圈有 {total} 件大事，先看{c}。"
+        return f"今天 AI 圈有 {total} 件大事，{c}{a}了大事。"
+    # H2 公司对比：两组主体/动作各自来自同一条新闻
+    if (day_hash == 1 or day_hash == 3) and len(triples) >= 2:
+        c1, a1, _ = triples[0]
+        c2, a2, _ = triples[1]
+        if c1 != c2:
+            return f"{c1} 刚{a1}，{c2} 就{a2}。"
     # H3 结果前置
     if total >= 3:
         return f"60 秒速览今天最值得关注的 {total} 条 AI 新闻。"
@@ -519,9 +574,11 @@ def build_script(meta, items, max_clauses=5, max_chars=120):
     #     「第 N 条」「来源」「正文」不上口播，仍展示在画面卡片上） ---
     for n, it in enumerate(items, start=1):
         clauses = []
-        if it["title"]:
+        # 口播用朗读稿（title_tts，助读拼写）；visual.title 保留显示稿官方拼写
+        tts_title = it.get("title_tts") or it["title"]
+        if tts_title:
             # 标题可能很长（列表格式常超 40 字），同样按字幕行宽拆句
-            clauses.extend(merge_clauses([ensure_period(it["title"])]))
+            clauses.extend(merge_clauses([ensure_period(tts_title)]))
 
         scenes.append({
             "id": f"s{n}_item",
@@ -538,8 +595,10 @@ def build_script(meta, items, max_clauses=5, max_chars=120):
                 "bullets": it.get("points", [])[:3],
             },
             # 每个子句都必须以完整标点结束（逗号切分的标题子句补句号，
-            # SKILL.md 约束 #3：禁止无标点残句）
-            "clauses": [ensure_period(c) for c in (clean_for_tts(x) for x in clauses) if c],
+            # SKILL.md 约束 #3：禁止无标点残句）。
+            # clauses 已由 title_tts（朗读稿）派生，不再二次 clean_for_tts，
+            # 避免对已助读文本重复归一化产生不可控变换（P1-5）。
+            "clauses": [ensure_period(c) for c in clauses if c],
         })
 
     # --- 结尾（浓缩版：一句收束） ---
